@@ -15,6 +15,7 @@
 
 import requests
 import logging
+import json
 
 class RouterRestAPI:
     ''' Base wrapper interface for the routeros_api library
@@ -40,7 +41,8 @@ class RouterRestAPI:
             resp.raise_for_status()
             logging.info(f"Done, took: {resp.elapsed.total_seconds()}")
 
-            return resp.json()
+            c = resp.content.decode('latin1')
+            return json.loads(c)
         except Exception as exc:
             logging.critical(f'Got Exception: {exc}')
 
@@ -54,7 +56,8 @@ class RouterRestAPI:
             resp.raise_for_status()
             logging.info(f"Done, took: {resp.elapsed.total_seconds()}")
 
-            return resp.json()
+            c = resp.content.decode('latin1')
+            return json.loads(c)
         except Exception as exc:
             logging.critical(f'Got Exception: {exc}')
 

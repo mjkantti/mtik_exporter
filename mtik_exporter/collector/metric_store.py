@@ -94,7 +94,13 @@ class MetricStore():
             translated_record = {}
             # Normalize keys
             for key, value in router_record.items():
-                k = key.replace('.', '_').replace('-', '_')
+                k = key
+                if key.startswith(('.', '_', '-')):
+                    k = k[1:]
+                if k.endswith(('.', '_', '-')):
+                    k = k[:-1]
+
+                k = k.replace('.', '_').replace('-', '_')
                 translated_record[k] = value
 
             # Add Router labels

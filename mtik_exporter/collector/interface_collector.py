@@ -58,12 +58,12 @@ class InterfaceCollector(LoadingCollector):
                     continue
 
                 if ifc.get('running', 'true') == 'false' or ifc.get('disabled', 'false') == 'true':
-                    monitor_records.append({ 'id': ifc.get('id', ''), 'name': ifc.get('name', ''), 'comment': ifc.get('comment', ''), 'status': 'link-down' })
+                    monitor_records.append({ 'id': ifc.get('.id', ''), 'name': ifc.get('name', ''), 'comment': ifc.get('comment', ''), 'status': 'link-down' })
                 else:
                     if_ids.append({'id': str(ifc.get('.id')), 'name': str(ifc.get('name')), 'comment': str(ifc.get('comment'))})
 
             #monitor_records_running = InterfaceMonitorMetricsDataSource.metric_records(router_entry, if_ids)
-            id_str = ','.join([i['id'] for i in if_ids])
+            id_str = ','.join([i.get('id') for i in if_ids])
             #monitor_records_running = router_entry.api_connection.call('/interface/ether', 'monitor', {'once':'', '.id': id_str})
             monitor_records_running = router_entry.rest_api.post('interface/ether', 'monitor', {'once': True, '.id': id_str})
             for if_info, mr in zip(if_ids, monitor_records_running):

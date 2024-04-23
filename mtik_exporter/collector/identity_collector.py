@@ -29,8 +29,8 @@ class IdentityCollector(LoadingCollector):
     def load(self, router_entry: 'RouterEntry'):
         if self.metric_store.run_fetch():
             #identity_records = IdentityMetricsDataSource.metric_records(router_entry)
-            identity_records = router_entry.api_connection.get('/system/identity')
-            self.metric_store.set_metrics(identity_records)
+            identity_record = router_entry.rest_api.get('system/identity')
+            self.metric_store.set_metrics([identity_record])
 
     def collect(self):
         if self.metric_store.have_metrics():

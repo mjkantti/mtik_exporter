@@ -29,7 +29,7 @@ class PoolCollector(LoadingCollector):
 
     def load(self, router_entry: 'RouterEntry'):
         #pool_used_records = PoolUsedMetricsDataSource.metric_records(router_entry)
-        pool_used_records = router_entry.api_connection.get('/ip/pool/used')
+        pool_used_records = router_entry.rest_api.get('ip/pool/used')
         self.metric_store.set_metrics(pool_used_records)
 
     def collect(self):

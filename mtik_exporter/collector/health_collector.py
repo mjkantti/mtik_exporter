@@ -34,7 +34,7 @@ class HealthCollector(LoadingCollector):
 
     def load(self, router_entry: 'RouterEntry'):
         #health_records = HealthMetricsDataSource.metric_records(router_entry)
-        health_records = router_entry.api_connection.get('/system/health')
+        health_records = router_entry.rest_api.get('system/health')
         for record in health_records:
             if 'name' in record:
                 # Note: The API in RouterOS v7.X+ returns a response like this:

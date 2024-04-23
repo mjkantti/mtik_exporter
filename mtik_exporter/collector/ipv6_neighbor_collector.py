@@ -29,7 +29,7 @@ class IPv6NeighborCollector(LoadingCollector):
 
     def load(self, router_entry: 'RouterEntry'):
         #records = IPv6NeighborDataSource.metric_records(router_entry)
-        records = router_entry.api_connection.get('/ipv6/neighbor', status='reachable')
+        records = router_entry.rest_api.get('ipv6/neighbor', {'status': 'reachable'})
         # add dhcp info
         if records:
             for registration_record in records:

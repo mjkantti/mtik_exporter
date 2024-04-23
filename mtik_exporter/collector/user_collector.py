@@ -28,7 +28,7 @@ class UserCollector(LoadingCollector):
 
     def load(self, router_entry: 'RouterEntry'):
         #user_records = UserMetricsDataSource.metric_records(router_entry)
-        user_records = router_entry.api_connection.get('/user/active/')
+        user_records = router_entry.rest_api.get('user/active')
         self.metric_store.set_metrics(user_records)
 
     def collect(self):

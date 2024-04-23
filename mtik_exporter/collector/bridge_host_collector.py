@@ -33,7 +33,7 @@ class BridgeHostCollector(LoadingCollector):
     def load(self, router_entry: 'RouterEntry'):
         if self.metric_store.run_fetch():
             #bridge_host_records = BridgeHostMetricsDataSource.metric_records(router_entry)
-            bridge_host_records = router_entry.api_connection.get('/interface/bridge/host', local='false', external='true')
+            bridge_host_records = router_entry.rest_api.get('interface/bridge/host', {'local': 'false', 'external': 'true'})
             if bridge_host_records:
                 for r in bridge_host_records:
                     BaseOutputProcessor.add_dhcp_info(router_entry, r, str(r.get('mac-address')))

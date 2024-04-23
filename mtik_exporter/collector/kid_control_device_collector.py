@@ -44,7 +44,7 @@ class KidDeviceCollector(LoadingCollector):
 
     def load(self, router_entry: 'RouterEntry'):
         #records = KidDeviceMetricsDataSource.metric_records(router_entry)
-        records = router_entry.api_connection.get('/ip/kid-control/device')
+        records = router_entry.rest_api.get('ip/kid-control/device')
         device_records = []
         for record in records:
             if record.get('user'):

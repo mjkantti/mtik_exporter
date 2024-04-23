@@ -39,8 +39,8 @@ class PublicIPAddressCollector(LoadingCollector):
     def load(self, router_entry: 'RouterEntry'):
         if self.metric_store.run_fetch():
             #address_records = PublicIPAddressDatasource.metric_records(router_entry)
-            address_records = router_entry.api_connection.get('/ip/cloud/')
-            self.metric_store.set_metrics(address_records)
+            address_record = router_entry.rest_api.get('ip/cloud')
+            self.metric_store.set_metrics([address_record])
 
     def collect(self):
         if self.metric_store.have_metrics():

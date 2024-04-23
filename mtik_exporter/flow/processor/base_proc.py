@@ -56,11 +56,11 @@ class ExportProcessor:
 
     def run_registry(self, registry: 'CollectorRegistry'):
         router = registry.router_entry
-        if not router.api_connection.is_connected():
-            logging.info('Router not connected, reconnecting, waiting for 3 seconds')
-            router.api_connection.connect()
-            self.s.enter(3, 1, self.run_registry, argument=(registry, ))
-            return
+        #if not router.api_connection.is_connected():
+            #logging.info('Router not connected, reconnecting, waiting for 3 seconds')
+            #router.api_connection.connect()
+            #self.s.enter(3, 1, self.run_registry, argument=(registry, ))
+            #return
 
 
         interval = registry.router_entry.config_entry.polling_interval        

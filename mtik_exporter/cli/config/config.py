@@ -21,7 +21,7 @@ from mtik_exporter.utils.utils import FSHelper
 
 ''' mtik_exporter conf file handling
 '''
-class mtik_exporterConfigKeys:
+class ConfigKeys:
     ''' mtik_exporter config file keys
     '''
     # Section Keys
@@ -42,13 +42,13 @@ class mtik_exporterConfigKeys:
     POLLING_INTERVAL_KEY = 'polling_interval'
     SLOW_POLLING_INTERVAL_KEY = 'slow_polling_interval'
 
-    mtik_exporter_SOCKET_TIMEOUT = 'socket_timeout'
-    mtik_exporter_INITIAL_DELAY = 'initial_delay_on_failure'
-    mtik_exporter_MAX_DELAY = 'max_delay_on_failure'
-    mtik_exporter_INC_DIV = 'delay_inc_div'
-    mtik_exporter_VERBOSE_MODE = 'verbose_mode'
-    mtik_exporter_MAX_SCRAPE_DURATION = 'max_scrape_duration'
-    mtik_exporter_TOTAL_MAX_SCRAPE_DURATION = 'total_max_scrape_duration'
+    EXPORTER_SOCKET_TIMEOUT = 'socket_timeout'
+    EXPORTER_INITIAL_DELAY = 'initial_delay_on_failure'
+    EXPORTER_MAX_DELAY = 'max_delay_on_failure'
+    EXPORTER_INC_DIV = 'delay_inc_div'
+    EXPORTER_VERBOSE_MODE = 'verbose_mode'
+    EXPORTER_MAX_SCRAPE_DURATION = 'max_scrape_duration'
+    EXPORTER_TOTAL_MAX_SCRAPE_DURATION = 'total_max_scrape_duration'
 
     # UnRegistered entries placeholder
     NO_ENTRIES_REGISTERED = 'NoEntriesRegistered'
@@ -58,33 +58,33 @@ class mtik_exporterConfigKeys:
     ROUTERBOARD_ADDRESS = 'routerboard_address'
 
     # Default values
-    DEFAULT_API_PORT = 8728
-    DEFAULT_API_SSL_PORT = 8729
+    DEFAULT_API_PORT = 80
+    DEFAULT_API_SSL_PORT = 443
     DEFAULT_POLLING_INTERVAL = 10
     DEFAULT_SLOW_POLLING_INTERVAL = 60
-    DEFAULT_mtik_exporter_PORT = 49090
-    DEFAULT_mtik_exporter_SOCKET_TIMEOUT = 2
-    DEFAULT_mtik_exporter_INITIAL_DELAY = 120
-    DEFAULT_mtik_exporter_MAX_DELAY = 900
-    DEFAULT_mtik_exporter_INC_DIV = 5
-    DEFAULT_mtik_exporter_MAX_SCRAPE_DURATION = 10
-    DEFAULT_mtik_exporter_TOTAL_MAX_SCRAPE_DURATION = 30
+    DEFAULT_EXPORT_PORT = 49090
+    DEFAULT_SOCKET_TIMEOUT = 2
+    DEFAULT_INITIAL_DELAY = 120
+    DEFAULT_MAX_DELAY = 900
+    DEFAULT_INC_DIV = 5
+    DEFAULT_MAX_SCRAPE_DURATION = 10
+    DEFAULT_TOTAL_MAX_SCRAPE_DURATION = 30
 
 
-    BOOLEAN_KEYS = {ENABLED_KEY, SSL_KEY, NO_SSL_CERTIFICATE, SSL_CERTIFICATE_VERIFY} | FEATURE_KEYS
-    INT_KEYS = {POLLING_INTERVAL_KEY, SLOW_POLLING_INTERVAL_KEY, PORT_KEY}
-    STR_KEYS = {HOST_KEY, USER_KEY, PASSWD_KEY}
+    ROUTER_BOOLEAN_KEYS = {ENABLED_KEY, SSL_KEY, NO_SSL_CERTIFICATE, SSL_CERTIFICATE_VERIFY} | FEATURE_KEYS
+    ROUTER_INT_KEYS = {POLLING_INTERVAL_KEY, SLOW_POLLING_INTERVAL_KEY, PORT_KEY}
+    ROUTER_STR_KEYS = {HOST_KEY, USER_KEY, PASSWD_KEY}
 
-    SYSTEM_BOOLEAN_KEYS = {mtik_exporter_VERBOSE_MODE}
-    SYSTEM_INT_KEYS = {PORT_KEY, mtik_exporter_SOCKET_TIMEOUT, mtik_exporter_INITIAL_DELAY, mtik_exporter_MAX_DELAY, mtik_exporter_INC_DIV, mtik_exporter_MAX_SCRAPE_DURATION, mtik_exporter_TOTAL_MAX_SCRAPE_DURATION}
+    SYSTEM_BOOLEAN_KEYS = {EXPORTER_VERBOSE_MODE}
+    SYSTEM_INT_KEYS = {PORT_KEY, EXPORTER_SOCKET_TIMEOUT, EXPORTER_INITIAL_DELAY, EXPORTER_MAX_DELAY, EXPORTER_INC_DIV, EXPORTER_MAX_SCRAPE_DURATION, EXPORTER_TOTAL_MAX_SCRAPE_DURATION}
 
-    # mtik_exporter config entry nane
-    mtik_exporter_CONFIG_ENTRY_NAME = 'SYSTEM'
+    # mtik_exporter config entry name
+    SYSTEM_CONFIG_ENTRY_NAME = 'SYSTEM'
 
 
 class ConfigEntry:
-    mtik_exporterConfigEntry = namedtuple('mtik_exporterConfigEntry', list(mtik_exporterConfigKeys.BOOLEAN_KEYS | mtik_exporterConfigKeys.STR_KEYS | mtik_exporterConfigKeys.INT_KEYS))
-    mtik_exporterSystemEntry = namedtuple('mtik_exporterSystemEntry', list(mtik_exporterConfigKeys.SYSTEM_BOOLEAN_KEYS | mtik_exporterConfigKeys.SYSTEM_INT_KEYS))
+    RouterConfigEntry = namedtuple('RouterConfigEntry', list(ConfigKeys.ROUTER_BOOLEAN_KEYS | ConfigKeys.ROUTER_STR_KEYS | ConfigKeys.ROUTER_INT_KEYS))
+    SystemConfigEntry = namedtuple('SystemConfigEntry', list(ConfigKeys.SYSTEM_BOOLEAN_KEYS | ConfigKeys.SYSTEM_INT_KEYS))
 
 
 class OSConfig(metaclass=ABCMeta):
@@ -145,7 +145,7 @@ class CustomConfig(OSConfig):
         return FSHelper.full_path(self._user_dir_path)
 
 
-class mtik_exporterConfigHandler:
+class SystemConfigHandler:
     # two-phase init
     def __init__(self):
         pass
@@ -175,7 +175,7 @@ class mtik_exporterConfigHandler:
         ''' All mtik_exporter registered entries
         '''
         # This is sections
-        return (entry_name for entry_name in self.config.sections() if entry_name != mtik_exporterConfigKeys.mtik_exporter_CONFIG_ENTRY_NAME)
+        return (entry_name for entry_name in self.config.sections() if entry_name != ConfigKeys.SYSTEM_CONFIG_ENTRY_NAME)
 
     def registered_entry(self, entry_name):
         ''' A specific mtik_exporter registered entry by name
@@ -188,13 +188,13 @@ class mtik_exporterConfigHandler:
         ''' Given an entry name, reads and returns the entry info
         '''
         entry_reader = self._config_entry_reader(entry_name)
-        return ConfigEntry.mtik_exporterConfigEntry(**entry_reader) if entry_reader else None
+        return ConfigEntry.RouterConfigEntry(**entry_reader) if entry_reader else None
 
     def system_entry(self):
         ''' mtik_exporter internal config entry
         '''
         _entry_reader = self._system_entry_reader()
-        return ConfigEntry.mtik_exporterSystemEntry(**_entry_reader)
+        return ConfigEntry.SystemConfigEntry(**_entry_reader)
 
     # Helpers
     def _read_from_disk(self):
@@ -207,13 +207,13 @@ class mtik_exporterConfigHandler:
         config_entry_reader = {}
         new_keys = []
 
-        for key in mtik_exporterConfigKeys.BOOLEAN_KEYS:
+        for key in ConfigKeys.ROUTER_BOOLEAN_KEYS:
             if self.config[entry_name].get(key) is not None:
                 config_entry_reader[key] = self.config.getboolean(entry_name, key)
             else:
                 config_entry_reader[key] = False
 
-        for key in mtik_exporterConfigKeys.STR_KEYS:
+        for key in ConfigKeys.ROUTER_STR_KEYS:
             if self.config[entry_name].get(key, raw=True):
                 config_entry_reader[key] = self.config[entry_name].get(key, raw=True)
             else:
@@ -223,18 +223,18 @@ class mtik_exporterConfigHandler:
             #if key is mtik_exporterConfigKeys.PASSWD_KEY and type(config_entry_reader[key]) is list:
             #    config_entry_reader[key] = ','.join(config_entry_reader[key])
 
-        for key in mtik_exporterConfigKeys.INT_KEYS:
+        for key in ConfigKeys.ROUTER_INT_KEYS:
             if self.config[entry_name].get(key):
                 config_entry_reader[key] = self.config.getint(entry_name, key)
             else:
                 config_entry_reader[key] = self._default_value_for_key(key)
 
         # port
-        if self.config[entry_name].get(mtik_exporterConfigKeys.PORT_KEY):
-            config_entry_reader[mtik_exporterConfigKeys.PORT_KEY] = self.config.getint(entry_name, mtik_exporterConfigKeys.PORT_KEY)
+        if self.config[entry_name].get(ConfigKeys.PORT_KEY):
+            config_entry_reader[ConfigKeys.PORT_KEY] = self.config.getint(entry_name, ConfigKeys.PORT_KEY)
         else:
-            config_entry_reader[mtik_exporterConfigKeys.PORT_KEY] = self._default_value_for_key(
-                mtik_exporterConfigKeys.SSL_KEY, config_entry_reader[mtik_exporterConfigKeys.SSL_KEY])
+            config_entry_reader[ConfigKeys.PORT_KEY] = self._default_value_for_key(
+                ConfigKeys.SSL_KEY, config_entry_reader[ConfigKeys.SSL_KEY])
 
         #if new_keys:
             #print(self.config[entry_name])
@@ -252,15 +252,15 @@ class mtik_exporterConfigHandler:
 
     def _system_entry_reader(self):
         system_entry_reader = {}
-        entry_name = mtik_exporterConfigKeys.mtik_exporter_CONFIG_ENTRY_NAME
+        entry_name = ConfigKeys.SYSTEM_CONFIG_ENTRY_NAME
 
-        for key in mtik_exporterConfigKeys.SYSTEM_INT_KEYS:
+        for key in ConfigKeys.SYSTEM_INT_KEYS:
             if self.config[entry_name].get(key):
                 system_entry_reader[key] = self.config.getint(entry_name, key)
             else:
                 system_entry_reader[key] = self._default_value_for_key(key)
 
-        for key in mtik_exporterConfigKeys.SYSTEM_BOOLEAN_KEYS:
+        for key in ConfigKeys.SYSTEM_BOOLEAN_KEYS:
             if self.config[entry_name].get(key) is not None:
                 system_entry_reader[key] = self.config.getboolean(entry_name, key)
             else:
@@ -280,18 +280,18 @@ class mtik_exporterConfigHandler:
 
     def _default_value_for_key(self, key, value=None):
         return {
-            mtik_exporterConfigKeys.SSL_KEY: lambda value: mtik_exporterConfigKeys.DEFAULT_API_SSL_PORT if value else mtik_exporterConfigKeys.DEFAULT_API_PORT,
-            mtik_exporterConfigKeys.PORT_KEY: lambda _: mtik_exporterConfigKeys.DEFAULT_mtik_exporter_PORT,
-            mtik_exporterConfigKeys.POLLING_INTERVAL_KEY: lambda _: mtik_exporterConfigKeys.DEFAULT_POLLING_INTERVAL,
-            mtik_exporterConfigKeys.SLOW_POLLING_INTERVAL_KEY: lambda _: mtik_exporterConfigKeys.DEFAULT_SLOW_POLLING_INTERVAL,
-            mtik_exporterConfigKeys.mtik_exporter_SOCKET_TIMEOUT: lambda _: mtik_exporterConfigKeys.DEFAULT_mtik_exporter_SOCKET_TIMEOUT,
-            mtik_exporterConfigKeys.mtik_exporter_INITIAL_DELAY: lambda _: mtik_exporterConfigKeys.DEFAULT_mtik_exporter_INITIAL_DELAY,
-            mtik_exporterConfigKeys.mtik_exporter_MAX_DELAY: lambda _: mtik_exporterConfigKeys.DEFAULT_mtik_exporter_MAX_DELAY,
-            mtik_exporterConfigKeys.mtik_exporter_INC_DIV: lambda _: mtik_exporterConfigKeys.DEFAULT_mtik_exporter_INC_DIV,
-            mtik_exporterConfigKeys.mtik_exporter_MAX_SCRAPE_DURATION: lambda _: mtik_exporterConfigKeys.DEFAULT_mtik_exporter_MAX_SCRAPE_DURATION,
-            mtik_exporterConfigKeys.mtik_exporter_TOTAL_MAX_SCRAPE_DURATION: lambda _: mtik_exporterConfigKeys.DEFAULT_mtik_exporter_TOTAL_MAX_SCRAPE_DURATION,
+            ConfigKeys.SSL_KEY: lambda value: ConfigKeys.DEFAULT_API_SSL_PORT if value else ConfigKeys.DEFAULT_API_PORT,
+            ConfigKeys.PORT_KEY: lambda _: ConfigKeys.DEFAULT_EXPORT_PORT,
+            ConfigKeys.POLLING_INTERVAL_KEY: lambda _: ConfigKeys.DEFAULT_POLLING_INTERVAL,
+            ConfigKeys.SLOW_POLLING_INTERVAL_KEY: lambda _: ConfigKeys.DEFAULT_SLOW_POLLING_INTERVAL,
+            ConfigKeys.EXPORTER_SOCKET_TIMEOUT: lambda _: ConfigKeys.DEFAULT_SOCKET_TIMEOUT,
+            ConfigKeys.EXPORTER_INITIAL_DELAY: lambda _: ConfigKeys.DEFAULT_INITIAL_DELAY,
+            ConfigKeys.EXPORTER_MAX_DELAY: lambda _: ConfigKeys.DEFAULT_MAX_DELAY,
+            ConfigKeys.EXPORTER_INC_DIV: lambda _: ConfigKeys.DEFAULT_INC_DIV,
+            ConfigKeys.EXPORTER_MAX_SCRAPE_DURATION: lambda _: ConfigKeys.DEFAULT_MAX_SCRAPE_DURATION,
+            ConfigKeys.EXPORTER_TOTAL_MAX_SCRAPE_DURATION: lambda _: ConfigKeys.DEFAULT_TOTAL_MAX_SCRAPE_DURATION,
         }[key](value)
 
 
 # Simplest possible Singleton impl
-config_handler = mtik_exporterConfigHandler()
+config_handler = SystemConfigHandler()

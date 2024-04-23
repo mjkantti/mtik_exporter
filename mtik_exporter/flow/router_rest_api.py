@@ -12,10 +12,12 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
+from mtik_exporter.cli.config.config import config_handler
 
 import requests
 import logging
 import json
+import time
 
 # Mikrotik returns everything with latin1 encoding
 mtik_encoding = 'latin1'
@@ -31,37 +33,71 @@ class RouterRestAPI:
         self.auth = (config_entry.username, config_entry.password)
         #self.base_url = f'http://{config_entry.hostname}:{config_entry.port}/rest'
         self.base_url = f'http://{config_entry.hostname}/rest'
+        self.timeout = config_handler.system_entry().socket_timeout
+        self.retry_timer = time.time()
         self.ses = requests.Session()
         
         self.timeout = 10
 
 
     def get(self, path, params = {}):
+        if time.time() < self.retry_timer:
+            return []
+
         url = f"{self.base_url}/{path}"
         logging.debug("Hitting %s", url)
         try:
-            resp = self.ses.get(url, auth=self.auth, params=params)
+            resp = self.ses.get(url, auth=self.auth, timeout=self.timeout, params=params)
             resp.raise_for_status()
             logging.debug(f"Done, took: {resp.elapsed.total_seconds()}")
 
             c = resp.content.decode(mtik_encoding)
             return json.loads(c)
+        except ConnectionError as connection_error:
+            # Connection error, set retry timer to 30s
+            self.retry_timer = time.time() + 30
+            logging.critical(f'Connection Error: {connection_error}')
+        except requests.exceptions.HTTPError as http_error:
+            # HTTP Error, no retry timer
+            logging.critical(f'Unsuccesful HTTP Request: {http_error}')
+        except requests.exceptions.Timeout as timeout_error:
+            # Timeout, set retry timer to 30s
+            self.retry_timer = time.time() + 30
+            logging.critical(f'Timeout Occured: {timeout_error}')
         except Exception as exc:
+            # Other exception set retry timer to 10s
+            self.retry_timer = time.time() + 10
             logging.critical(f'Got Exception: {exc}')
 
         return None
     
     def post(self, path, command, data):
+        if time.time() < self.retry_timer:
+            return []
+
         url = f"{self.base_url}/{path}/{command}"
         logging.debug("Hitting %s", url)
         try:
-            resp = self.ses.post(url, auth=self.auth, json=data)
+            resp = self.ses.post(url, auth=self.auth, timeout=self.timeout, json=data)
             resp.raise_for_status()
             logging.debug(f"Done, took: {resp.elapsed.total_seconds()}")
 
             c = resp.content.decode(mtik_encoding)
             return json.loads(c)
+        except ConnectionError as connection_error:
+            # Connection error, set retry timer to 30s
+            self.retry_timer = time.time() + 30
+            logging.critical(f'Connection Error: {connection_error}')
+        except requests.exceptions.HTTPError as http_error:
+            # HTTP Error, no retry timer
+            logging.critical(f'Unsuccesful HTTP Request: {http_error}')
+        except requests.exceptions.Timeout as timeout_error:
+            # Timeout, set retry timer to 30s
+            self.retry_timer = time.time() + 30
+            logging.critical(f'Timeout Occured: {timeout_error}')
         except Exception as exc:
+            # Other exception set retry timer to 10s
+            self.retry_timer = time.time() + 10
             logging.critical(f'Got Exception: {exc}')
 
         return None

@@ -13,7 +13,7 @@
 ## GNU General Public License for more details.
 
 
-from mtik_exporter.cli.config.config import config_handler, mtik_exporterConfigKeys
+from mtik_exporter.cli.config.config import config_handler, ConfigKeys
 from mtik_exporter.flow.router_rest_api import RouterRestAPI
 
 class RouterEntry:
@@ -24,9 +24,9 @@ class RouterEntry:
         self.config_entry  = config_handler.config_entry(router_name)
         self.rest_api = RouterRestAPI(router_name, self.config_entry)
         self.router_id = {
-            mtik_exporterConfigKeys.ROUTERBOARD_NAME: self.router_name,
-            mtik_exporterConfigKeys.ROUTERBOARD_ADDRESS: self.config_entry.hostname
-            }
+            ConfigKeys.ROUTERBOARD_NAME: self.router_name,
+            ConfigKeys.ROUTERBOARD_ADDRESS: self.config_entry.hostname
+        }
 
         #self.collector_time_spent: dict[str, float] =  {}
         self.data_loader_time_spent: dict[str, float] =  {}
@@ -38,11 +38,3 @@ class RouterEntry:
 
     def dhcp_record(self, key: str, value: str):
         return next((e for e in self._dhcp_entries if e.get(key) == value), None)
-
-    def is_ready(self):
-        is_ready = True
-        if not self.api_connection.check_connection():
-            is_ready = False
-            # let's get connected now
-            self.api_connection.connect()
-        return is_ready

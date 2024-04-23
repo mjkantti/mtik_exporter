@@ -12,7 +12,6 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
-from datetime import datetime
 from time import time, sleep
 from prometheus_client.core import REGISTRY
 from prometheus_client import start_http_server
@@ -29,7 +28,7 @@ class ExportProcessor:
     ''' Base Export Processing
     '''
     def __init__(self):
-        self.s = scheduler(time, sleep)
+        self.s = scheduler()
         self.collector_registries: list[CollectorRegistry] = []
 
     def start(self):

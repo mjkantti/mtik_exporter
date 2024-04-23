@@ -66,6 +66,7 @@ class ExportProcessor:
         interval = registry.router_entry.config_entry.polling_interval        
         logging.debug('Starting data load, polling interval set to: %i', interval)
         self.s.enter(interval, 1, self.run_registry, argument=(registry, ))
+        router.data_loader_time_spent.clear()
         
         for collector in registry.registered_collectors:
             logging.debug('Running %s', collector.name)

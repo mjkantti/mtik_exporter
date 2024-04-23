@@ -17,8 +17,11 @@ import requests
 import logging
 import json
 
+# Mikrotik returns everything with latin1 encoding
+mtik_encoding = 'latin1'
+
 class RouterRestAPI:
-    ''' Base wrapper interface for the routeros_api library
+    ''' Base wrapper for the routeros rest api
     '''
     def __init__(self, router_name: str, config_entry):
         self.router_name: str = router_name
@@ -35,13 +38,13 @@ class RouterRestAPI:
 
     def get(self, path, params = {}):
         url = f"{self.base_url}/{path}"
-        logging.info("Hitting %s", url)
+        logging.debug("Hitting %s", url)
         try:
             resp = self.ses.get(url, auth=self.auth, params=params)
             resp.raise_for_status()
-            logging.info(f"Done, took: {resp.elapsed.total_seconds()}")
+            logging.debug(f"Done, took: {resp.elapsed.total_seconds()}")
 
-            c = resp.content.decode('latin1')
+            c = resp.content.decode(mtik_encoding)
             return json.loads(c)
         except Exception as exc:
             logging.critical(f'Got Exception: {exc}')
@@ -50,13 +53,13 @@ class RouterRestAPI:
     
     def post(self, path, command, data):
         url = f"{self.base_url}/{path}/{command}"
-        logging.info("Hitting %s", url)
+        logging.debug("Hitting %s", url)
         try:
             resp = self.ses.post(url, auth=self.auth, json=data)
             resp.raise_for_status()
-            logging.info(f"Done, took: {resp.elapsed.total_seconds()}")
+            logging.debug(f"Done, took: {resp.elapsed.total_seconds()}")
 
-            c = resp.content.decode('latin1')
+            c = resp.content.decode(mtik_encoding)
             return json.loads(c)
         except Exception as exc:
             logging.critical(f'Got Exception: {exc}')

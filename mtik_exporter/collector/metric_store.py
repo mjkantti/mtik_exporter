@@ -105,7 +105,7 @@ class MetricStore():
                     v = {}
                 else:
                     v = translated_record.get(value)
-                    if not v:
+                    if v == None:
                         continue
 
                 lv: list[str] = [str(translated_record.get(label, '')) for label in labels]

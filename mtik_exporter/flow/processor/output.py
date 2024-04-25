@@ -32,7 +32,7 @@ class BaseOutputProcessor:
         dhcp_lease_record = router_entry.dhcp_record(id_key, key)
         if dhcp_lease_record:
             dhcp_comment = dhcp_lease_record.get('comment', '')
-            dhcp_name = dhcp_lease_record.get('host_name', '')
+            dhcp_name = dhcp_lease_record.get('host-name', '')
             dhcp_address = dhcp_lease_record.get('address', '')
 
         registration_record['dhcp_name'] = dhcp_name

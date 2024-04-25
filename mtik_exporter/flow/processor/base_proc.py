@@ -12,7 +12,7 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
-from time import time, sleep
+from time import time
 from prometheus_client.core import REGISTRY
 from prometheus_client import start_http_server
 from sched import scheduler

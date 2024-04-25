@@ -14,6 +14,7 @@
 
 
 from mtik_exporter.collector.metric_store import MetricStore, LoadingCollector
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -24,16 +25,35 @@ class UserCollector(LoadingCollector):
 
     def __init__(self, router_id: dict[str, str], polling_interval: int):
         self.name = 'UserCollector'
-        self.metric_store = MetricStore(router_id, ['name', 'when', 'address', 'via', 'group'], polling_interval=polling_interval)
+        self.metric_store = MetricStore(
+            router_id,
+            ['name', 'address', 'via', 'group'],
+            ['when', 'count'],
+            polling_interval=polling_interval
+        )
 
         # Metrics
-        self.metric_store.create_info_collector('active_users', 'Active Users')
+        self.metric_store.create_gauge_collector('active_users_last_login', 'Active Users', 'when')
+        self.metric_store.create_gauge_collector('active_users_count', 'Active Users Count', 'count')
 
     def load(self, router_entry: 'RouterEntry'):
         #user_records = UserMetricsDataSource.metric_records(router_entry)
         self.metric_store.clear_metrics()
         user_records = router_entry.rest_api.get('user/active')
-        self.metric_store.set_metrics(user_records)
+
+        filtered_users = {}
+        for usr in user_records:
+            k = f'{usr.get("name", "")}_{usr.get("address", "")}_{usr.get("via", "")}'
+            t = datetime.fromisoformat(usr.get('when')).replace(tzinfo=timezone.utc).timestamp()
+            u = filtered_users.get(k, {})
+            #print(filtered_users)
+            cnt = u.get('count', 0) + 1
+            t = max(t, u.get('when', 0))
+
+            usr.update({'when': t, 'count': cnt})
+            filtered_users[k] = usr
+
+        self.metric_store.set_metrics(filtered_users.values())
 
     def collect(self):
         return self.metric_store.get_metrics()

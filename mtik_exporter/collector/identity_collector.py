@@ -27,7 +27,7 @@ class IdentityCollector(LoadingCollector):
         self.metric_store = MetricStore(router_id, ['name'], polling_interval=polling_interval)
 
         # Metrics
-        self.metric_store.create_info_collector('system_identity', 'System identity')
+        self.metric_store.create_info_metric('system_identity', 'System identity')
 
     def load(self, router_entry: 'RouterEntry'):
         if self.metric_store.run_fetch():
@@ -37,5 +37,5 @@ class IdentityCollector(LoadingCollector):
             self.metric_store.set_metrics([identity_record])
 
     def collect(self):
-        return self.metric_store.get_metrics()
+        yield from self.metric_store.get_metrics()
 

@@ -31,7 +31,7 @@ class BridgeHostCollector(LoadingCollector):
             )
 
         # Metrics
-        self.metric_store.create_info_collector('bridge_host', 'Wireguard Interfaces')
+        self.metric_store.create_info_metric('bridge_host', 'Wireguard Interfaces')
 
     def load(self, router_entry: 'RouterEntry'):
         if self.metric_store.run_fetch():
@@ -44,4 +44,4 @@ class BridgeHostCollector(LoadingCollector):
             self.metric_store.set_metrics(bridge_host_records)
 
     def collect(self):
-        return self.metric_store.get_metrics()
+        yield from self.metric_store.get_metrics()

@@ -31,8 +31,8 @@ class InternalCollector(LoadingCollector):
         self.load_count = MetricStore(router_id, [], ['count'])
 
         # Metrics
-        self.load_metrics.create_gauge_collector('data_load_time', 'Time spent loading metrics in seconds', 'duration')
-        self.load_count.create_counter_collector('data_load_count', 'Total count of metrics loads since reboot', 'count')
+        self.load_metrics.create_gauge_metric('data_load_time', 'Time spent loading metrics in seconds', 'duration')
+        self.load_count.create_counter_metric('data_load_count', 'Total count of metrics loads since reboot', 'count')
 
     def load(self, router_entry: 'RouterEntry'):
         self.load_metrics.clear_metrics()
@@ -50,5 +50,5 @@ class InternalCollector(LoadingCollector):
         #if self.collect_metrics.have_metrics():
         #    yield self.collect_metrics.gauge_collector('collection_time', 'Time spent collecting metrics in seconds', 'duration')
 
-        for metric, _, _ in self.load_metrics.metrics + self.load_count.metrics:
-            yield metric
+        yield from self.load_metrics.get_metrics()
+        yield from self.load_count.get_metrics()

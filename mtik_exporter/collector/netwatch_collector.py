@@ -47,23 +47,23 @@ class NetwatchCollector(LoadingCollector):
         )
 
         # Create metrics
-        self.metric_store.create_gauge_collector('netwatch_status', 'Netwatch Status Metrics', 'status')
-        self.metric_store.create_gauge_collector('netwatch_since', 'Netwatch Status Since Metrics', 'since')
+        self.metric_store.create_gauge_metric('netwatch_status', 'Netwatch Status Metrics', 'status')
+        self.metric_store.create_gauge_metric('netwatch_since', 'Netwatch Status Since Metrics', 'since')
 
         # ICMP
-        self.metric_store.create_gauge_collector('netwatch_icmp_loss_count', 'Netwatch ICMP Loss Count', 'loss_count')
-        self.metric_store.create_gauge_collector('netwatch_icmp_response_count', 'Netwatch ICMP Loss Count', 'response_count')
-        self.metric_store.create_gauge_collector('netwatch_icmp_sent_count', 'Netwatch ICMP Sent Count', 'sent_count')
-        self.metric_store.create_gauge_collector('netwatch_icmp_rtt_avg', 'Netwatch ICMP RTT Average', 'rtt_avg')
-        self.metric_store.create_gauge_collector('netwatch_icmp_rtt_jitter', 'Netwatch ICMP RTT Jitter', 'rtt_jitter')
-        self.metric_store.create_gauge_collector('netwatch_icmp_rtt_max', 'Netwatch ICMP RTT Max', 'rtt_max')
-        self.metric_store.create_gauge_collector('netwatch_icmp_rtt_min', 'Netwatch ICMP RTT Min', 'rtt_min')
-        self.metric_store.create_gauge_collector('netwatch_icmp_rtt_stdev', 'Netwatch ICMP RTT Standard Deviation', 'rtt_stdev')
+        self.metric_store.create_gauge_metric('netwatch_icmp_loss_count', 'Netwatch ICMP Loss Count', 'loss_count')
+        self.metric_store.create_gauge_metric('netwatch_icmp_response_count', 'Netwatch ICMP Loss Count', 'response_count')
+        self.metric_store.create_gauge_metric('netwatch_icmp_sent_count', 'Netwatch ICMP Sent Count', 'sent_count')
+        self.metric_store.create_gauge_metric('netwatch_icmp_rtt_avg', 'Netwatch ICMP RTT Average', 'rtt_avg')
+        self.metric_store.create_gauge_metric('netwatch_icmp_rtt_jitter', 'Netwatch ICMP RTT Jitter', 'rtt_jitter')
+        self.metric_store.create_gauge_metric('netwatch_icmp_rtt_max', 'Netwatch ICMP RTT Max', 'rtt_max')
+        self.metric_store.create_gauge_metric('netwatch_icmp_rtt_min', 'Netwatch ICMP RTT Min', 'rtt_min')
+        self.metric_store.create_gauge_metric('netwatch_icmp_rtt_stdev', 'Netwatch ICMP RTT Standard Deviation', 'rtt_stdev')
 
         # HTTP(S)
-        self.metric_store.create_gauge_collector('netwatch_http_status_code', 'Netwatch HTTP Status Code', 'http_status_code')
-        self.metric_store.create_gauge_collector('netwatch_http_response_time', 'Netwatch HTTP Response Time', 'http_resp_time')
-        self.metric_store.create_gauge_collector('tcp_connect_time', 'Netwatch HTTP TCP Connect Time', 'tcp_connect_time')
+        self.metric_store.create_gauge_metric('netwatch_http_status_code', 'Netwatch HTTP Status Code', 'http_status_code')
+        self.metric_store.create_gauge_metric('netwatch_http_response_time', 'Netwatch HTTP Response Time', 'http_resp_time')
+        self.metric_store.create_gauge_metric('tcp_connect_time', 'Netwatch HTTP TCP Connect Time', 'tcp_connect_time')
 
     def load(self, router_entry: 'RouterEntry'):
         #nw_records = NetwatchMetricsDataSource.metric_records(router_entry)
@@ -80,4 +80,4 @@ class NetwatchCollector(LoadingCollector):
         self.metric_store.set_metrics(nw_records)
 
     def collect(self):
-        return self.metric_store.get_metrics()
+        yield from self.metric_store.get_metrics()

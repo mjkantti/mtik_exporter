@@ -36,16 +36,16 @@ class BGPCollector(LoadingCollector):
             )
 
         # Metrics
-        self.metric_store.create_info_collector('bgp_sessions_info', 'BGP sessions info')
+        self.metric_store.create_info_metric('bgp_sessions_info', 'BGP sessions info')
 
         session_id_labes = ['name']
-        self.metric_store.create_counter_collector('bgp_remote_messages', 'Number of remote messages', 'remote_messages', session_id_labes)
-        self.metric_store.create_counter_collector('bgp_local_messages', 'Number of local messages', 'local_messages', session_id_labes)
-        self.metric_store.create_counter_collector('bgp_remote_bytes', 'Number of remote bytes', 'remote_bytes', session_id_labes)
-        self.metric_store.create_counter_collector('bgp_local_bytes', 'Number of local bytes', 'local_bytes', session_id_labes)
-        self.metric_store.create_gauge_collector('bgp_prefix_count', 'BGP prefix count', 'prefix_count', session_id_labes)
-        self.metric_store.create_gauge_collector('bgp_established', 'BGP established', 'established', session_id_labes)
-        self.metric_store.create_gauge_collector('bgp_uptime', 'BGP uptime in seconds', 'uptime', session_id_labes)
+        self.metric_store.create_counter_metric('bgp_remote_messages', 'Number of remote messages', 'remote_messages', session_id_labes)
+        self.metric_store.create_counter_metric('bgp_local_messages', 'Number of local messages', 'local_messages', session_id_labes)
+        self.metric_store.create_counter_metric('bgp_remote_bytes', 'Number of remote bytes', 'remote_bytes', session_id_labes)
+        self.metric_store.create_counter_metric('bgp_local_bytes', 'Number of local bytes', 'local_bytes', session_id_labes)
+        self.metric_store.create_gauge_metric('bgp_prefix_count', 'BGP prefix count', 'prefix_count', session_id_labes)
+        self.metric_store.create_gauge_metric('bgp_established', 'BGP established', 'established', session_id_labes)
+        self.metric_store.create_gauge_metric('bgp_uptime', 'BGP uptime in seconds', 'uptime', session_id_labes)
 
     def load(self, router_entry: 'RouterEntry'):
         self.metric_store.clear_metrics()
@@ -54,4 +54,4 @@ class BGPCollector(LoadingCollector):
         self.metric_store.set_metrics(bgp_records)
 
     def collect(self):
-        return self.metric_store.get_metrics()
+        yield from self.metric_store.get_metrics()

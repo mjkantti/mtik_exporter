@@ -27,7 +27,7 @@ class CapsmanCollector(LoadingCollector):
         self.metric_store = MetricStore(router_id, ['identity', 'version', 'base_mac', 'board', 'base_mac'], polling_interval=polling_interval)
 
         # Metrics
-        self.metric_store.create_info_collector('capsman_remote_caps', 'CAPsMAN remote caps')
+        self.metric_store.create_info_metric('capsman_remote_caps', 'CAPsMAN remote caps')
 
     def load(self, router_entry: 'RouterEntry'):
         if self.metric_store.run_fetch():
@@ -36,4 +36,4 @@ class CapsmanCollector(LoadingCollector):
             self.metric_store.set_metrics(recs)
 
     def collect(self):
-        return self.metric_store.get_metrics()
+        yield from self.metric_store.get_metrics()

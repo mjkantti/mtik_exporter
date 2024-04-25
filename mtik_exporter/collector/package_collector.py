@@ -29,7 +29,7 @@ class PackageCollector(LoadingCollector):
         #self.metric_store_updates = MetricStore(router_id, ['channel', 'latest_version', 'build_time', 'status'], polling_interval=polling_interval)
 
         # Metrics
-        self.metric_store.create_info_collector('installed_packages', 'Installed Packages')
+        self.metric_store.create_info_metric('installed_packages', 'Installed Packages')
 
     def load(self, router_entry: 'RouterEntry'):
         if self.metric_store.run_fetch():
@@ -50,7 +50,7 @@ class PackageCollector(LoadingCollector):
             #    self.metric_store_updates.set_metrics(package_update_records)
 
     def collect(self):
-        return self.metric_store.get_metrics()
+        yield from self.metric_store.get_metrics()
 
         #if self.metric_store_updates.have_metrics():
         #    yield self.metric_store_updates.info_collector('update', 'Latest package versions info')

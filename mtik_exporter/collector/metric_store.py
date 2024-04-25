@@ -15,7 +15,7 @@
 import logging
 
 from abc import abstractmethod
-from prometheus_client.core import GaugeMetricFamily, CounterMetricFamily, InfoMetricFamily
+from prometheus_client.core import GaugeMetricFamily, CounterMetricFamily, InfoMetricFamily, Metric
 from prometheus_client.registry import Collector
 from collections.abc import Callable
 from time import time
@@ -41,21 +41,16 @@ class MetricStore():
         self.metric_values = metric_values
         self.translation_table = translation_table
 
-        self.metrics = []
+        self.metrics: tuple[Metric, list[str], str | None] = []
 
-    def set_metrics(self, records: list[dict[str, str | float]]):
-        if records:
-            self.trimmed_records(records)
-            self.ts = time()
-
-    def create_info_collector(self, name: str, decription: str):
+    def create_info_metric(self, name: str, decription: str):
         self.metrics.append((InfoMetricFamily(f'mtik_exporter_{name}', decription, labels=self.metric_labels), self.metric_labels, None))
 
-    def create_gauge_collector(self, name: str, decription: str, value: str, labels = []):
+    def create_gauge_metric(self, name: str, decription: str, value: str, labels = []):
         labels = self.add_router_labels(labels) if labels else self.metric_labels
         self.metrics.append((GaugeMetricFamily(f'mtik_exporter_{name}', decription, labels=labels), labels, value))
 
-    def create_counter_collector(self, name: str, decription: str, value: str, labels = []):
+    def create_counter_metric(self, name: str, decription: str, value: str, labels = []):
         labels = self.add_router_labels(labels) if labels else self.metric_labels
         self.metrics.append((CounterMetricFamily(f'mtik_exporter_{name}', decription, labels=labels), labels, value))
 
@@ -67,7 +62,8 @@ class MetricStore():
         for metric, _, _ in self.metrics:
             metric.samples.clear()
 
-    def trimmed_records(self, router_records: list[dict[str, str | float]] = []):
+    def set_metrics(self, router_records: list[dict[str, str | float]] = []):
+        self.ts = time()
         if not router_records:
             router_records = []
 

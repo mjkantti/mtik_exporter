@@ -28,7 +28,7 @@ class POECollector(LoadingCollector):
         self.metric_store = MetricStore(router_id, ['id', 'name', 'comment', 'poe_out', 'poe_priority', 'poe_voltage', 'poe_out_status', 'poe_out_voltage', 'poe_out_current', 'poe_out_power'], polling_interval=polling_interval)
 
         # Metrics
-        self.metric_store.create_info_collector('poe', 'POE Metrics')
+        self.metric_store.create_info_metric('poe', 'POE Metrics')
 
     def load(self, router_entry: 'RouterEntry'):
         self.metric_store.clear_metrics()
@@ -50,4 +50,4 @@ class POECollector(LoadingCollector):
         self.metric_store.set_metrics(poe_records)
 
     def collect(self):
-        return self.metric_store.get_metrics()
+        yield from self.metric_store.get_metrics()

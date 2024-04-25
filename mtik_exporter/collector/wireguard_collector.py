@@ -27,7 +27,7 @@ class WireguardCollector(LoadingCollector):
         self.if_metric_store = MetricStore(router_id, ['name', 'mtu', 'listen_port', 'public_key', 'comment', 'running'], polling_interval=polling_interval)
 
         # Metrics
-        self.if_metric_store.create_info_collector('wireguard_interfaces', 'Wireguard Interfaces')
+        self.if_metric_store.create_info_metric('wireguard_interfaces', 'Wireguard Interfaces')
 
     def load(self, router_entry: 'RouterEntry'):
         if self.if_metric_store.run_fetch():
@@ -37,7 +37,7 @@ class WireguardCollector(LoadingCollector):
             self.if_metric_store.set_metrics(recs)
 
     def collect(self):
-        return self.if_metric_store.get_metrics()
+        yield from self.if_metric_store.get_metrics()
 
 class WireguardPeerCollector(LoadingCollector):
     '''Wireguard collector'''
@@ -55,12 +55,12 @@ class WireguardPeerCollector(LoadingCollector):
         )
 
         # Metrics
-        self.peer_metric_store.create_info_collector('wireguard_peer', 'Wireguard Peer Info')
+        self.peer_metric_store.create_info_metric('wireguard_peer', 'Wireguard Peer Info')
 
         wg_peer_labels = ['interface', 'name', 'comment']
-        self.peer_metric_store.create_gauge_collector('wireguard_peer_last_handshake', 'Wireguard Peer Last Handshake', 'last_handshake', wg_peer_labels)
-        self.peer_metric_store.create_counter_collector('wireguard_peer_tx_bytes', 'Wireguard Peer TX Bytes', 'tx', wg_peer_labels)
-        self.peer_metric_store.create_counter_collector('wireguard_peer_rx_bytes', 'Wireguard Peer RX Bytes', 'rx', wg_peer_labels)
+        self.peer_metric_store.create_gauge_metric('wireguard_peer_last_handshake', 'Wireguard Peer Last Handshake', 'last_handshake', wg_peer_labels)
+        self.peer_metric_store.create_counter_metric('wireguard_peer_tx_bytes', 'Wireguard Peer TX Bytes', 'tx', wg_peer_labels)
+        self.peer_metric_store.create_counter_metric('wireguard_peer_rx_bytes', 'Wireguard Peer RX Bytes', 'rx', wg_peer_labels)
 
     def load(self, router_entry: 'RouterEntry'):
         self.peer_metric_store.clear_metrics()
@@ -69,4 +69,4 @@ class WireguardPeerCollector(LoadingCollector):
         self.peer_metric_store.set_metrics(recs)
 
     def collect(self):
-        return self.peer_metric_store.get_metrics()
+        yield from self.peer_metric_store.get_metrics()

@@ -43,12 +43,12 @@ class KidDeviceCollector(LoadingCollector):
         )
 
         # Metrics
-        self.metric_store.create_info_collector('kid_control_device', 'Kid-control device Info')
-        self.metric_store.create_gauge_collector('kid_control_device_bytes_down', 'Number of received bytes', 'bytes_down', ['name', 'mac_address', 'user'])
-        self.metric_store.create_gauge_collector('kid_control_device_bytes_up', 'Number of transmitted bytes', 'bytes_up', ['name', 'mac_address', 'user'])
-        self.metric_store.create_gauge_collector('kid_control_device_rate_down', 'Device rate down', 'rate_down', ['name', 'mac_address', 'user'])
-        self.metric_store.create_gauge_collector('kid_control_device_rate_up', 'Device rate up', 'rate_up', ['name', 'mac_address', 'user'])
-        self.metric_store.create_gauge_collector('kid_control_device_idle_time', 'Device idle time', 'idle_time', ['name', 'mac_address', 'user'])
+        self.metric_store.create_info_metric('kid_control_device', 'Kid-control device Info')
+        self.metric_store.create_gauge_metric('kid_control_device_bytes_down', 'Number of received bytes', 'bytes_down', ['name', 'mac_address', 'user'])
+        self.metric_store.create_gauge_metric('kid_control_device_bytes_up', 'Number of transmitted bytes', 'bytes_up', ['name', 'mac_address', 'user'])
+        self.metric_store.create_gauge_metric('kid_control_device_rate_down', 'Device rate down', 'rate_down', ['name', 'mac_address', 'user'])
+        self.metric_store.create_gauge_metric('kid_control_device_rate_up', 'Device rate up', 'rate_up', ['name', 'mac_address', 'user'])
+        self.metric_store.create_gauge_metric('kid_control_device_idle_time', 'Device idle time', 'idle_time', ['name', 'mac_address', 'user'])
 
     def load(self, router_entry: 'RouterEntry'):
         self.metric_store.clear_metrics()
@@ -62,4 +62,4 @@ class KidDeviceCollector(LoadingCollector):
         self.metric_store.set_metrics(device_records)
 
     def collect(self):
-        return self.metric_store.get_metrics()
+        yield from self.metric_store.get_metrics()

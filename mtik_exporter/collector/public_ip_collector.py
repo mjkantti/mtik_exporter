@@ -37,7 +37,7 @@ class PublicIPAddressCollector(LoadingCollector):
         )
 
         # Metrics
-        self.metric_store.create_info_collector('public_ip_address', 'Public IP address')
+        self.metric_store.create_info_metric('public_ip_address', 'Public IP address')
 
     def load(self, router_entry: 'RouterEntry'):
         if self.metric_store.run_fetch():
@@ -47,5 +47,5 @@ class PublicIPAddressCollector(LoadingCollector):
             self.metric_store.set_metrics([address_record])
 
     def collect(self):
-        return self.metric_store.get_metrics()
+        yield from self.metric_store.get_metrics()
 

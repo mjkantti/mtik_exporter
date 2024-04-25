@@ -33,8 +33,8 @@ class UserCollector(LoadingCollector):
         )
 
         # Metrics
-        self.metric_store.create_gauge_collector('active_users_last_login', 'Active Users', 'when')
-        self.metric_store.create_gauge_collector('active_users_count', 'Active Users Count', 'count')
+        self.metric_store.create_gauge_metric('active_users_last_login', 'Active Users', 'when')
+        self.metric_store.create_gauge_metric('active_users_count', 'Active Users Count', 'count')
 
     def load(self, router_entry: 'RouterEntry'):
         #user_records = UserMetricsDataSource.metric_records(router_entry)
@@ -56,4 +56,4 @@ class UserCollector(LoadingCollector):
         self.metric_store.set_metrics(filtered_users.values())
 
     def collect(self):
-        return self.metric_store.get_metrics()
+        yield from self.metric_store.get_metrics()

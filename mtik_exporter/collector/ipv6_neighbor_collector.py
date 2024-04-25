@@ -28,7 +28,7 @@ class IPv6NeighborCollector(LoadingCollector):
         self.metric_store = MetricStore(router_id, ['address', 'interface', 'mac_address', 'status', 'router', 'dhcp_name', 'dhcp_address', 'dhcp_comment'], polling_interval=polling_interval)
 
         # Metrics
-        self.metric_store.create_info_collector('ipv6_neighbor', 'Reachable IPv6 neighbors')
+        self.metric_store.create_info_metric('ipv6_neighbor', 'Reachable IPv6 neighbors')
 
     def load(self, router_entry: 'RouterEntry'):
         self.metric_store.clear_metrics()
@@ -41,4 +41,4 @@ class IPv6NeighborCollector(LoadingCollector):
         self.metric_store.set_metrics(records)
 
     def collect(self):
-        return self.metric_store.get_metrics()
+        yield from self.metric_store.get_metrics()

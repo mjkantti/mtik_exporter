@@ -36,13 +36,16 @@ class PublicIPAddressCollector(LoadingCollector):
             polling_interval=polling_interval
         )
 
+        # Metrics
+        self.metric_store.create_info_collector('public_ip_address', 'Public IP address')
+
     def load(self, router_entry: 'RouterEntry'):
         if self.metric_store.run_fetch():
+            self.metric_store.clear_metrics()
             #address_records = PublicIPAddressDatasource.metric_records(router_entry)
             address_record = router_entry.rest_api.get('ip/cloud')
             self.metric_store.set_metrics([address_record])
 
     def collect(self):
-        if self.metric_store.have_metrics():
-            yield self.metric_store.info_collector('public_ip_address', 'Public IP address')
+        return self.metric_store.get_metrics()
 

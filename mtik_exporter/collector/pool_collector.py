@@ -27,12 +27,14 @@ class PoolCollector(LoadingCollector):
         self.name = 'PoolCollector'
         self.metric_store = MetricStore(router_id, ['pool', 'address', 'owner', 'info'], polling_interval=polling_interval)
 
+        # Metrics
+        self.metric_store.create_info_collector('ip_pool_device', 'Used Addresses in IP Pool')
+
     def load(self, router_entry: 'RouterEntry'):
+        self.metric_store.clear_metrics()
         #pool_used_records = PoolUsedMetricsDataSource.metric_records(router_entry)
         pool_used_records = router_entry.rest_api.get('ip/pool/used')
         self.metric_store.set_metrics(pool_used_records)
 
     def collect(self):
-        if self.metric_store.have_metrics():
-            # yield used-per-pool metrics
-            yield self.metric_store.info_collector('ip_pool_device', 'Used Addresses in IP Pool')
+        return self.metric_store.get_metrics()

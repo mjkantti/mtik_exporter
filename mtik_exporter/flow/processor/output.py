@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 class BaseOutputProcessor:
     @staticmethod
-    def add_dhcp_info(router_entry: 'RouterEntry', registration_record: dict[str, str | float], key: str, id_key: str = 'mac_address') -> None:
+    def add_dhcp_info(router_entry: 'RouterEntry', registration_record: dict[str, str | float], key: str, id_key: str = 'mac-address') -> None:
         dhcp_name = ''
         dhcp_address = 'No DHCP Record'
         dhcp_comment = ''

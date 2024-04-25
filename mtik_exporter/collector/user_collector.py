@@ -26,12 +26,14 @@ class UserCollector(LoadingCollector):
         self.name = 'UserCollector'
         self.metric_store = MetricStore(router_id, ['name', 'when', 'address', 'via', 'group'], polling_interval=polling_interval)
 
+        # Metrics
+        self.metric_store.create_info_collector('active_users', 'Active Users')
+
     def load(self, router_entry: 'RouterEntry'):
         #user_records = UserMetricsDataSource.metric_records(router_entry)
+        self.metric_store.clear_metrics()
         user_records = router_entry.rest_api.get('user/active')
         self.metric_store.set_metrics(user_records)
 
     def collect(self):
-        if self.metric_store.have_metrics():
-            yield self.metric_store.info_collector('active_users', 'Active Users')
-
+        return self.metric_store.get_metrics()

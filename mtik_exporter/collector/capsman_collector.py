@@ -26,11 +26,14 @@ class CapsmanCollector(LoadingCollector):
         self.name = 'CapsmanCollector'
         self.metric_store = MetricStore(router_id, ['identity', 'version', 'base_mac', 'board', 'base_mac'], polling_interval=polling_interval)
 
+        # Metrics
+        self.metric_store.create_info_collector('capsman_remote_caps', 'CAPsMAN remote caps')
+
     def load(self, router_entry: 'RouterEntry'):
         if self.metric_store.run_fetch():
+            self.metric_store.clear_metrics()
             recs = router_entry.rest_api.get('interface/wifi/capsman/remote-cap')
             self.metric_store.set_metrics(recs)
 
     def collect(self):
-        if self.metric_store.have_metrics():
-            yield self.metric_store.info_collector('capsman_remote_caps', 'CAPsMAN remote caps')
+        return self.metric_store.get_metrics()

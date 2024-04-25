@@ -32,7 +32,20 @@ class HealthCollector(LoadingCollector):
             polling_interval=polling_interval,
         )
 
+        # Metrics
+        self.metric_store.create_gauge_collector('system_routerboard_voltage', 'Supplied routerboard voltage', 'voltage')
+        self.metric_store.create_gauge_collector('system_routerboard_temperature', 'Routerboard current temperature', 'temperature')
+        self.metric_store.create_gauge_collector('system_routerboard_temperature', 'Routerboard current temperature', 'phy_temperature')
+        self.metric_store.create_gauge_collector('system_cpu_temperature', 'CPU current temperature', 'cpu_temperature')
+        self.metric_store.create_gauge_collector('system_switch_temperature', 'Switch chip current temperature', 'switch_temperature')
+        self.metric_store.create_gauge_collector('system_fan_one_speed', 'System fan 1 current speed', 'fan1_speed')
+        self.metric_store.create_gauge_collector('system_fan_two_speed', 'System fan 2 current speed', 'fan2_speed')
+        self.metric_store.create_gauge_collector('system_fan_three_speed', 'System fan 3 current speed', 'fan3_speed')
+        self.metric_store.create_gauge_collector('system_fan_four_speed', 'System fan 4 current speed', 'fan4_speed')
+        self.metric_store.create_gauge_collector('system_power_consumption', 'System Power Consumption', 'power_consumption')
+
     def load(self, router_entry: 'RouterEntry'):
+        self.metric_store.clear_metrics()
         #health_records = HealthMetricsDataSource.metric_records(router_entry)
         health_records = router_entry.rest_api.get('system/health')
         for record in health_records:
@@ -48,14 +61,4 @@ class HealthCollector(LoadingCollector):
         self.metric_store.set_metrics(health_records)
 
     def collect(self):
-        if self.metric_store.have_metrics():
-            yield self.metric_store.gauge_collector('system_routerboard_voltage', 'Supplied routerboard voltage', 'voltage')
-            yield self.metric_store.gauge_collector('system_routerboard_temperature', 'Routerboard current temperature', 'temperature')
-            yield self.metric_store.gauge_collector('system_routerboard_temperature', 'Routerboard current temperature', 'phy_temperature')
-            yield self.metric_store.gauge_collector('system_cpu_temperature', 'CPU current temperature', 'cpu_temperature')
-            yield self.metric_store.gauge_collector('system_switch_temperature', 'Switch chip current temperature', 'switch_temperature')
-            yield self.metric_store.gauge_collector('system_fan_one_speed', 'System fan 1 current speed', 'fan1_speed')
-            yield self.metric_store.gauge_collector('system_fan_two_speed', 'System fan 2 current speed', 'fan2_speed')
-            yield self.metric_store.gauge_collector('system_fan_three_speed', 'System fan 3 current speed', 'fan3_speed')
-            yield self.metric_store.gauge_collector('system_fan_four_speed', 'System fan 4 current speed', 'fan4_speed')
-            yield self.metric_store.gauge_collector('system_power_consumption', 'System Power Consumption', 'power_consumption')
+        return self.metric_store.get_metrics()

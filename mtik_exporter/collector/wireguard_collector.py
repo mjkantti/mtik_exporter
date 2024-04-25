@@ -26,14 +26,18 @@ class WireguardCollector(LoadingCollector):
         self.name = 'WireguardCollector'
         self.if_metric_store = MetricStore(router_id, ['name', 'mtu', 'listen_port', 'public_key', 'comment', 'running'], polling_interval=polling_interval)
 
+        # Metrics
+        self.if_metric_store.create_info_collector('wireguard_interfaces', 'Wireguard Interfaces')
+
     def load(self, router_entry: 'RouterEntry'):
         if self.if_metric_store.run_fetch():
+            self.if_metric_store.clear_metrics()
+
             recs = router_entry.rest_api.get('interface/wireguard')
             self.if_metric_store.set_metrics(recs)
 
     def collect(self):
-        if self.if_metric_store.have_metrics():
-            yield self.if_metric_store.info_collector('wireguard_interfaces', 'Wireguard Interfaces')
+        return self.if_metric_store.get_metrics()
 
 class WireguardPeerCollector(LoadingCollector):
     '''Wireguard collector'''
@@ -50,17 +54,19 @@ class WireguardPeerCollector(LoadingCollector):
             polling_interval=polling_interval,
         )
 
+        # Metrics
+        self.peer_metric_store.create_info_collector('wireguard_peer', 'Wireguard Peer Info')
+
+        wg_peer_labels = ['interface', 'name', 'comment']
+        self.peer_metric_store.create_gauge_collector('wireguard_peer_last_handshake', 'Wireguard Peer Last Handshake', 'last_handshake', wg_peer_labels)
+        self.peer_metric_store.create_counter_collector('wireguard_peer_tx_bytes', 'Wireguard Peer TX Bytes', 'tx', wg_peer_labels)
+        self.peer_metric_store.create_counter_collector('wireguard_peer_rx_bytes', 'Wireguard Peer RX Bytes', 'rx', wg_peer_labels)
+
     def load(self, router_entry: 'RouterEntry'):
+        self.peer_metric_store.clear_metrics()
+
         recs = router_entry.rest_api.get('interface/wireguard/peers')
         self.peer_metric_store.set_metrics(recs)
 
     def collect(self):
-        if self.peer_metric_store.have_metrics():
-            yield self.peer_metric_store.info_collector('wireguard_peer', 'Wireguard Peer Info')
-
-            wg_peer_labels = ['interface', 'name', 'comment']
-            yield self.peer_metric_store.gauge_collector('wireguard_peer_last_handshake', 'Wireguard Peer Last Handshake', 'last_handshake', wg_peer_labels)
-
-            yield self.peer_metric_store.counter_collector('wireguard_peer_tx_bytes', 'Wireguard Peer TX Bytes', 'tx', wg_peer_labels)
-
-            yield self.peer_metric_store.counter_collector('wireguard_peer_rx_bytes', 'Wireguard Peer RX Bytes', 'rx', wg_peer_labels)
+        return self.peer_metric_store.get_metrics()

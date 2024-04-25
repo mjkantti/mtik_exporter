@@ -31,7 +31,21 @@ class FirewallCollector(LoadingCollector):
         self.ipv4_mangle_metric_store = MetricStore(router_id, firewall_labels, firewall_values, polling_interval=polling_interval)
         self.ipv4_raw_metric_store = MetricStore(router_id, firewall_labels, firewall_values, polling_interval=polling_interval)
 
+        # Metrics
+        self.ipv4_filter_metric_store.create_counter_collector('firewall_filter_bytes', 'Total amount of bytes matched by firewall rules', 'bytes')
+        self.ipv4_filter_metric_store.create_counter_collector('firewall_filter_packets', 'Total amount of packets matched by firewall rules', 'packets')
+
+        self.ipv4_mangle_metric_store.create_counter_collector('firewall_mangle_bytes', 'Total amount of bytes matched by firewall mangle rules', 'bytes')
+        self.ipv4_mangle_metric_store.create_counter_collector('firewall_mangle_packets', 'Total amount of packets matched by firewall mangle rules', 'packets')
+
+        self.ipv4_raw_metric_store.create_counter_collector('firewall_raw_bytes', 'Total amount of bytes matched by firewall raw rules', 'bytes')
+        self.ipv4_raw_metric_store.create_counter_collector('firewall_raw_packets', 'Total amount of packets matched by firewall raw rules', 'packets')
+
     def load(self, router_entry: 'RouterEntry'):
+        self.ipv4_filter_metric_store.clear_metrics()
+        self.ipv4_mangle_metric_store.clear_metrics()
+        self.ipv4_raw_metric_store.clear_metrics()
+
         #firewall_filter_records = FirewallMetricsDataSource.metric_records_ipv4(router_entry)
         firewall_filter_records = router_entry.rest_api.get('ip/firewall/filter')
         self.ipv4_filter_metric_store.set_metrics(firewall_filter_records)
@@ -46,17 +60,8 @@ class FirewallCollector(LoadingCollector):
 
     def collect(self):
         # ~*~*~*~*~*~ IPv4 ~*~*~*~*~*~
-        if self.ipv4_filter_metric_store.have_metrics():
-            yield self.ipv4_filter_metric_store.counter_collector('firewall_filter_bytes', 'Total amount of bytes matched by firewall rules', 'bytes')
-            yield self.ipv4_filter_metric_store.counter_collector('firewall_filter_packets', 'Total amount of packets matched by firewall rules', 'packets')
-
-        if self.ipv4_mangle_metric_store.have_metrics():
-            yield self.ipv4_mangle_metric_store.counter_collector('firewall_mangle_bytes', 'Total amount of bytes matched by firewall mangle rules', 'bytes')
-            yield self.ipv4_mangle_metric_store.counter_collector('firewall_mangle_packets', 'Total amount of packets matched by firewall mangle rules', 'packets')
-
-        if self.ipv4_raw_metric_store.have_metrics():
-            yield self.ipv4_raw_metric_store.counter_collector('firewall_raw_bytes', 'Total amount of bytes matched by firewall raw rules', 'bytes')
-            yield self.ipv4_raw_metric_store.counter_collector('firewall_raw_packets', 'Total amount of packets matched by firewall raw rules', 'packets')
+        for metric, _, _ in self.ipv4_filter_metric_store.metrics + self.ipv4_mangle_metric_store.metrics + self.ipv4_raw_metric_store.metrics:
+            yield metric
 
 class IPv6FirewallCollector(LoadingCollector):
     ''' Firewall rules traffic metrics collector
@@ -70,7 +75,22 @@ class IPv6FirewallCollector(LoadingCollector):
         self.ipv6_mangle_metric_store = MetricStore(router_id, firewall_labels, firewall_values, polling_interval=polling_interval)
         self.ipv6_raw_metric_store = MetricStore(router_id, firewall_labels, firewall_values, polling_interval=polling_interval)
 
+        # Metrics
+        self.ipv6_filter_metric_store.create_counter_collector('firewall_filter_ipv6_bytes', 'Total amount of bytes matched by firewall rules (IPv6)', 'bytes')
+        self.ipv6_filter_metric_store.create_counter_collector('firewall_filter_ipv6_packets', 'Total amount of packets matched by firewall rules (IPv6)', 'packets')
+
+        self.ipv6_mangle_metric_store.create_counter_collector('firewall_mangle_ipv6_bytes', 'Total amount of bytes matched by firewall mangle rules (IPv6)', 'bytes')
+        self.ipv6_mangle_metric_store.create_counter_collector('firewall_mangle_ipv6_packets', 'Total amount of packets matched by firewall mangle rules (IPv6)', 'packets')
+
+        self.ipv6_raw_metric_store.create_counter_collector('firewall_raw_ipv6_bytes', 'Total amount of bytes matched by firewall raw rules (IPv6)', 'bytes')
+        self.ipv6_raw_metric_store.create_counter_collector('firewall_raw_ipv6_packets', 'Total amount of packets matched by firewall raw rules (IPv6)', 'packets')
+
+
     def load(self, router_entry: 'RouterEntry'):
+        self.ipv6_filter_metric_store.clear_metrics()
+        self.ipv6_mangle_metric_store.clear_metrics()
+        self.ipv6_raw_metric_store.clear_metrics()
+
         #firewall_filter_records_ipv6 =  FirewallMetricsDataSource.metric_records_ipv6(router_entry)
         firewall_filter_records_ipv6 = router_entry.rest_api.get('ipv6/firewall/filter')
         self.ipv6_filter_metric_store.set_metrics(firewall_filter_records_ipv6)
@@ -84,14 +104,5 @@ class IPv6FirewallCollector(LoadingCollector):
         self.ipv6_raw_metric_store.set_metrics(firewall_raw_records_ipv6)
 
     def collect(self):
-        if self.ipv6_filter_metric_store.have_metrics():
-            yield self.ipv6_filter_metric_store.counter_collector('firewall_filter_ipv6_bytes', 'Total amount of bytes matched by firewall rules (IPv6)', 'bytes')
-            yield self.ipv6_filter_metric_store.counter_collector('firewall_filter_ipv6_packets', 'Total amount of packets matched by firewall rules (IPv6)', 'packets')
-
-        if self.ipv6_mangle_metric_store.have_metrics():
-            yield self.ipv6_mangle_metric_store.counter_collector('firewall_mangle_ipv6_bytes', 'Total amount of bytes matched by firewall mangle rules (IPv6)', 'bytes')
-            yield self.ipv6_mangle_metric_store.counter_collector('firewall_mangle_ipv6_packets', 'Total amount of packets matched by firewall mangle rules (IPv6)', 'packets')
-
-        if self.ipv6_raw_metric_store.have_metrics():
-            yield self.ipv6_raw_metric_store.counter_collector('firewall_raw_ipv6_bytes', 'Total amount of bytes matched by firewall raw rules (IPv6)', 'bytes')
-            yield self.ipv6_raw_metric_store.counter_collector('firewall_raw_ipv6_packets', 'Total amount of packets matched by firewall raw rules (IPv6)', 'packets')
+        for metric, _, _ in self.ipv6_filter_metric_store.metrics + self.ipv6_mangle_metric_store.metrics + self.ipv6_raw_metric_store.metrics:
+            yield metric

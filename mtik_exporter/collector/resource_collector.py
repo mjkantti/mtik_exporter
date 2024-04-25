@@ -39,7 +39,25 @@ class SystemResourceCollector(LoadingCollector):
         )
         self.version_metric_store = MetricStore(router_id, ['current_version', 'channel', 'latest_version'])
 
+        # Metrics
+        self.metric_store.create_counter_collector('system_uptime', 'Time interval since boot-up', 'uptime', ['version', 'board_name', 'cpu', 'architecture_name'])
+        self.metric_store.create_gauge_collector('system_free_memory', 'Unused amount of RAM', 'free_memory', ['version', 'board_name', 'cpu', 'architecture_name'])
+        self.metric_store.create_gauge_collector('system_total_memory', 'Amount of installed RAM', 'total_memory', ['version', 'board_name', 'cpu', 'architecture_name'])
+        self.metric_store.create_gauge_collector('system_free_hdd_space', 'Free space on hard drive or NAND', 'free_hdd_space', ['version', 'board_name', 'cpu', 'architecture_name'])
+        self.metric_store.create_gauge_collector('system_total_hdd_space', 'Size of the hard drive or NAND', 'total_hdd_space', ['version', 'board_name', 'cpu', 'architecture_name'])
+        self.metric_store.create_gauge_collector('system_cpu_load', 'Percentage of used CPU resources', 'cpu_load', ['version', 'board_name', 'cpu', 'architecture_name'])
+        self.metric_store.create_gauge_collector('system_cpu_count', 'Number of CPUs present on the system', 'cpu_count', ['version', 'board_name', 'cpu', 'architecture_name'])
+        self.metric_store.create_gauge_collector('system_cpu_frequency', 'Current CPU frequency', 'cpu_frequency', ['version', 'board_name', 'cpu', 'architecture_name'])
+        self.metric_store.create_gauge_collector('system_hdd_bad_blocks_percent', 'HDD Bad Block percentage', 'bad_blocks', ['version', 'board_name', 'cpu', 'architecture_name'])
+        self.metric_store.create_counter_collector('system_hdd_write_sector_count', 'HDD Written Sector Count', 'write_sect_total', ['version', 'board_name', 'cpu', 'architecture_name'])
+
+        # Updates
+        self.version_metric_store.create_info_collector('system_latest_version', 'Latest RouterOS version available')
+        self.version_metric_store.create_gauge_collector('system_latest_version_built', 'Latest RouterOS version built time', 'latest_built')
+
     def load(self, router_entry: 'RouterEntry'):
+        self.metric_store.clear_metrics()
+        self.version_metric_store.clear_metrics()
         #resource_records = SystemResourceMetricsDataSource.metric_records(router_entry)
         resource_record = router_entry.rest_api.get('system/resource')
 
@@ -59,18 +77,5 @@ class SystemResourceCollector(LoadingCollector):
         self.metric_store.set_metrics([resource_record])
 
     def collect(self):
-        if self.metric_store.have_metrics():
-            yield self.metric_store.counter_collector('system_uptime', 'Time interval since boot-up', 'uptime', ['version', 'board_name', 'cpu', 'architecture_name'])
-            yield self.metric_store.gauge_collector('system_free_memory', 'Unused amount of RAM', 'free_memory', ['version', 'board_name', 'cpu', 'architecture_name'])
-            yield self.metric_store.gauge_collector('system_total_memory', 'Amount of installed RAM', 'total_memory', ['version', 'board_name', 'cpu', 'architecture_name'])
-            yield self.metric_store.gauge_collector('system_free_hdd_space', 'Free space on hard drive or NAND', 'free_hdd_space', ['version', 'board_name', 'cpu', 'architecture_name'])
-            yield self.metric_store.gauge_collector('system_total_hdd_space', 'Size of the hard drive or NAND', 'total_hdd_space', ['version', 'board_name', 'cpu', 'architecture_name'])
-            yield self.metric_store.gauge_collector('system_cpu_load', 'Percentage of used CPU resources', 'cpu_load', ['version', 'board_name', 'cpu', 'architecture_name'])
-            yield self.metric_store.gauge_collector('system_cpu_count', 'Number of CPUs present on the system', 'cpu_count', ['version', 'board_name', 'cpu', 'architecture_name'])
-            yield self.metric_store.gauge_collector('system_cpu_frequency', 'Current CPU frequency', 'cpu_frequency', ['version', 'board_name', 'cpu', 'architecture_name'])
-            yield self.metric_store.gauge_collector('system_hdd_bad_blocks_percent', 'HDD Bad Block percentage', 'bad_blocks', ['version', 'board_name', 'cpu', 'architecture_name'])
-            yield self.metric_store.counter_collector('system_hdd_write_sector_count', 'HDD Written Sector Count', 'write_sect_total', ['version', 'board_name', 'cpu', 'architecture_name'])
-
-            # Updates
-            yield self.version_metric_store.info_collector('system_latest_version', 'Latest RouterOS version available')
-            yield self.version_metric_store.gauge_collector('system_latest_version_built', 'Latest RouterOS version built time', 'latest_built')
+        for metric, _, _ in self.metric_store.metrics + self.version_metric_store.metrics:
+            yield metric

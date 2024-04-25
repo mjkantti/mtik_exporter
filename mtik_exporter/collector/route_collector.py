@@ -30,15 +30,18 @@ class RouteCollector(LoadingCollector):
             polling_interval=polling_interval,
         )
 
+        # Metrics
+        self.metric_store.create_info_collector('routes', 'Routes Info')
+
     def load(self, router_entry: 'RouterEntry'):
         if self.metric_store.run_fetch():
+            self.metric_store.clear_metrics()
             #route_records = RouteMetricsDataSource.metric_records(router_entry)
             route_records = router_entry.rest_api.get('ip/route')
             self.metric_store.set_metrics(route_records)
 
     def collect(self):
-        if self.metric_store.have_metrics():
-            yield self.metric_store.info_collector('routes', 'Routes Info')
+        return self.metric_store.get_metrics()
 
 class IPv6RouteCollector(LoadingCollector):
     ''' IP Route Metrics collector
@@ -51,12 +54,15 @@ class IPv6RouteCollector(LoadingCollector):
             polling_interval=polling_interval,
         )
 
+        # Metrics
+        self.metric_store.create_info_collector('ipv6_routes', 'IPv6 Routes Info')
+
     def load(self, router_entry: 'RouterEntry'):
         if self.metric_store.run_fetch():
+            self.metric_store.clear_metrics()
             #route_records = IPv6RouteMetricsDataSource.metric_records(router_entry)
             route_records = router_entry.rest_api.get('ipv6/route')
             self.metric_store.set_metrics(route_records)
 
     def collect(self):
-        if self.metric_store.have_metrics():
-            yield self.metric_store.info_collector('ipv6_routes', 'IPv6 Routes Info')
+        return self.metric_store.get_metrics()

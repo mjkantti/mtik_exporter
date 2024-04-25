@@ -45,12 +45,37 @@ class InterfaceCollector(LoadingCollector):
             polling_interval=slow_polling_interval
         )
 
+        # Metrics
+        self.interface_metric_store.create_counter_collector('interface_rx_byte', 'Number of received bytes', 'rx_byte')
+        self.interface_metric_store.create_counter_collector('interface_tx_byte', 'Number of transmitted bytes', 'tx_byte')
+
+        self.interface_metric_store.create_counter_collector('interface_rx_packet', 'Number of packets received', 'rx_packet')
+        self.interface_metric_store.create_counter_collector('interface_tx_packet', 'Number of transmitted packets', 'tx_packet')
+
+        self.interface_metric_store.create_counter_collector('interface_rx_error', 'Number of packets received with an error', 'rx_error')
+        self.interface_metric_store.create_counter_collector('interface_tx_error', 'Number of packets transmitted with an error', 'tx_error')
+
+        self.interface_metric_store.create_counter_collector('interface_rx_drop', 'Number of received packets being dropped', 'rx_drop')
+        self.interface_metric_store.create_counter_collector('interface_tx_drop', 'Number of transmitted packets being dropped', 'tx_drop')
+
+        self.interface_metric_store.create_counter_collector('link_downs', 'Number of times link went down', 'link_downs')
+
+        self.interface_monitor_metric_store.create_gauge_collector('interface_status', 'Current interface link status', 'status')
+        self.interface_monitor_metric_store.create_gauge_collector('interface_rate', 'Actual interface connection data rate', 'rate')
+
+        self.interface_monitor_metric_store.create_gauge_collector('interface_full_duplex', 'Full duplex data transmission', 'full_duplex')
+
+        self.interface_monitor_metric_store.create_gauge_collector('interface_sfp_temperature', 'Current SFP temperature', 'sfp_temperature')
+
     def load(self, router_entry: 'RouterEntry'):
+        self.interface_metric_store.clear_metrics()
         #interface_traffic_records = InterfaceTrafficMetricsDataSource.metric_records(router_entry)
         #interface_traffic_records = router_entry.api_connection.get('/interface')
         interface_traffic_records = router_entry.rest_api.get('interface')
 
         if interface_traffic_records and router_entry.config_entry.monitor and self.interface_monitor_metric_store.run_fetch():
+            self.interface_monitor_metric_store.clear_metrics()
+
             monitor_records = []
             if_ids = []
             for ifc in interface_traffic_records:
@@ -75,26 +100,7 @@ class InterfaceCollector(LoadingCollector):
 
         interface_traffic_records_running = [ift for ift in interface_traffic_records if ift['running'] == 'true']
         self.interface_metric_store.set_metrics(interface_traffic_records_running)
+
     def collect(self):
-        if self.interface_metric_store.have_metrics():
-            yield self.interface_metric_store.counter_collector('interface_rx_byte', 'Number of received bytes', 'rx_byte')
-            yield self.interface_metric_store.counter_collector('interface_tx_byte', 'Number of transmitted bytes', 'tx_byte')
-
-            yield self.interface_metric_store.counter_collector('interface_rx_packet', 'Number of packets received', 'rx_packet')
-            yield self.interface_metric_store.counter_collector('interface_tx_packet', 'Number of transmitted packets', 'tx_packet')
-
-            yield self.interface_metric_store.counter_collector('interface_rx_error', 'Number of packets received with an error', 'rx_error')
-            yield self.interface_metric_store.counter_collector('interface_tx_error', 'Number of packets transmitted with an error', 'tx_error')
-
-            yield self.interface_metric_store.counter_collector('interface_rx_drop', 'Number of received packets being dropped', 'rx_drop')
-            yield self.interface_metric_store.counter_collector('interface_tx_drop', 'Number of transmitted packets being dropped', 'tx_drop')
-
-            yield self.interface_metric_store.counter_collector('link_downs', 'Number of times link went down', 'link_downs')
-
-        if self.interface_monitor_metric_store.have_metrics():
-            yield self.interface_monitor_metric_store.gauge_collector('interface_status', 'Current interface link status', 'status')
-            yield self.interface_monitor_metric_store.gauge_collector('interface_rate', 'Actual interface connection data rate', 'rate')
-
-            yield self.interface_monitor_metric_store.gauge_collector('interface_full_duplex', 'Full duplex data transmission', 'full_duplex')
-
-            yield self.interface_monitor_metric_store.gauge_collector('interface_sfp_temperature', 'Current SFP temperature', 'sfp_temperature')
+        for metric, _, _ in self.interface_metric_store.metrics + self.interface_monitor_metric_store.metrics:
+            yield metric

@@ -35,20 +35,23 @@ class BGPCollector(LoadingCollector):
             polling_interval,
             )
 
+        # Metrics
+        self.metric_store.create_info_collector('bgp_sessions_info', 'BGP sessions info')
+
+        session_id_labes = ['name']
+        self.metric_store.create_counter_collector('bgp_remote_messages', 'Number of remote messages', 'remote_messages', session_id_labes)
+        self.metric_store.create_counter_collector('bgp_local_messages', 'Number of local messages', 'local_messages', session_id_labes)
+        self.metric_store.create_counter_collector('bgp_remote_bytes', 'Number of remote bytes', 'remote_bytes', session_id_labes)
+        self.metric_store.create_counter_collector('bgp_local_bytes', 'Number of local bytes', 'local_bytes', session_id_labes)
+        self.metric_store.create_gauge_collector('bgp_prefix_count', 'BGP prefix count', 'prefix_count', session_id_labes)
+        self.metric_store.create_gauge_collector('bgp_established', 'BGP established', 'established', session_id_labes)
+        self.metric_store.create_gauge_collector('bgp_uptime', 'BGP uptime in seconds', 'uptime', session_id_labes)
+
     def load(self, router_entry: 'RouterEntry'):
+        self.metric_store.clear_metrics()
         #bgp_records = BGPMetricsDataSource.metric_records(router_entry)
         bgp_records = router_entry.rest_api.get('routing/bgp/session')
         self.metric_store.set_metrics(bgp_records)
 
     def collect(self):
-        if self.metric_store.have_metrics():
-            yield self.metric_store.info_collector('bgp_sessions_info', 'BGP sessions info')
-
-            session_id_labes = ['name']
-            yield self.metric_store.counter_collector('bgp_remote_messages', 'Number of remote messages', 'remote_messages', session_id_labes)
-            yield self.metric_store.counter_collector('bgp_local_messages', 'Number of local messages', 'local_messages', session_id_labes)
-            yield self.metric_store.counter_collector('bgp_remote_bytes', 'Number of remote bytes', 'remote_bytes', session_id_labes)
-            yield self.metric_store.counter_collector('bgp_local_bytes', 'Number of local bytes', 'local_bytes', session_id_labes)
-            yield self.metric_store.gauge_collector('bgp_prefix_count', 'BGP prefix count', 'prefix_count', session_id_labes)
-            yield self.metric_store.gauge_collector('bgp_established', 'BGP established', 'established', session_id_labes)
-            yield self.metric_store.gauge_collector('bgp_uptime', 'BGP uptime in seconds', 'uptime', session_id_labes)
+        return self.metric_store.get_metrics()

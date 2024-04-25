@@ -35,57 +35,42 @@ class MetricStore():
                  translation_table: dict[str, Callable[[str | None], str | float | None]]={},
                  polling_interval = 10):
         self.router_id = router_id
-        self.metrics: list[dict[str, str | float]] = []
         self.ts: float = 0
         self.polling_interval = polling_interval
         self.metric_labels = self.add_router_labels(metric_labels)
         self.metric_values = metric_values
         self.translation_table = translation_table
 
+        self.metrics = []
+
     def set_metrics(self, records: list[dict[str, str | float]]):
         if records:
-            self.metrics = self.trimmed_records(records)
+            self.trimmed_records(records)
             self.ts = time()
 
-    def have_metrics(self):
-        return self.metrics and time() - self.ts < self.polling_interval * 1.5
+    def create_info_collector(self, name: str, decription: str):
+        self.metrics.append((InfoMetricFamily(f'mtik_exporter_{name}', decription, labels=self.metric_labels), self.metric_labels, None))
 
-    def info_collector(self, name: str, decription: str):
-        collector = InfoMetricFamily(f'mtik_exporter_{name}', decription, labels=self.metric_labels)
-        for rec in self.metrics:
-            lv: list[str] = [str(rec.get(v, '')) for v in self.metric_labels]
-            collector.add_metric(labels = lv, value = {})
-        return collector
-
-    def counter_collector(self, name: str, decription: str, key: str, labels: list[str] = []):
+    def create_gauge_collector(self, name: str, decription: str, value: str, labels = []):
         labels = self.add_router_labels(labels) if labels else self.metric_labels
-        collector = CounterMetricFamily(f'mtik_exporter_{name}', decription, labels=labels)
-        for rec in self.metrics:
-            val = rec.get(key)
-            if val is None:
-                continue
+        self.metrics.append((GaugeMetricFamily(f'mtik_exporter_{name}', decription, labels=labels), labels, value))
 
-            lv: list[str] = [str(rec.get(v, '')) for v in labels]
-            collector.add_metric(lv, float(val))
-        return collector
-
-    def gauge_collector(self, name: str, decription: str, key: str, labels: list[str] = []):
+    def create_counter_collector(self, name: str, decription: str, value: str, labels = []):
         labels = self.add_router_labels(labels) if labels else self.metric_labels
-        collector = GaugeMetricFamily(f'mtik_exporter_{name}', decription, labels=labels)
-        for rec in self.metrics:
-            val = rec.get(key)
-            if val is None:
-                continue
+        self.metrics.append((CounterMetricFamily(f'mtik_exporter_{name}', decription, labels=labels), labels, value))
 
-            lv: list[str] = [str(rec.get(v, '')) for v in labels]
-            collector.add_metric(lv, float(val))
-        return collector
+    def get_metrics(self):
+        for metric, _, _ in self.metrics:
+            yield metric
+
+    def clear_metrics(self):
+        for metric, _, _ in self.metrics:
+            metric.samples.clear()
 
     def trimmed_records(self, router_records: list[dict[str, str | float]] = []):
         if not router_records:
             router_records = []
 
-        labeled_records = []
         for router_record in router_records:
             # Some routeros endpoints do not support filtering by disabled flag, do it here instead
             if router_record.get('disabled', 'false') == 'true':
@@ -113,9 +98,18 @@ class MetricStore():
                 if val != None:
                     translated_record[key] = val
 
-            labeled_records.append(translated_record)
+            for metric, labels, value in self.metrics:
+                v = None
+                # Info Metrics
+                if not value:
+                    v = {}
+                else:
+                    v = translated_record.get(value)
+                    if not v:
+                        continue
 
-        return labeled_records
+                lv: list[str] = [str(translated_record.get(label, '')) for label in labels]
+                metric.add_metric(lv, v)
 
     def add_router_labels(self, labels: list[str]):
         return labels + list(self.router_id.keys())

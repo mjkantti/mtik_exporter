@@ -37,17 +37,18 @@ class DHCPCollector(LoadingCollector):
             polling_interval=polling_interval,
         )
 
+        # Metrics
+        self.lease_metric_store.create_info_collector('dhcp_lease', 'DHCP Active Leases')
+        self.lease_metric_store.create_gauge_collector('dhcp_lease_expiry', 'DHCP Active Lease Expiry', 'expires_after', ['mac_address', 'comment', 'client_id'])
+        self.lease_metric_store.create_gauge_collector('dhcp_lease_last_seen', 'DHCP Active Lease Last Seen', 'last_seen', ['mac_address', 'comment', 'client_id'])
+
     def load(self, router_entry: 'RouterEntry'):
+        self.lease_metric_store.clear_metrics()
         #dhcp_lease_records = DHCPMetricsDataSource.metric_records(router_entry)
         #dhcp_lease_records = router_entry.api_connection.get('/ip/dhcp-server/lease')
         dhcp_lease_records = router_entry.rest_api.get('ip/dhcp-server/lease')
         self.lease_metric_store.set_metrics(dhcp_lease_records)
-        router_entry.set_dhcp_entries(self.lease_metric_store.metrics)
+        router_entry.set_dhcp_entries(dhcp_lease_records)
 
     def collect(self):
-        if self.lease_metric_store.have_metrics():
-            yield self.lease_metric_store.info_collector('dhcp_lease', 'DHCP Active Leases')
-
-            yield self.lease_metric_store.gauge_collector('dhcp_lease_expiry', 'DHCP Active Lease Expiry', 'expires_after', ['mac_address', 'comment', 'client_id'])
-
-            yield self.lease_metric_store.gauge_collector('dhcp_lease_last_seen', 'DHCP Active Lease Last Seen', 'last_seen', ['mac_address', 'comment', 'client_id'])
+        return self.lease_metric_store.get_metrics()

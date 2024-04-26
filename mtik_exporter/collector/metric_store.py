@@ -55,6 +55,11 @@ class MetricStore():
         self.metrics.append((CounterMetricFamily(f'mtik_exporter_{name}', decription, labels=labels), labels, value))
 
     def get_metrics(self):
+        if self.ts < time() - self.polling_interval * 1.5:
+            if self.ts > 0:
+                metric_names = [m[0].name for m in self.metrics]
+                logging.warn('Metrics too old to show for: %s', ', '.join(metric_names))
+            return
         for metric, _, _ in self.metrics:
             yield metric
 

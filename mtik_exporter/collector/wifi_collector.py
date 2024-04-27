@@ -49,7 +49,7 @@ class WifiCollector(LoadingCollector):
                 #monitor_records = router_entry.rest_api.post('interface/wifi', 'monitor', {'once': True, '.id': if_ids})
                 monitor_records = router_entry.api_connection.call('/interface/wifi', 'monitor', {'once':'', '.id': if_ids})
                 for mon_r, w_r in zip(monitor_records, wifi_interface_records):
-                    mon_r.update({'id': w_r.get('.id', ''), 'name': w_r.get('name', ''), 'comment': w_r.get('comment', '')})
+                    mon_r.update({'id': w_r.get('id', ''), 'name': w_r.get('name', ''), 'comment': w_r.get('comment', '')})
                 self.wifi_monitor_metric_store.set_metrics(monitor_records)
 
     def collect(self):

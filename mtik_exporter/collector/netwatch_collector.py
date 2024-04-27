@@ -68,7 +68,8 @@ class NetwatchCollector(LoadingCollector):
     def load(self, router_entry: 'RouterEntry'):
         #nw_records = NetwatchMetricsDataSource.metric_records(router_entry)
         self.metric_store.clear_metrics()
-        nw_records = router_entry.rest_api.get('tool/netwatch', {'disabled': 'false'})
+        #nw_records = router_entry.api_connection.get('tool/netwatch', {'disabled': 'false'})
+        nw_records = router_entry.api_connection.get('/tool/netwatch', disabled='false')
         if not nw_records:
             return
 

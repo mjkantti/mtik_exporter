@@ -32,7 +32,7 @@ class CapsmanCollector(LoadingCollector):
     def load(self, router_entry: 'RouterEntry'):
         if self.metric_store.run_fetch():
             self.metric_store.clear_metrics()
-            recs = router_entry.rest_api.get('interface/wifi/capsman/remote-cap')
+            recs = router_entry.api_connection.get('interface/wifi/capsman/remote-cap')
             self.metric_store.set_metrics(recs)
 
     def collect(self):

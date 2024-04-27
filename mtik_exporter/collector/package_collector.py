@@ -35,7 +35,7 @@ class PackageCollector(LoadingCollector):
         if self.metric_store.run_fetch():
             self.metric_store.clear_metrics()
             #package_records = PackageMetricsDataSource.metric_records(router_entry)
-            package_record = router_entry.rest_api.get('system/package')
+            package_record = router_entry.api_connection.get('system/package')
             self.metric_store.set_metrics(package_record)
 
             #if router_entry.config_entry.check_for_updates:

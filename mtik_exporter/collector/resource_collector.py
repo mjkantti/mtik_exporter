@@ -59,12 +59,12 @@ class SystemResourceCollector(LoadingCollector):
         self.metric_store.clear_metrics()
         self.version_metric_store.clear_metrics()
         #resource_records = SystemResourceMetricsDataSource.metric_records(router_entry)
-        resource_record = router_entry.rest_api.get('system/resource')
+        resource_records = router_entry.api_connection.get('system/resource')
 
         # Check for updates
-        if resource_record and router_entry.config_entry.check_for_updates:
+        if resource_records and router_entry.config_entry.check_for_updates:
             latest_version_rec = {}
-            version, channel = parse_ros_version(resource_record.get('version'))
+            version, channel = parse_ros_version(resource_records[0].get('version'))
             latest_version_rec['current_version'] = version
             latest_version_rec['channel'] = channel
 
@@ -74,7 +74,7 @@ class SystemResourceCollector(LoadingCollector):
 
             self.version_metric_store.set_metrics([latest_version_rec])
 
-        self.metric_store.set_metrics([resource_record])
+        self.metric_store.set_metrics(resource_records)
 
     def collect(self):
         yield from self.metric_store.get_metrics()

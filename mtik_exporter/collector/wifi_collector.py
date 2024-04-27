@@ -40,13 +40,14 @@ class WifiCollector(LoadingCollector):
             self.wifi_interface_metric_store.clear_metrics()
             self.wifi_monitor_metric_store.clear_metrics()
 
-            wifi_interface_records = router_entry.rest_api.get('interface/wifi')
+            wifi_interface_records = router_entry.api_connection.get('interface/wifi')
             self.wifi_interface_metric_store.set_metrics(wifi_interface_records)
 
             if wifi_interface_records and router_entry.config_entry.monitor and self.wifi_monitor_metric_store.run_fetch():
-                if_ids = ','.join([str(i.get('.id')) for i in wifi_interface_records])
+                if_ids = ','.join([str(i.get('id')) for i in wifi_interface_records])
                 #monitor_records = router_entry.api_connection.call('/interface/wifi', 'monitor', {'once':'', '.id': if_ids})
-                monitor_records = router_entry.rest_api.post('interface/wifi', 'monitor', {'once': True, '.id': if_ids})
+                #monitor_records = router_entry.rest_api.post('interface/wifi', 'monitor', {'once': True, '.id': if_ids})
+                monitor_records = router_entry.api_connection.call('/interface/wifi', 'monitor', {'once':'', '.id': if_ids})
                 for mon_r, w_r in zip(monitor_records, wifi_interface_records):
                     mon_r.update({'id': w_r.get('.id', ''), 'name': w_r.get('name', ''), 'comment': w_r.get('comment', '')})
                 self.wifi_monitor_metric_store.set_metrics(monitor_records)
@@ -77,7 +78,7 @@ class WifiClientCollector(LoadingCollector):
     def load(self, router_entry: 'RouterEntry'):
         self.wifi_registration_metric_store.clear_metrics()
 
-        registration_records = router_entry.rest_api.get('interface/wifi/registration-table')
+        registration_records = router_entry.api_connection.get('interface/wifi/registration-table')
         if registration_records:
             for r in registration_records:
                 # Split bytes

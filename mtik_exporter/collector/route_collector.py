@@ -37,7 +37,7 @@ class RouteCollector(LoadingCollector):
         if self.metric_store.run_fetch():
             self.metric_store.clear_metrics()
             #route_records = RouteMetricsDataSource.metric_records(router_entry)
-            route_records = router_entry.rest_api.get('ip/route')
+            route_records = router_entry.api_connection.get('ip/route')
             self.metric_store.set_metrics(route_records)
 
     def collect(self):
@@ -61,7 +61,7 @@ class IPv6RouteCollector(LoadingCollector):
         if self.metric_store.run_fetch():
             self.metric_store.clear_metrics()
             #route_records = IPv6RouteMetricsDataSource.metric_records(router_entry)
-            route_records = router_entry.rest_api.get('ipv6/route')
+            route_records = router_entry.api_connection.get('ipv6/route')
             self.metric_store.set_metrics(route_records)
 
     def collect(self):

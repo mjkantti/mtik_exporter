@@ -15,6 +15,7 @@
 
 from mtik_exporter.cli.config.config import config_handler, ConfigKeys
 from mtik_exporter.flow.router_rest_api import RouterRestAPI
+from mtik_exporter.flow.router_connection import RouterAPIConnection
 
 class RouterEntry:
     ''' RouterOS Entry
@@ -22,7 +23,8 @@ class RouterEntry:
     def __init__(self, router_name: str):
         self.router_name = router_name
         self.config_entry  = config_handler.config_entry(router_name)
-        self.rest_api = RouterRestAPI(router_name, self.config_entry)
+        #self.rest_api = RouterRestAPI(router_name, self.config_entry)
+        self.api_connection = RouterAPIConnection(router_name, self.config_entry)
         self.router_id = {
             ConfigKeys.ROUTERBOARD_NAME: self.router_name,
             ConfigKeys.ROUTERBOARD_ADDRESS: self.config_entry.hostname

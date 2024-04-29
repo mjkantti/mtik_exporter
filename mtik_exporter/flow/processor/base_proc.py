@@ -23,7 +23,7 @@ from mtik_exporter.flow.collector_registry import CollectorRegistry
 from mtik_exporter.flow.router_entries_handler import RouterEntriesHandler
 
 import logging
-logging.basicConfig(format='%(asctime)s %(levelname)s %(message)s', level=logging.INFO)
+logging.basicConfig(format='%(levelname)s %(message)s', level=logging.INFO)
 
 class ExportProcessor:
     ''' Base Export Processing
@@ -41,9 +41,13 @@ class ExportProcessor:
 
     def exit_gracefully(self, signal, _):
         logging.warning(f"Caught signal {signal}, stopping")
-        self.server.shutdown()
-        self.thr.join(5)
         self.running = False
+
+        if self.server:
+            self.server.shutdown()
+
+        if self.thr:
+            self.thr.join(5)
 
     def start(self):
         router_entries_handler = RouterEntriesHandler()

@@ -16,6 +16,7 @@ from time import time
 from prometheus_client.core import REGISTRY
 from prometheus_client import start_http_server
 from sched import scheduler
+from signal import signal, SIGTERM, SIGINT
 
 from mtik_exporter.cli.config.config import config_handler
 from mtik_exporter.flow.collector_registry import CollectorRegistry
@@ -28,8 +29,21 @@ class ExportProcessor:
     ''' Base Export Processing
     '''
     def __init__(self):
+        signal(SIGINT, self.exit_gracefully)
+        signal(SIGTERM, self.exit_gracefully)
+
         self.s = scheduler()
         self.collector_registries: list[CollectorRegistry] = []
+
+        self.server = None
+        self.thr = None
+        self.running = True
+
+    def exit_gracefully(self, signal, _):
+        logging.warning(f"Caught signal {signal}, stopping")
+        self.server.shutdown()
+        self.thr.join(5)
+        self.running = False
 
     def start(self):
         router_entries_handler = RouterEntriesHandler()
@@ -41,26 +55,24 @@ class ExportProcessor:
 
         logging.info('Running HTTP metrics server on port %i', config_handler.system_entry().port)
 
-        try:
-            server, t = start_http_server(config_handler.system_entry().port)
+        self.server, self.thr = start_http_server(config_handler.system_entry().port)
 
-            for registry in self.collector_registries:
-                self.run_registry(registry)
+        for registry in self.collector_registries:
+            self.run_registry(registry)
 
-            self.s.run()
+        self.s.run()
 
-        except KeyboardInterrupt:
-            server.shutdown()
-            t.join(5)
 
     def run_registry(self, registry: 'CollectorRegistry'):
+        if not self.running:
+            return
+
         router = registry.router_entry
         if not router.api_connection.is_connected():
             logging.info('Router not connected, reconnecting, waiting for 3 seconds')
             router.api_connection.connect()
             self.s.enter(3, 1, self.run_registry, argument=(registry, ))
             return
-
 
         interval = registry.router_entry.config_entry.polling_interval        
         logging.debug('Starting data load, polling interval set to: %i', interval)

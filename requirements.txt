@@ -1,0 +1,3 @@
+prometheus-client==0.20.0
+RouterOS-api==0.17.0
+Requests==2.31.0

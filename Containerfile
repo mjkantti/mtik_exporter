@@ -8,7 +8,7 @@ COPY . .
 RUN chmod +x export.py
 
 RUN addgroup -S exporter && adduser -S exporter -G exporter
-USER mktxp
+USER exporter
 
 RUN python -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"

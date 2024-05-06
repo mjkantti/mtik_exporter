@@ -55,6 +55,7 @@ class ExportProcessor:
             collector_registry = CollectorRegistry(router)
             self.collector_registries.append(collector_registry)
             for c in collector_registry.registered_collectors:
+                logging.info('%s: Adding Collector %s', router.router_name, c.name)
                 REGISTRY.register(c)
 
         logging.info('Running HTTP metrics server on port %i', config_handler.system_entry().port)

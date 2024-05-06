@@ -25,7 +25,7 @@ class InternalCollector(LoadingCollector):
     '''
 
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'Collector'
+        self.name = 'InternalCollector'
         #self.collect_metrics = MetricStore(router_id, ['name'], ['duration'])
         self.load_metrics = MetricStore(router_id, ['name'], ['duration'])
         self.load_count = MetricStore(router_id, [], ['count'])

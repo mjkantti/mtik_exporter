@@ -28,7 +28,7 @@ class DHCPCollector(LoadingCollector):
         self.name = 'DHCPCollector'
         self.lease_metric_store = MetricStore(
             router_id,
-            ['active_address', 'address', 'mac_address', 'host_name', 'comment', 'server', 'dynamic', 'client_id', 'status', 'address-lists'],
+            ['active_address', 'address', 'mac_address', 'host_name', 'comment', 'server', 'dynamic', 'client_id', 'status', 'address_lists'],
             ['expires_after', 'last_seen'],
             {
                 'expires_after': lambda ea: BaseOutputProcessor.parse_timedelta(ea) if ea else None,

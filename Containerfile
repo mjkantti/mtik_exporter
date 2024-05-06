@@ -1,13 +1,13 @@
 FROM python:3-alpine
 
-ENV VIRTUAL_ENV=/home/mktxp/venv
+ENV VIRTUAL_ENV=/home/exporter/venv
 
 WORKDIR /mtik_exporter
 COPY . .
 
 RUN chmod +x export.py
 
-RUN addgroup -S mktxp && adduser -S mktxp -G mktxp
+RUN addgroup -S exporter && adduser -S exporter -G exporter
 USER mktxp
 
 RUN python -m venv $VIRTUAL_ENV

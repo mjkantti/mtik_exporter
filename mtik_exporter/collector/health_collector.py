@@ -23,13 +23,12 @@ if TYPE_CHECKING:
 class HealthCollector(LoadingCollector):
     ''' System Health Metrics collector
     '''
-    def __init__(self, router_id: dict[str, str], polling_interval: int):
+    def __init__(self, router_id: dict[str, str]):
         self.name = 'HealthCollector'
         self.metric_store = MetricStore(
             router_id,
             [],
-            ['voltage', 'temperature', 'phy_temperature', 'cpu_temperature', 'switch_temperature', 'fan1_speed', 'fan2_speed', 'fan3_speed', 'fan4_speed', 'power_consumption'],
-            polling_interval=polling_interval,
+            ['voltage', 'temperature', 'phy_temperature', 'cpu_temperature', 'switch_temperature', 'fan1_speed', 'fan2_speed', 'fan3_speed', 'fan4_speed', 'power_consumption']
         )
 
         # Metrics

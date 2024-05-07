@@ -22,19 +22,18 @@ if TYPE_CHECKING:
 class IdentityCollector(LoadingCollector):
     ''' System Identity Metrics collector
     '''
-    def __init__(self, router_id: dict[str, str], polling_interval: int):
+    def __init__(self, router_id: dict[str, str]):
         self.name = 'IdentityCollector'
-        self.metric_store = MetricStore(router_id, ['name'], polling_interval=polling_interval)
+        self.metric_store = MetricStore(router_id, ['name'])
 
         # Metrics
         self.metric_store.create_info_metric('system_identity', 'System identity')
 
     def load(self, router_entry: 'RouterEntry'):
-        if self.metric_store.run_fetch():
-            self.metric_store.clear_metrics()
-            #identity_records = IdentityMetricsDataSource.metric_records(router_entry)
-            identity_records = router_entry.api_connection.get('system/identity')
-            self.metric_store.set_metrics(identity_records)
+        self.metric_store.clear_metrics()
+        #identity_records = IdentityMetricsDataSource.metric_records(router_entry)
+        identity_records = router_entry.api_connection.get('system/identity')
+        self.metric_store.set_metrics(identity_records)
 
     def collect(self):
         yield from self.metric_store.get_metrics()

@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 class PublicIPAddressCollector(LoadingCollector):
     '''Public IP address collector'''
 
-    def __init__(self, router_id: dict[str, str], polling_interval: int):
+    def __init__(self, router_id: dict[str, str]):
         self.name = 'PublicIPAddressCollector'
         self.metric_store = MetricStore(
             router_id,
@@ -32,19 +32,17 @@ class PublicIPAddressCollector(LoadingCollector):
                 'dns_name': lambda name: 'ddns_disabled' if not name else name,
                 'public_address_ipv6': lambda addr: '' if not addr else addr,
                 'public_address_ipv4': lambda addr: '' if not addr else addr,
-            },
-            polling_interval=polling_interval
+            }
         )
 
         # Metrics
         self.metric_store.create_info_metric('public_ip_address', 'Public IP address')
 
     def load(self, router_entry: 'RouterEntry'):
-        if self.metric_store.run_fetch():
-            self.metric_store.clear_metrics()
-            #address_records = PublicIPAddressDatasource.metric_records(router_entry)
-            address_records = router_entry.api_connection.get('ip/cloud')
-            self.metric_store.set_metrics(address_records)
+        self.metric_store.clear_metrics()
+        #address_records = PublicIPAddressDatasource.metric_records(router_entry)
+        address_records = router_entry.api_connection.get('ip/cloud')
+        self.metric_store.set_metrics(address_records)
 
     def collect(self):
         yield from self.metric_store.get_metrics()

@@ -24,10 +24,10 @@ class WifiCollector(LoadingCollector):
     ''' Wireless Metrics collector
     '''
 
-    def __init__(self, router_id: dict[str, str], polling_interval: int):
+    def __init__(self, router_id: dict[str, str]):
         self.name = 'WifiCollector'
-        self.wifi_interface_metric_store = MetricStore(router_id, ['id', 'name', 'comment', 'configuration', 'configuration_mode', 'configuration_ssid', 'mac_address', 'master'], polling_interval=polling_interval)
-        self.wifi_monitor_metric_store = MetricStore(router_id, ['id', 'name', 'comment', 'state', 'channel', 'tx_power'], ['registered_peers', 'authorized_peers'], polling_interval=polling_interval)
+        self.wifi_interface_metric_store = MetricStore(router_id, ['id', 'name', 'comment', 'configuration', 'configuration_mode', 'configuration_ssid', 'mac_address', 'master'])
+        self.wifi_monitor_metric_store = MetricStore(router_id, ['id', 'name', 'comment', 'state', 'channel', 'tx_power'], ['registered_peers', 'authorized_peers'])
 
         # Metrics
         self.wifi_interface_metric_store.create_info_metric('wifi_interfaces', 'Wifi Interfaces')
@@ -36,21 +36,20 @@ class WifiCollector(LoadingCollector):
         self.wifi_monitor_metric_store.create_gauge_metric('wifi_interface_authorized_peers', 'Wifi interface authorized peers', 'authorized_peers', ['id', 'name', 'comment'])
 
     def load(self, router_entry: 'RouterEntry'):
-        if self.wifi_interface_metric_store.run_fetch():
-            self.wifi_interface_metric_store.clear_metrics()
-            self.wifi_monitor_metric_store.clear_metrics()
+        self.wifi_interface_metric_store.clear_metrics()
+        self.wifi_monitor_metric_store.clear_metrics()
 
-            wifi_interface_records = router_entry.api_connection.get('interface/wifi')
-            self.wifi_interface_metric_store.set_metrics(wifi_interface_records)
+        wifi_interface_records = router_entry.api_connection.get('interface/wifi')
+        self.wifi_interface_metric_store.set_metrics(wifi_interface_records)
 
-            if wifi_interface_records and self.wifi_monitor_metric_store.run_fetch():
-                if_ids = ','.join([str(i.get('id')) for i in wifi_interface_records])
-                #monitor_records = router_entry.api_connection.call('/interface/wifi', 'monitor', {'once':'', '.id': if_ids})
-                #monitor_records = router_entry.rest_api.post('interface/wifi', 'monitor', {'once': True, '.id': if_ids})
-                monitor_records = router_entry.api_connection.call('/interface/wifi', 'monitor', {'once':'', '.id': if_ids})
-                for mon_r, w_r in zip(monitor_records, wifi_interface_records):
-                    mon_r.update({'id': w_r.get('id', ''), 'name': w_r.get('name', ''), 'comment': w_r.get('comment', '')})
-                self.wifi_monitor_metric_store.set_metrics(monitor_records)
+        if wifi_interface_records:
+            if_ids = ','.join([str(i.get('id')) for i in wifi_interface_records])
+            #monitor_records = router_entry.api_connection.call('/interface/wifi', 'monitor', {'once':'', '.id': if_ids})
+            #monitor_records = router_entry.rest_api.post('interface/wifi', 'monitor', {'once': True, '.id': if_ids})
+            monitor_records = router_entry.api_connection.call('/interface/wifi', 'monitor', {'once':'', '.id': if_ids})
+            for mon_r, w_r in zip(monitor_records, wifi_interface_records):
+                mon_r.update({'id': w_r.get('id', ''), 'name': w_r.get('name', ''), 'comment': w_r.get('comment', '')})
+            self.wifi_monitor_metric_store.set_metrics(monitor_records)
 
     def collect(self):
         yield from self.wifi_interface_metric_store.get_metrics()
@@ -60,9 +59,9 @@ class WifiClientCollector(LoadingCollector):
     ''' Wireless Metrics collector
     '''
 
-    def __init__(self, router_id: dict[str, str], polling_interval: int):
+    def __init__(self, router_id: dict[str, str]):
         self.name = 'WifiClientCollector'
-        self.wifi_registration_metric_store = MetricStore(router_id, ['interface', 'ssid', 'mac_address', 'dhcp_name', 'dhcp_comment', 'dhcp_address'], ['tx_rate', 'rx_rate', 'rx_signal', 'signal', 'uptime', 'rx_bytes', 'tx_bytes'], polling_interval=polling_interval)
+        self.wifi_registration_metric_store = MetricStore(router_id, ['interface', 'ssid', 'mac_address', 'dhcp_name', 'dhcp_comment', 'dhcp_address'], ['tx_rate', 'rx_rate', 'rx_signal', 'signal', 'uptime', 'rx_bytes', 'tx_bytes'])
 
         # Metrics
         self.wifi_registration_metric_store.create_info_metric('wifi_clients_devices', 'Registered client devices info')

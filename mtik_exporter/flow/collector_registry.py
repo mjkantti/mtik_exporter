@@ -54,6 +54,7 @@ class CollectorRegistry:
         'health': HealthCollector, 
         'pool': PoolCollector,
         'interface': InterfaceCollector,
+        'identity': IdentityCollector,
         'interface_monitor': InterfaceMonitorCollector,
         'firewall': FirewallCollector,
         'ipv6_firewall': IPv6FirewallCollector,
@@ -88,11 +89,11 @@ class CollectorRegistry:
 
         for key in router_entry.config_entry.collectors:
             cls = self.collector_mapping.get(key)
-            self.fast_collectors.append(cls(router_id, self.polling_interval))
+            self.fast_collectors.append(cls(router_id))
 
         for key in router_entry.config_entry.slow_collectors:
             cls = self.collector_mapping.get(key)
-            self.slow_collectors.append(cls(router_id, self.slow_polling_interval))
+            self.slow_collectors.append(cls(router_id))
 
         self.interal_collector = InternalCollector(router_id)
 

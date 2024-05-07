@@ -22,23 +22,21 @@ if TYPE_CHECKING:
 class RouteCollector(LoadingCollector):
     ''' IP Route Metrics collector
     '''
-    def __init__(self, router_id: dict[str, str], polling_interval: int):
+    def __init__(self, router_id: dict[str, str]):
         self.name = 'RouteCollector'
         self.metric_store = MetricStore(
             router_id,
-            ['comment', 'type', 'dst_address', 'gateway', 'distance', 'connect', 'dynamic', 'bgp', 'ospf', 'active'],
-            polling_interval=polling_interval,
+            ['comment', 'type', 'dst_address', 'gateway', 'distance', 'connect', 'dynamic', 'bgp', 'ospf', 'active']
         )
 
         # Metrics
         self.metric_store.create_info_metric('routes', 'Routes Info')
 
     def load(self, router_entry: 'RouterEntry'):
-        if self.metric_store.run_fetch():
-            self.metric_store.clear_metrics()
-            #route_records = RouteMetricsDataSource.metric_records(router_entry)
-            route_records = router_entry.api_connection.get('ip/route')
-            self.metric_store.set_metrics(route_records)
+        self.metric_store.clear_metrics()
+        #route_records = RouteMetricsDataSource.metric_records(router_entry)
+        route_records = router_entry.api_connection.get('ip/route')
+        self.metric_store.set_metrics(route_records)
 
     def collect(self):
         yield from self.metric_store.get_metrics()
@@ -46,23 +44,21 @@ class RouteCollector(LoadingCollector):
 class IPv6RouteCollector(LoadingCollector):
     ''' IP Route Metrics collector
     '''
-    def __init__(self, router_id: dict[str, str], polling_interval: int):
+    def __init__(self, router_id: dict[str, str]):
         self.name = 'IPv6RouteCollector'
         self.metric_store = MetricStore(
             router_id,
-            ['comment', 'type', 'dst_address', 'gateway', 'distance', 'connect', 'dynamic', 'bgp', 'ospf', 'active'],
-            polling_interval=polling_interval,
+            ['comment', 'type', 'dst_address', 'gateway', 'distance', 'connect', 'dynamic', 'bgp', 'ospf', 'active']
         )
 
         # Metrics
         self.metric_store.create_info_metric('ipv6_routes', 'IPv6 Routes Info')
 
     def load(self, router_entry: 'RouterEntry'):
-        if self.metric_store.run_fetch():
-            self.metric_store.clear_metrics()
-            #route_records = IPv6RouteMetricsDataSource.metric_records(router_entry)
-            route_records = router_entry.api_connection.get('ipv6/route')
-            self.metric_store.set_metrics(route_records)
+        self.metric_store.clear_metrics()
+        #route_records = IPv6RouteMetricsDataSource.metric_records(router_entry)
+        route_records = router_entry.api_connection.get('ipv6/route')
+        self.metric_store.set_metrics(route_records)
 
     def collect(self):
         yield from self.metric_store.get_metrics()

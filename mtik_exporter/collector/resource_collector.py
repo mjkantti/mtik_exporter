@@ -25,7 +25,7 @@ class SystemResourceCollector(LoadingCollector):
     ''' System Resource Metrics collector
     '''
 
-    def __init__(self, router_id: dict[str, str], polling_interval: int):
+    def __init__(self, router_id: dict[str, str]):
         self.name = 'SystemResourceCollector'
         self.metric_store = MetricStore(
             router_id,
@@ -34,8 +34,7 @@ class SystemResourceCollector(LoadingCollector):
             {
                 'uptime': lambda c: BaseOutputProcessor.parse_timedelta(c) if c else 0,
                 'bad_blocks': lambda b: b.strip('%') if b else b
-            },
-            polling_interval=polling_interval,
+            }
         )
         self.version_metric_store = MetricStore(router_id, ['current_version', 'channel', 'latest_version'])
 

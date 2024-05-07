@@ -23,31 +23,30 @@ if TYPE_CHECKING:
 class PackageCollector(LoadingCollector):
     '''Installed Packages collector'''
 
-    def __init__(self, router_id: dict[str, str], polling_interval: int):
+    def __init__(self, router_id: dict[str, str]):
         self.name = 'PackageCollector'
-        self.metric_store = MetricStore(router_id, ['name', 'version', 'build_time', 'disabled'], polling_interval=polling_interval)
+        self.metric_store = MetricStore(router_id, ['name', 'version', 'build_time', 'disabled'])
         #self.metric_store_updates = MetricStore(router_id, ['channel', 'latest_version', 'build_time', 'status'], polling_interval=polling_interval)
 
         # Metrics
         self.metric_store.create_info_metric('installed_packages', 'Installed Packages')
 
     def load(self, router_entry: 'RouterEntry'):
-        if self.metric_store.run_fetch():
-            self.metric_store.clear_metrics()
-            #package_records = PackageMetricsDataSource.metric_records(router_entry)
-            package_record = router_entry.api_connection.get('system/package')
-            self.metric_store.set_metrics(package_record)
+        self.metric_store.clear_metrics()
+        #package_records = PackageMetricsDataSource.metric_records(router_entry)
+        package_record = router_entry.api_connection.get('system/package')
+        self.metric_store.set_metrics(package_record)
 
-            #if router_entry.config_entry.check_for_updates:
-            #    #package_update_records = PackageMetricsDataSource.metric_records_update(router_entry)
-            #    package_update_records = router_entry.api_connection.get('/system/package/update')
-            #    for pkg_upd in package_update_records:
-            #        if not 'latest-version' in pkg_upd:
-            #            latest_version, build_time = get_available_updates(pkg_upd['channel'])
-            #            pkg_upd['latest_version'] = latest_version
-            #            pkg_upd['build_time'] = build_time
+        #if router_entry.config_entry.check_for_updates:
+        #    #package_update_records = PackageMetricsDataSource.metric_records_update(router_entry)
+        #    package_update_records = router_entry.api_connection.get('/system/package/update')
+        #    for pkg_upd in package_update_records:
+        #        if not 'latest-version' in pkg_upd:
+        #            latest_version, build_time = get_available_updates(pkg_upd['channel'])
+        #            pkg_upd['latest_version'] = latest_version
+        #            pkg_upd['build_time'] = build_time
 
-            #    self.metric_store_updates.set_metrics(package_update_records)
+        #    self.metric_store_updates.set_metrics(package_update_records)
 
     def collect(self):
         yield from self.metric_store.get_metrics()

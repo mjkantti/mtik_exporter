@@ -27,12 +27,11 @@ class InternalCollector(LoadingCollector):
     def __init__(self, router_id: dict[str, str]):
         self.name = 'InternalCollector'
         #self.collect_metrics = MetricStore(router_id, ['name'], ['duration'])
-        self.load_metrics = MetricStore(router_id, ['name'], ['duration'])
-        self.load_count = MetricStore(router_id, [], ['count'])
+        self.load_metrics = MetricStore(router_id, ['name'], ['duration', 'count'])
 
         # Metrics
         self.load_metrics.create_gauge_metric('data_load_time', 'Time spent loading metrics in seconds', 'duration')
-        self.load_count.create_counter_metric('data_load_count', 'Total count of metrics loads since reboot', 'count')
+        self.load_metrics.create_counter_metric('data_load_count', 'Total count of metrics loads since reboot', 'count')
 
     def load(self, router_entry: 'RouterEntry'):
         self.load_metrics.clear_metrics()
@@ -42,13 +41,11 @@ class InternalCollector(LoadingCollector):
         # self.collect_metrics.set_metrics(collect_records)
 
         # Load metrics
-        load_records: list[dict[str, str | float]] = [{'name': key, 'duration': val} for key, val in router_entry.data_loader_time_spent.items()]
+        load_records: list[dict[str, str | float]] = [{'name': key, 'duration': dur, 'count': count} for key, (dur, count) in router_entry.data_loader_time_spent.items()]
         self.load_metrics.set_metrics(load_records)
-        self.load_count.set_metrics([{'count': router_entry.data_load_count}])
 
     def collect(self):
         #if self.collect_metrics.have_metrics():
         #    yield self.collect_metrics.gauge_collector('collection_time', 'Time spent collecting metrics in seconds', 'duration')
 
         yield from self.load_metrics.get_metrics()
-        yield from self.load_count.get_metrics()

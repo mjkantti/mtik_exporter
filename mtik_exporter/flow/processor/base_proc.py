@@ -23,14 +23,14 @@ from mtik_exporter.flow.collector_registry import CollectorRegistry
 from mtik_exporter.flow.router_entries_handler import RouterEntriesHandler
 
 import logging
-logging.basicConfig(format='%(levelname)s %(message)s', level=logging.INFO)
+logging.basicConfig(format='%(levelname)s %(message)s', level=logging.DEBUG)
 
 class ExportProcessor:
     ''' Base Export Processing
     '''
     def __init__(self):
-        signal(SIGINT, self.exit_gracefully)
-        signal(SIGTERM, self.exit_gracefully)
+        #signal(SIGINT, self.exit_gracefully)
+        #signal(SIGTERM, self.exit_gracefully)
 
         self.s = scheduler()
         self.collector_registries: list[CollectorRegistry] = []
@@ -54,39 +54,48 @@ class ExportProcessor:
         for router in router_entries_handler.router_entries:
             collector_registry = CollectorRegistry(router)
             self.collector_registries.append(collector_registry)
-            for c in collector_registry.registered_collectors:
-                logging.info('%s: Adding Collector %s', router.router_name, c.name)
+            for c in collector_registry.fast_collectors:
+                logging.info('%s: Adding Fast Collector %s', router.router_name, c.name)
                 REGISTRY.register(c)
+            
+            for c in collector_registry.slow_collectors:
+                logging.info('%s: Adding Slow Collector %s', router.router_name, c.name)
+                REGISTRY.register(c)
+            
+            REGISTRY.register(collector_registry.interal_collector)
 
         logging.info('Running HTTP metrics server on port %i', config_handler.system_entry().port)
 
         self.server, self.thr = start_http_server(config_handler.system_entry().port)
 
         for registry in self.collector_registries:
-            self.run_registry(registry)
+            interval = registry.router_entry.config_entry.polling_interval        
+            self.run_collectors(registry.router_entry, registry.fast_collectors, interval)
+
+            slow_interval = registry.router_entry.config_entry.slow_polling_interval        
+            self.run_collectors(registry.router_entry, registry.slow_collectors, slow_interval)
 
         self.s.run()
 
 
-    def run_registry(self, registry: 'CollectorRegistry'):
+    def run_collectors(self, router_entry, collectors,  interval):
         if not self.running:
             return
 
-        router = registry.router_entry
-        if not router.api_connection.is_connected():
+        if not router_entry.api_connection.is_connected():
             logging.info('Router not connected, reconnecting, waiting for 3 seconds')
-            router.api_connection.connect()
-            self.s.enter(3, 1, self.run_registry, argument=(registry, ))
+            router_entry.api_connection.connect()
+            self.s.enter(3, 1, self.run_collectors, argument=(router_entry, collectors, interval))
             return
 
-        interval = registry.router_entry.config_entry.polling_interval        
         logging.debug('Starting data load, polling interval set to: %i', interval)
-        self.s.enter(interval, 1, self.run_registry, argument=(registry, ))
-        router.data_loader_time_spent.clear()
+        self.s.enter(interval, 1, self.run_collectors, argument=(router_entry, collectors, interval))
+        router_entry.data_loader_stats.clear()
         
-        for collector in registry.registered_collectors:
+        for collector in collectors:
             logging.debug('Running %s', collector.name)
             start = time()
-            collector.load(router)
-            router.data_loader_time_spent[collector.get_name()] = time() - start
-        router.data_load_count += 1
+            collector.load(router_entry)
+
+            count = router_entry.data_loader_stats.get('count', 0)
+            router_entry.data_loader_stats[collector.get_name()] = {'time': time() - start, 'count': count}

@@ -13,6 +13,7 @@
 ## GNU General Public License for more details.
 
 import sys
+import json
 from collections import namedtuple
 from configparser import ConfigParser
 from abc import ABCMeta, abstractmethod
@@ -35,12 +36,39 @@ class ConfigKeys:
     NO_SSL_CERTIFICATE = 'no_ssl_certificate'
     SSL_CERTIFICATE_VERIFY = 'ssl_certificate_verify'
 
-    FEATURE_KEYS = {'installed_packages', 'dhcp', 'pool', 'interface', 'firewall', 'ipv6_firewall', 'ipv6_neighbor', 'monitor', 'route', 'ipv6_route',
-                    'capsman', 'wifi', 'wifi_clients', 'poe', 'public_ip', 'netwatch', 'user', 'queue', 'bgp', 'check_for_updates', 'wireguard',
-                    'wireguard_peers', 'kid_control_devices', 'bridge_hosts'}
+    FEATURE_KEYS = {
+        'installed_packages',
+        'dhcp',
+        'pool',
+        'interface',
+        'interface_monitor',
+        'firewall',
+        'ipv6_firewall',
+        'ipv6_neighbor',
+        'monitor',
+        'route',
+        'ipv6_route',
+        'capsman',
+        'wifi',
+        'wifi_clients',
+        'poe',
+        'public_ip',
+        'netwatch',
+        'user',
+        'queue',
+        'bgp',
+        'check_for_updates',
+        'wireguard',
+        'wireguard_peers',
+        'kid_control_devices',
+        'bridge_hosts'
+    }
 
     POLLING_INTERVAL_KEY = 'polling_interval'
     SLOW_POLLING_INTERVAL_KEY = 'slow_polling_interval'
+
+    FAST_POLLING_KEYS = 'collectors'
+    SLOW_POLLING_KEYS = 'slow_collectors'
 
     EXPORTER_SOCKET_TIMEOUT = 'socket_timeout'
     EXPORTER_INITIAL_DELAY = 'initial_delay_on_failure'
@@ -74,6 +102,7 @@ class ConfigKeys:
     ROUTER_BOOLEAN_KEYS = {ENABLED_KEY, SSL_KEY, NO_SSL_CERTIFICATE, SSL_CERTIFICATE_VERIFY} | FEATURE_KEYS
     ROUTER_INT_KEYS = {POLLING_INTERVAL_KEY, SLOW_POLLING_INTERVAL_KEY, PORT_KEY}
     ROUTER_STR_KEYS = {HOST_KEY, USER_KEY, PASSWD_KEY}
+    ROUTER_LIST_KEYS = {FAST_POLLING_KEYS, SLOW_POLLING_KEYS}
 
     SYSTEM_BOOLEAN_KEYS = {EXPORTER_VERBOSE_MODE}
     SYSTEM_INT_KEYS = {PORT_KEY, EXPORTER_SOCKET_TIMEOUT, EXPORTER_INITIAL_DELAY, EXPORTER_MAX_DELAY, EXPORTER_INC_DIV, EXPORTER_MAX_SCRAPE_DURATION, EXPORTER_TOTAL_MAX_SCRAPE_DURATION}
@@ -83,7 +112,7 @@ class ConfigKeys:
 
 
 class ConfigEntry:
-    RouterConfigEntry = namedtuple('RouterConfigEntry', list(ConfigKeys.ROUTER_BOOLEAN_KEYS | ConfigKeys.ROUTER_STR_KEYS | ConfigKeys.ROUTER_INT_KEYS))
+    RouterConfigEntry = namedtuple('RouterConfigEntry', list(ConfigKeys.ROUTER_BOOLEAN_KEYS | ConfigKeys.ROUTER_STR_KEYS | ConfigKeys.ROUTER_INT_KEYS | ConfigKeys.ROUTER_LIST_KEYS))
     SystemConfigEntry = namedtuple('SystemConfigEntry', list(ConfigKeys.SYSTEM_BOOLEAN_KEYS | ConfigKeys.SYSTEM_INT_KEYS))
 
 
@@ -222,6 +251,9 @@ class SystemConfigHandler:
 
             #if key is mtik_exporterConfigKeys.PASSWD_KEY and type(config_entry_reader[key]) is list:
             #    config_entry_reader[key] = ','.join(config_entry_reader[key])
+        for key in ConfigKeys.ROUTER_LIST_KEYS:
+            collectors = json.loads(self.config[entry_name].get(key))
+            config_entry_reader[key] = collectors
 
         for key in ConfigKeys.ROUTER_INT_KEYS:
             if self.config[entry_name].get(key):

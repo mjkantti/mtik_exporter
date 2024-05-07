@@ -43,7 +43,7 @@ class WifiCollector(LoadingCollector):
             wifi_interface_records = router_entry.api_connection.get('interface/wifi')
             self.wifi_interface_metric_store.set_metrics(wifi_interface_records)
 
-            if wifi_interface_records and router_entry.config_entry.monitor and self.wifi_monitor_metric_store.run_fetch():
+            if wifi_interface_records and self.wifi_monitor_metric_store.run_fetch():
                 if_ids = ','.join([str(i.get('id')) for i in wifi_interface_records])
                 #monitor_records = router_entry.api_connection.call('/interface/wifi', 'monitor', {'once':'', '.id': if_ids})
                 #monitor_records = router_entry.rest_api.post('interface/wifi', 'monitor', {'once': True, '.id': if_ids})

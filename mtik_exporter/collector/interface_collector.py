@@ -24,25 +24,13 @@ class InterfaceCollector(LoadingCollector):
     ''' Router Interface Metrics collector
     '''
 
-    def __init__(self, router_id: dict[str, str], polling_interval: int, slow_polling_interval: int):
+    def __init__(self, router_id: dict[str, str], polling_interval: int):
         self.name = 'InterfaceCollector'
         self.interface_metric_store = MetricStore(
             router_id,
             ['id', 'name', 'comment', 'type', 'mtu', 'mac_address', 'running'],
             ['rx_byte', 'tx_byte', 'rx_packet', 'tx_packet', 'rx_error', 'tx_error', 'rx_drop', 'tx_drop', 'link_downs'],
             polling_interval=polling_interval,
-        )
-        self.interface_monitor_metric_store = MetricStore(
-            router_id,
-            ['id', 'name', 'comment'],
-            ['full_duplex', 'status', 'rate', 'sfp_temperature'],
-            {
-                'status': lambda value: '1' if value=='link-ok' else '0',
-                'rate': BaseOutputProcessor.parse_rates,
-                'full_duplex': lambda value: '1' if value=='true' else (None if value is None else '0'),
-                'sfp_temperature': lambda value: None if value is None else value
-            },
-            polling_interval=slow_polling_interval
         )
 
         # Metrics
@@ -60,6 +48,37 @@ class InterfaceCollector(LoadingCollector):
 
         self.interface_metric_store.create_counter_metric('link_downs', 'Number of times link went down', 'link_downs')
 
+    def load(self, router_entry: 'RouterEntry'):
+        self.interface_metric_store.clear_metrics()
+        #interface_traffic_records = InterfaceTrafficMetricsDataSource.metric_records(router_entry)
+        #interface_traffic_records = router_entry.api_connection.get('/interface')
+        interface_traffic_records = router_entry.api_connection.get('interface')
+
+        interface_traffic_records_running = [ift for ift in interface_traffic_records if ift['running'] == 'true']
+        self.interface_metric_store.set_metrics(interface_traffic_records_running)
+
+    def collect(self):
+        yield from self.interface_metric_store.get_metrics()
+
+class InterfaceMonitorCollector(LoadingCollector):
+    ''' Router Interface Monitor Metrics collector
+    '''
+
+    def __init__(self, router_id: dict[str, str], polling_interval: int):
+        self.name = 'InterfaceMonitorCollector'
+        self.interface_monitor_metric_store = MetricStore(
+            router_id,
+            ['id', 'name', 'comment'],
+            ['full_duplex', 'status', 'rate', 'sfp_temperature'],
+            {
+                'status': lambda value: '1' if value=='link-ok' else '0',
+                'rate': BaseOutputProcessor.parse_rates,
+                'full_duplex': lambda value: '1' if value=='true' else (None if value is None else '0'),
+                'sfp_temperature': lambda value: None if value is None else value
+            },
+            polling_interval=polling_interval
+        )
+
         self.interface_monitor_metric_store.create_gauge_metric('interface_status', 'Current interface link status', 'status')
         self.interface_monitor_metric_store.create_gauge_metric('interface_rate', 'Actual interface connection data rate', 'rate')
 
@@ -68,14 +87,12 @@ class InterfaceCollector(LoadingCollector):
         self.interface_monitor_metric_store.create_gauge_metric('interface_sfp_temperature', 'Current SFP temperature', 'sfp_temperature')
 
     def load(self, router_entry: 'RouterEntry'):
-        self.interface_metric_store.clear_metrics()
+        self.interface_monitor_metric_store.clear_metrics()
         #interface_traffic_records = InterfaceTrafficMetricsDataSource.metric_records(router_entry)
         #interface_traffic_records = router_entry.api_connection.get('/interface')
-        interface_traffic_records = router_entry.api_connection.get('interface')
+        interface_traffic_records = router_entry.api_connection.call('interface/ether','print', {'proplist':'id,name,comment,running'} )
 
-        if interface_traffic_records and router_entry.config_entry.monitor and self.interface_monitor_metric_store.run_fetch():
-            self.interface_monitor_metric_store.clear_metrics()
-
+        if interface_traffic_records:
             monitor_records = []
             if_ids = []
             for ifc in interface_traffic_records:
@@ -98,10 +115,5 @@ class InterfaceCollector(LoadingCollector):
 
             self.interface_monitor_metric_store.set_metrics(monitor_records)
 
-
-        interface_traffic_records_running = [ift for ift in interface_traffic_records if ift['running'] == 'true']
-        self.interface_metric_store.set_metrics(interface_traffic_records_running)
-
     def collect(self):
-        yield from self.interface_metric_store.get_metrics()
         yield from self.interface_monitor_metric_store.get_metrics()

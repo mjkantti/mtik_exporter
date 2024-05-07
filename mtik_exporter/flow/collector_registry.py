@@ -79,20 +79,18 @@ class CollectorRegistry:
 
     def __init__(self, router_entry: 'RouterEntry') -> None:
         self.router_entry = router_entry
-        self.fast_collectors: list[LoadingCollector] = []
-        self.slow_collectors: list[LoadingCollector] = []
-
         self.polling_interval = router_entry.config_entry.polling_interval
         self.slow_polling_interval = router_entry.config_entry.slow_polling_interval
+
         router_id = router_entry.router_id
+        self.fast_collectors: list[LoadingCollector] = [InternalCollector(router_id)]
+        self.slow_collectors: list[LoadingCollector] = []
 
         for key in router_entry.config_entry.collectors:
-            print(f'GETTING: {key}')
             cls = self.collector_mapping.get(key)
             self.fast_collectors.append(cls(router_id, self.polling_interval))
 
         for key in router_entry.config_entry.slow_collectors:
-            print(f'GETTING: {key}')
             cls = self.collector_mapping.get(key)
             self.slow_collectors.append(cls(router_id, self.slow_polling_interval))
 

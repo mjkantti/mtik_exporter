@@ -35,6 +35,7 @@ from mtik_exporter.collector.wireguard_collector import WireguardCollector, Wire
 from mtik_exporter.collector.bridge_host_collector import BridgeHostCollector
 from mtik_exporter.collector.kid_control_device_collector import KidDeviceCollector
 from mtik_exporter.collector.bgp_collector import BGPCollector
+from mtik_exporter.collector.arp_collector import ARPCollector
 from mtik_exporter.collector.internal_collector import InternalCollector
 
 from typing import TYPE_CHECKING
@@ -71,7 +72,7 @@ class CollectorRegistry:
         'queue_simple': QueueSimpleCollector,
         'queue_tree': QueueTreeCollector,
         'bgp': BGPCollector,
-        #'check_for_updates': ,
+        'arp': ARPCollector,
         'wireguard': WireguardCollector,
         'wireguard_peers': WireguardPeerCollector,
         'kid_control_devices': KidDeviceCollector,

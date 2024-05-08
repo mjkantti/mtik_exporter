@@ -41,9 +41,10 @@ class ExportProcessor:
     def exit_gracefully(self, signal, _):
         logging.warning(f"Caught signal {signal}, stopping")
         for j in self.s.queue:
-            logging.warning(f'Cancelling job {j}')
+            logging.warning(f'Cancelling scheduler job')
             self.s.cancel(j)
 
+        logging.info(f'Shut Down HTTP server')
         if self.server:
             self.server.shutdown()
 
@@ -79,6 +80,8 @@ class ExportProcessor:
             self.s.enter((i+1)*10, 2, self.run_collectors, argument=(router, registry.slow_collectors, slow_interval))
 
         self.s.run()
+
+        logging.info(f'Shut Down Done')
 
 
     def run_collectors(self, router_entry, collectors,  interval):

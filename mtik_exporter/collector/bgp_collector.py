@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
 class BGPCollector(LoadingCollector):
     '''BGP collector'''
-    def __init__(self, router_id: dict[str, str], polling_interval):
+    def __init__(self, router_id: dict[str, str]):
         self.name = 'BGPCollector'
         self.metric_store = MetricStore(
             router_id,

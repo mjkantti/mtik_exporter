@@ -19,28 +19,26 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from mtik_exporter.flow.router_entry import RouterEntry
 
-class BridgeHostCollector(LoadingCollector):
-    '''Bridge host (MAC Table) collector'''
+class ARPCollector(LoadingCollector):
+    '''ARP Entry collector'''
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'BridgeHostsCollector'
+        self.name = 'ARPCollector'
         self.metric_store = MetricStore(
             router_id,
-            ['mac_address', 'vid', 'bridge', 'interface', 'on_interface', 'dhcp_name', 'dhcp_comment', 'dhcp_address'],
-            ['prefix_count', 'local_messages', 'local_bytes', 'remote_messages', 'remote_bytes', 'established', 'uptime']
+            ['mac_address', 'address', 'interface', 'status', 'dynamic', 'dhcp_name', 'dhcp_comment']
             )
 
         # Metrics
-        self.metric_store.create_info_metric('bridge_host', 'Wireguard Interfaces')
+        self.metric_store.create_info_metric('arp_entry', 'ARP Entry Info')
 
     def load(self, router_entry: 'RouterEntry'):
         self.metric_store.clear_metrics()
         #bridge_host_records = BridgeHostMetricsDataSource.metric_records(router_entry)
         #bridge_host_records = router_entry.api_connection.get('interface/bridge/host', {'local': 'false', 'external': 'true'})
-        bridge_host_records = router_entry.api_connection.get('interface/bridge/host', local='false', external='true')
-        if bridge_host_records:
-            for r in bridge_host_records:
-                BaseOutputProcessor.add_dhcp_info(router_entry, r, str(r.get('mac-address')))
-        self.metric_store.set_metrics(bridge_host_records)
+        arp_records = router_entry.api_connection.get('ip/arp')
+        for r in arp_records:
+            BaseOutputProcessor.add_dhcp_info(router_entry, r, str(r.get('mac-address')))
+        self.metric_store.set_metrics(arp_records)
 
     def collect(self):
         yield from self.metric_store.get_metrics()

@@ -36,36 +36,9 @@ class ConfigKeys:
     NO_SSL_CERTIFICATE = 'no_ssl_certificate'
     SSL_CERTIFICATE_VERIFY = 'ssl_certificate_verify'
 
-    FEATURE_KEYS = {
-        'installed_packages',
-        'dhcp',
-        'pool',
-        'interface',
-        'interface_monitor',
-        'firewall',
-        'ipv6_firewall',
-        'ipv6_neighbor',
-        'monitor',
-        'route',
-        'ipv6_route',
-        'capsman',
-        'wifi',
-        'wifi_clients',
-        'poe',
-        'public_ip',
-        'netwatch',
-        'user',
-        'queue',
-        'bgp',
-        'check_for_updates',
-        'wireguard',
-        'wireguard_peers',
-        'kid_control_devices',
-        'bridge_hosts'
-    }
-
     POLLING_INTERVAL_KEY = 'polling_interval'
     SLOW_POLLING_INTERVAL_KEY = 'slow_polling_interval'
+    CHECK_FOR_UPDATES_KEY = 'check_for_updates'
 
     FAST_POLLING_KEYS = 'collectors'
     SLOW_POLLING_KEYS = 'slow_collectors'
@@ -99,7 +72,7 @@ class ConfigKeys:
     DEFAULT_TOTAL_MAX_SCRAPE_DURATION = 30
 
 
-    ROUTER_BOOLEAN_KEYS = {ENABLED_KEY, SSL_KEY, NO_SSL_CERTIFICATE, SSL_CERTIFICATE_VERIFY} | FEATURE_KEYS
+    ROUTER_BOOLEAN_KEYS = {ENABLED_KEY, SSL_KEY, NO_SSL_CERTIFICATE, SSL_CERTIFICATE_VERIFY, CHECK_FOR_UPDATES_KEY}
     ROUTER_INT_KEYS = {POLLING_INTERVAL_KEY, SLOW_POLLING_INTERVAL_KEY, PORT_KEY}
     ROUTER_STR_KEYS = {HOST_KEY, USER_KEY, PASSWD_KEY}
     ROUTER_LIST_KEYS = {FAST_POLLING_KEYS, SLOW_POLLING_KEYS}
@@ -185,15 +158,8 @@ class SystemConfigHandler:
         if not self.os_config:
             sys.exit(1)
 
-        # mtik_exporter user config folder
-        #if not os.path.exists(self.os_config.mtik_exporter_user_dir_path):
-        #    os.makedirs(self.os_config.mtik_exporter_user_dir_path)
-
         # if needed, stage the user config data
         self.usr_conf_data_path = self.os_config.mtik_exporter_user_dir_path
-        #self.usr_conf_data_path = 'config/config.ini'
-
-        #self._create_os_path(self.usr_conf_data_path, 'mtik_exporter/cli/config/mtik_exporter.ini')
 
         self.re_compiled = {}
 
@@ -249,8 +215,6 @@ class SystemConfigHandler:
                 config_entry_reader[key] = self._default_value_for_key(key)
                 new_keys.append(key) # read from disk next time
 
-            #if key is mtik_exporterConfigKeys.PASSWD_KEY and type(config_entry_reader[key]) is list:
-            #    config_entry_reader[key] = ','.join(config_entry_reader[key])
         for key in ConfigKeys.ROUTER_LIST_KEYS:
             collectors = json.loads(self.config[entry_name].get(key))
             config_entry_reader[key] = collectors
@@ -267,18 +231,6 @@ class SystemConfigHandler:
         else:
             config_entry_reader[ConfigKeys.PORT_KEY] = self._default_value_for_key(
                 ConfigKeys.SSL_KEY, config_entry_reader[ConfigKeys.SSL_KEY])
-
-        #if new_keys:
-            #print(self.config[entry_name])
-            #print(config_entry_reader)
-            #self.config[entry_name] = config_entry_reader
-            #try:
-                #self.config.write()
-                #if self._config.getboolean(mtik_exporterConfigKeys.mtik_exporter_CONFIG_ENTRY_NAME, mtik_exporterConfigKeys.mtik_exporter_VERBOSE_MODE):
-                #    print(f'Updated router entry {entry_name} with new feature keys {new_keys}')
-            #except Exception as exc:
-                #print(f'Error updating router entry {entry_name} with new feature keys {new_keys}: {exc}')
-                #print('Please update mtik_exporter.conf to its latest version manually')
 
         return config_entry_reader
 
@@ -297,16 +249,6 @@ class SystemConfigHandler:
                 system_entry_reader[key] = self.config.getboolean(entry_name, key)
             else:
                 system_entry_reader[key] = False
-
-        #if new_keys:
-            #self.config[entry_name] = system_entry_reader
-            #try:
-            #    self.config.write()
-            #    if self.config.getboolean(entry_name, mtik_exporterConfigKeys.mtik_exporter_VERBOSE_MODE):
-            #        print(f'Updated system entry {entry_name} with new system keys {new_keys}')
-            #except Exception as exc:
-            #    print(f'Error updating system entry {entry_name} with new system keys {new_keys}: {exc}')
-            #    print('Please update _mtik_exporter.conf to its latest version manually')
 
         return system_entry_reader
 

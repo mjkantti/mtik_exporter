@@ -23,7 +23,7 @@ from mtik_exporter.flow.collector_registry import CollectorRegistry
 from mtik_exporter.flow.router_entries_handler import RouterEntriesHandler
 
 import logging
-logging.basicConfig(format='%(levelname)s %(message)s', level=logging.DEBUG)
+logging.basicConfig(format='%(levelname)s %(message)s', level=logging.INFO)
 
 class ExportProcessor:
     ''' Base Export Processing

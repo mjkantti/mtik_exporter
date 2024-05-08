@@ -88,15 +88,12 @@ class InterfaceMonitorCollector(LoadingCollector):
         self.interface_monitor_metric_store.clear_metrics()
         #interface_traffic_records = InterfaceTrafficMetricsDataSource.metric_records(router_entry)
         #interface_traffic_records = router_entry.api_connection.get('/interface')
-        interface_traffic_records = router_entry.api_connection.call('interface/ether','print', {'proplist':'id,name,comment,running'} )
+        interface_traffic_records = router_entry.api_connection.call('interface/ether','print', {'proplist':'.id,name,comment,running'} )
 
         if interface_traffic_records:
             monitor_records = []
             if_ids = []
             for ifc in interface_traffic_records:
-                if ifc.get('type', '') != 'ether':
-                    continue
-
                 if ifc.get('running', 'true') == 'false' or ifc.get('disabled', 'false') == 'true':
                     monitor_records.append({ 'id': ifc.get('id', ''), 'name': ifc.get('name', ''), 'comment': ifc.get('comment', ''), 'status': 'link-down' })
                 else:

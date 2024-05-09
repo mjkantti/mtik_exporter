@@ -24,7 +24,7 @@ class KidDeviceCollector(LoadingCollector):
     """ Kid-control device Metrics collector
     """
 
-    def __init__(self, router_id: dict[str, str], polling_interval):
+    def __init__(self, router_id: dict[str, str]):
         self.name = 'KidDeviceCollector'
         self.metric_store = MetricStore(
             router_id,
@@ -38,8 +38,7 @@ class KidDeviceCollector(LoadingCollector):
                 'limited': lambda value: '1' if value == 'true' else '0',
                 'inactive': lambda value: '1' if value == 'true' else '0',
                 'disabled': lambda value: '1' if value == 'true' else '0'
-            },
-            polling_interval=polling_interval,
+            }
         )
 
         # Metrics

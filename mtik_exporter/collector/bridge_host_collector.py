@@ -21,28 +21,26 @@ if TYPE_CHECKING:
 
 class BridgeHostCollector(LoadingCollector):
     '''Bridge host (MAC Table) collector'''
-    def __init__(self, router_id: dict[str, str], polling_interval: int):
+    def __init__(self, router_id: dict[str, str]):
         self.name = 'BridgeHostsCollector'
         self.metric_store = MetricStore(
             router_id,
             ['mac_address', 'vid', 'bridge', 'interface', 'on_interface', 'dhcp_name', 'dhcp_comment', 'dhcp_address'],
-            ['prefix_count', 'local_messages', 'local_bytes', 'remote_messages', 'remote_bytes', 'established', 'uptime'],
-            polling_interval=polling_interval,
+            ['prefix_count', 'local_messages', 'local_bytes', 'remote_messages', 'remote_bytes', 'established', 'uptime']
             )
 
         # Metrics
         self.metric_store.create_info_metric('bridge_host', 'Wireguard Interfaces')
 
     def load(self, router_entry: 'RouterEntry'):
-        if self.metric_store.run_fetch():
-            self.metric_store.clear_metrics()
-            #bridge_host_records = BridgeHostMetricsDataSource.metric_records(router_entry)
-            #bridge_host_records = router_entry.api_connection.get('interface/bridge/host', {'local': 'false', 'external': 'true'})
-            bridge_host_records = router_entry.api_connection.get('interface/bridge/host', local='false', external='true')
-            if bridge_host_records:
-                for r in bridge_host_records:
-                    BaseOutputProcessor.add_dhcp_info(router_entry, r, str(r.get('mac-address')))
-            self.metric_store.set_metrics(bridge_host_records)
+        self.metric_store.clear_metrics()
+        #bridge_host_records = BridgeHostMetricsDataSource.metric_records(router_entry)
+        #bridge_host_records = router_entry.api_connection.get('interface/bridge/host', {'local': 'false', 'external': 'true'})
+        bridge_host_records = router_entry.api_connection.get('interface/bridge/host', local='false', external='true')
+        if bridge_host_records:
+            for r in bridge_host_records:
+                BaseOutputProcessor.add_dhcp_info(router_entry, r, str(r.get('mac-address')))
+        self.metric_store.set_metrics(bridge_host_records)
 
     def collect(self):
         yield from self.metric_store.get_metrics()

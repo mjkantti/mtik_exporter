@@ -37,12 +37,14 @@ class ExportProcessor:
 
         self.server = None
         self.thr = None
-        self.running = True
 
     def exit_gracefully(self, signal, _):
         logging.warning(f"Caught signal {signal}, stopping")
-        self.running = False
+        for j in self.s.queue:
+            logging.warning(f'Cancelling scheduler job')
+            self.s.cancel(j)
 
+        logging.info(f'Shut Down HTTP server')
         if self.server:
             self.server.shutdown()
 
@@ -54,39 +56,54 @@ class ExportProcessor:
         for router in router_entries_handler.router_entries:
             collector_registry = CollectorRegistry(router)
             self.collector_registries.append(collector_registry)
-            for c in collector_registry.registered_collectors:
-                logging.info('%s: Adding Collector %s', router.router_name, c.name)
+            for c in collector_registry.fast_collectors:
+                logging.info('%s: Adding Fast Collector %s', router.router_name, c.name)
                 REGISTRY.register(c)
+            
+            for c in collector_registry.slow_collectors:
+                logging.info('%s: Adding Slow Collector %s', router.router_name, c.name)
+                REGISTRY.register(c)
+            
 
         logging.info('Running HTTP metrics server on port %i', config_handler.system_entry().port)
 
         self.server, self.thr = start_http_server(config_handler.system_entry().port)
 
-        for registry in self.collector_registries:
-            self.run_registry(registry)
+        for i, registry in enumerate(self.collector_registries):
+            router = registry.router_entry
+            router.api_connection.connect()
+
+            interval = registry.router_entry.config_entry.polling_interval
+            if registry.fast_collectors:
+                self.s.enter((i+1), 1, self.run_collectors, argument=(router, registry.fast_collectors, interval))
+
+            slow_interval = registry.router_entry.config_entry.slow_polling_interval
+            if registry.slow_collectors:
+                self.s.enter((i+1)*10, 2, self.run_collectors, argument=(router, registry.slow_collectors, slow_interval))
 
         self.s.run()
 
+        logging.info(f'Shut Down Done')
 
-    def run_registry(self, registry: 'CollectorRegistry'):
-        if not self.running:
-            return
 
-        router = registry.router_entry
-        if not router.api_connection.is_connected():
+    def run_collectors(self, router_entry, collectors,  interval):
+        if not router_entry.api_connection.is_connected():
             logging.info('Router not connected, reconnecting, waiting for 3 seconds')
-            router.api_connection.connect()
-            self.s.enter(3, 1, self.run_registry, argument=(registry, ))
+            router_entry.api_connection.connect()
+            self.s.enter(3, 1, self.run_collectors, argument=(router_entry, collectors, interval))
             return
 
-        interval = registry.router_entry.config_entry.polling_interval        
         logging.debug('Starting data load, polling interval set to: %i', interval)
-        self.s.enter(interval, 1, self.run_registry, argument=(registry, ))
-        router.data_loader_time_spent.clear()
+        self.s.enter(interval, 1, self.run_collectors, argument=(router_entry, collectors, interval))
         
-        for collector in registry.registered_collectors:
+        for collector in collectors:
             logging.debug('Running %s', collector.name)
             start = time()
-            collector.load(router)
-            router.data_loader_time_spent[collector.get_name()] = time() - start
-        router.data_load_count += 1
+            collector.load(router_entry)
+
+            stats = router_entry.data_loader_stats.get(collector.get_name(), {})
+
+            stats['count'] = stats.get('count', 0) + 1
+            stats['duration'] = stats.get('duration', 0) + (time() - start)
+            stats['name'] = collector.get_name()
+            router_entry.data_loader_stats[collector.get_name()] = stats

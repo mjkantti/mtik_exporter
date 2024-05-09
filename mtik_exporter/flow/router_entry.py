@@ -31,8 +31,7 @@ class RouterEntry:
         }
 
         #self.collector_time_spent: dict[str, float] =  {}
-        self.data_loader_time_spent: dict[str, float] =  {}
-        self.data_load_count: float = 1
+        self.data_loader_stats: dict[str, dict[str, float]] =  {}
         self._dhcp_entries: list[dict[str, str | float]] = []
 
     def set_dhcp_entries(self, entries: list[dict[str, str | float]]):

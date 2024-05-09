@@ -23,13 +23,12 @@ if TYPE_CHECKING:
 class UserCollector(LoadingCollector):
     '''Active Users collector'''
 
-    def __init__(self, router_id: dict[str, str], polling_interval: int):
+    def __init__(self, router_id: dict[str, str]):
         self.name = 'UserCollector'
         self.metric_store = MetricStore(
             router_id,
             ['name', 'address', 'via', 'group'],
-            ['when', 'count'],
-            polling_interval=polling_interval
+            ['when', 'count']
         )
 
         # Metrics

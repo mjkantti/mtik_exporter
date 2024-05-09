@@ -1,6 +1,5 @@
 # coding=utf8
 ## Copyright (c) 2020 Arseniy Kuznetsov
-## Copyright (c) 2024 Martti Anttila
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License
@@ -12,38 +11,34 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
-
+from mtik_exporter.flow.processor.output import BaseOutputProcessor
 from mtik_exporter.collector.metric_store import MetricStore, LoadingCollector
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from mtik_exporter.flow.router_entry import RouterEntry
 
-class PublicIPAddressCollector(LoadingCollector):
-    '''Public IP address collector'''
-
+class ARPCollector(LoadingCollector):
+    '''ARP Entry collector'''
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'PublicIPAddressCollector'
+        self.name = 'ARPCollector'
         self.metric_store = MetricStore(
             router_id,
-            ['public_address', 'dns_name', 'public_address_ipv6'],
-            [],
-            {
-                'dns_name': lambda name: 'ddns_disabled' if not name else name,
-                'public_address_ipv6': lambda addr: '' if not addr else addr,
-                'public_address_ipv4': lambda addr: '' if not addr else addr,
-            }
-        )
+            ['mac_address', 'address', 'interface', 'status', 'dynamic', 'dhcp_name', 'dhcp_comment']
+            )
 
         # Metrics
-        self.metric_store.create_info_metric('public_ip_address', 'Public IP address')
+        self.metric_store.create_info_metric('arp_entry', 'ARP Entry Info')
 
     def load(self, router_entry: 'RouterEntry'):
         self.metric_store.clear_metrics()
-        #address_records = PublicIPAddressDatasource.metric_records(router_entry)
-        address_records = router_entry.api_connection.get('ip/cloud')
-        self.metric_store.set_metrics(address_records)
+        #bridge_host_records = BridgeHostMetricsDataSource.metric_records(router_entry)
+        #bridge_host_records = router_entry.api_connection.get('interface/bridge/host', {'local': 'false', 'external': 'true'})
+        arp_records = router_entry.api_connection.get('ip/arp')
+        for r in arp_records:
+            BaseOutputProcessor.add_dhcp_info(router_entry, r, str(r.get('mac-address')))
+        self.metric_store.set_metrics(arp_records)
 
     def collect(self):
         yield from self.metric_store.get_metrics()
-

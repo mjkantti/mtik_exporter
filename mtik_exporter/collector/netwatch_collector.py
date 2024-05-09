@@ -26,7 +26,7 @@ class NetwatchCollector(LoadingCollector):
     ''' Netwatch Metrics collector
     '''
 
-    def __init__(self, router_id: dict[str, str], polling_interval: int):
+    def __init__(self, router_id: dict[str, str]):
         self.name = 'NetwatchCollector'
         self.metric_store = MetricStore(
             router_id,
@@ -42,8 +42,7 @@ class NetwatchCollector(LoadingCollector):
                 'rtt_stdev': lambda value: BaseOutputProcessor.parse_timedelta(value) if value else None,
                 'http_resp_time': lambda value: BaseOutputProcessor.parse_timedelta(value) if value else None,
                 'tcp_connect_time': lambda value: BaseOutputProcessor.parse_timedelta(value) if value else None,
-            },
-            polling_interval=polling_interval,
+            }
         )
 
         # Create metrics

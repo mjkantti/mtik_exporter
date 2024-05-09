@@ -32,11 +32,9 @@ class MetricStore():
     def __init__(self, router_id: dict[str, str],
                  metric_labels: list[str],
                  metric_values: list[str] = [],
-                 translation_table: dict[str, Callable[[str | None], str | float | None]]={},
-                 polling_interval = 10):
+                 translation_table: dict[str, Callable[[str | None], str | float | None]]={}):
         self.router_id = router_id
         self.ts: float = 0
-        self.polling_interval = polling_interval
         self.metric_labels = self.add_router_labels(metric_labels)
         self.metric_values = metric_values
         self.translation_table = translation_table
@@ -55,11 +53,11 @@ class MetricStore():
         self.metrics.append((CounterMetricFamily(f'mtik_exporter_{name}', decription, labels=labels), labels, value))
 
     def get_metrics(self):
-        if self.ts < time() - self.polling_interval * 1.5:
-            if self.ts > 0:
-                metric_names = [m[0].name for m in self.metrics]
-                logging.warn('Metrics too old to show for: %s', ', '.join(metric_names))
-            return
+        #if self.ts < time() - self.polling_interval * 1.5:
+        #    if self.ts > 0:
+        #        metric_names = [m[0].name for m in self.metrics]
+        #        logging.warn('Metrics too old to show for: %s', ', '.join(metric_names))
+        #    return
         for metric, _, _ in self.metrics:
             yield metric
 
@@ -115,12 +113,6 @@ class MetricStore():
     def add_router_labels(self, labels: list[str]):
         return labels + list(self.router_id.keys())
 
-    def run_fetch(self):
-        if self.ts + self.polling_interval - 1 < time():
-            return True
-        else:
-            return False
-    
 class LoadingCollector(Collector):
     name: str
 

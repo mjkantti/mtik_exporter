@@ -35,7 +35,7 @@ class POECollector(LoadingCollector):
         #poe_records = POEMetricsDataSource.metric_records(router_entry)
         poe_records = router_entry.api_connection.get('interface/ethernet/poe')
 
-        if poe_records and router_entry.config_entry.monitor:
+        if poe_records:
             if_ids = ','.join([str(i.get('id')) for i in poe_records if i.get('running', 'true') == 'true' and i.get('disabled', 'false') == 'false'])
 
             if if_ids:

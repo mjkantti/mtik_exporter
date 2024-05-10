@@ -63,12 +63,14 @@ class MetricStore():
         for metric, _, _ in self.metrics:
             yield metric
 
-    def clear_metrics(self):
+    def _clear_metrics(self):
         for metric, _, _ in self.metrics:
             metric.samples.clear()
 
     def set_metrics(self, router_records: list[dict[str, str | float]] = []):
         self.ts = time()
+        self._clear_metrics()
+
         if not router_records:
             router_records = []
 

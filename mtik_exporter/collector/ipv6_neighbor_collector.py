@@ -31,9 +31,6 @@ class IPv6NeighborCollector(LoadingCollector):
         self.metric_store.create_info_metric('ipv6_neighbor', 'Reachable IPv6 neighbors')
 
     def load(self, router_entry: 'RouterEntry'):
-        self.metric_store.clear_metrics()
-        #records = IPv6NeighborDataSource.metric_records(router_entry)
-        #records = router_entry.api_connection.get('ipv6/neighbor', {'status': 'reachable'})
         records = router_entry.api_connection.get('/ipv6/neighbor', status='reachable')
         # add dhcp info
         if records:

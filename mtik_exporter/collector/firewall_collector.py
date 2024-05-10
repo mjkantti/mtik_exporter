@@ -42,10 +42,6 @@ class FirewallCollector(LoadingCollector):
         self.ipv4_raw_metric_store.create_counter_metric('firewall_raw_packets', 'Total amount of packets matched by firewall raw rules', 'packets')
 
     def load(self, router_entry: 'RouterEntry'):
-        self.ipv4_filter_metric_store.clear_metrics()
-        self.ipv4_mangle_metric_store.clear_metrics()
-        self.ipv4_raw_metric_store.clear_metrics()
-
         #firewall_filter_records = FirewallMetricsDataSource.metric_records_ipv4(router_entry)
         firewall_filter_records = router_entry.api_connection.get('ip/firewall/filter')
         self.ipv4_filter_metric_store.set_metrics(firewall_filter_records)
@@ -88,10 +84,6 @@ class IPv6FirewallCollector(LoadingCollector):
 
 
     def load(self, router_entry: 'RouterEntry'):
-        self.ipv6_filter_metric_store.clear_metrics()
-        self.ipv6_mangle_metric_store.clear_metrics()
-        self.ipv6_raw_metric_store.clear_metrics()
-
         #firewall_filter_records_ipv6 =  FirewallMetricsDataSource.metric_records_ipv6(router_entry)
         firewall_filter_records_ipv6 = router_entry.api_connection.get('ipv6/firewall/filter')
         self.ipv6_filter_metric_store.set_metrics(firewall_filter_records_ipv6)

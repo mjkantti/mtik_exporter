@@ -33,8 +33,6 @@ class RouteCollector(LoadingCollector):
         self.metric_store.create_info_metric('routes', 'Routes Info')
 
     def load(self, router_entry: 'RouterEntry'):
-        self.metric_store.clear_metrics()
-        #route_records = RouteMetricsDataSource.metric_records(router_entry)
         route_records = router_entry.api_connection.get('ip/route')
         self.metric_store.set_metrics(route_records)
 
@@ -55,8 +53,6 @@ class IPv6RouteCollector(LoadingCollector):
         self.metric_store.create_info_metric('ipv6_routes', 'IPv6 Routes Info')
 
     def load(self, router_entry: 'RouterEntry'):
-        self.metric_store.clear_metrics()
-        #route_records = IPv6RouteMetricsDataSource.metric_records(router_entry)
         route_records = router_entry.api_connection.get('ipv6/route')
         self.metric_store.set_metrics(route_records)
 

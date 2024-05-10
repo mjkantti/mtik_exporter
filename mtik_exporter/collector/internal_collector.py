@@ -34,7 +34,6 @@ class InternalCollector(LoadingCollector):
         self.load_metrics.create_counter_metric('data_load_count', 'Total count of metrics loads since reboot', 'count')
 
     def load(self, router_entry: 'RouterEntry'):
-        self.load_metrics.clear_metrics()
         self.load_metrics.set_metrics(router_entry.data_loader_stats.values())
 
     def collect(self):

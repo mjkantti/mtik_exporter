@@ -32,8 +32,6 @@ class PackageCollector(LoadingCollector):
         self.metric_store.create_info_metric('installed_packages', 'Installed Packages')
 
     def load(self, router_entry: 'RouterEntry'):
-        self.metric_store.clear_metrics()
-        #package_records = PackageMetricsDataSource.metric_records(router_entry)
         package_record = router_entry.api_connection.get('system/package')
         self.metric_store.set_metrics(package_record)
 

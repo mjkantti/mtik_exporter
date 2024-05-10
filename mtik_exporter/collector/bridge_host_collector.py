@@ -33,9 +33,6 @@ class BridgeHostCollector(LoadingCollector):
         self.metric_store.create_info_metric('bridge_host', 'Wireguard Interfaces')
 
     def load(self, router_entry: 'RouterEntry'):
-        self.metric_store.clear_metrics()
-        #bridge_host_records = BridgeHostMetricsDataSource.metric_records(router_entry)
-        #bridge_host_records = router_entry.api_connection.get('interface/bridge/host', {'local': 'false', 'external': 'true'})
         bridge_host_records = router_entry.api_connection.get('interface/bridge/host', local='false', external='true')
         if bridge_host_records:
             for r in bridge_host_records:

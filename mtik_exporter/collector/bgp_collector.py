@@ -46,8 +46,6 @@ class BGPCollector(LoadingCollector):
         self.metric_store.create_gauge_metric('bgp_uptime', 'BGP uptime in seconds', 'uptime', session_id_labes)
 
     def load(self, router_entry: 'RouterEntry'):
-        self.metric_store.clear_metrics()
-        #bgp_records = BGPMetricsDataSource.metric_records(router_entry)
         bgp_records = router_entry.api_connection.get('routing/bgp/session')
         self.metric_store.set_metrics(bgp_records)
 

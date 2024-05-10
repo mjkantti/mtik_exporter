@@ -36,9 +36,6 @@ class WifiCollector(LoadingCollector):
         self.wifi_monitor_metric_store.create_gauge_metric('wifi_interface_authorized_peers', 'Wifi interface authorized peers', 'authorized_peers', ['id', 'name', 'comment'])
 
     def load(self, router_entry: 'RouterEntry'):
-        self.wifi_interface_metric_store.clear_metrics()
-        self.wifi_monitor_metric_store.clear_metrics()
-
         wifi_interface_records = router_entry.api_connection.get('interface/wifi')
         self.wifi_interface_metric_store.set_metrics(wifi_interface_records)
 
@@ -75,8 +72,6 @@ class WifiClientCollector(LoadingCollector):
         self.wifi_registration_metric_store.create_gauge_metric('wifi_clients_tx_rate', 'Client devices TX bitrate', 'tx_rate', ['mac_address', 'dhcp_name', 'dhcp_comment'])
 
     def load(self, router_entry: 'RouterEntry'):
-        self.wifi_registration_metric_store.clear_metrics()
-
         registration_records = router_entry.api_connection.get('interface/wifi/registration-table')
         if registration_records:
             for r in registration_records:

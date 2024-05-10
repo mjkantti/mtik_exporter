@@ -48,9 +48,6 @@ class InterfaceCollector(LoadingCollector):
         self.interface_metric_store.create_counter_metric('link_downs', 'Number of times link went down', 'link_downs')
 
     def load(self, router_entry: 'RouterEntry'):
-        self.interface_metric_store.clear_metrics()
-        #interface_traffic_records = InterfaceTrafficMetricsDataSource.metric_records(router_entry)
-        #interface_traffic_records = router_entry.api_connection.get('/interface')
         interface_traffic_records = router_entry.api_connection.get('interface')
 
         interface_traffic_records_running = [ift for ift in interface_traffic_records if ift['running'] == 'true']
@@ -85,9 +82,6 @@ class InterfaceMonitorCollector(LoadingCollector):
         self.interface_monitor_metric_store.create_gauge_metric('interface_sfp_temperature', 'Current SFP temperature', 'sfp_temperature')
 
     def load(self, router_entry: 'RouterEntry'):
-        self.interface_monitor_metric_store.clear_metrics()
-        #interface_traffic_records = InterfaceTrafficMetricsDataSource.metric_records(router_entry)
-        #interface_traffic_records = router_entry.api_connection.get('/interface')
         interface_traffic_records = router_entry.api_connection.call('interface/ether','print', {'proplist':'.id,name,comment,running'} )
 
         if interface_traffic_records:

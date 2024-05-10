@@ -44,8 +44,6 @@ class HealthCollector(LoadingCollector):
         self.metric_store.create_gauge_metric('system_power_consumption', 'System Power Consumption', 'power_consumption')
 
     def load(self, router_entry: 'RouterEntry'):
-        self.metric_store.clear_metrics()
-        #health_records = HealthMetricsDataSource.metric_records(router_entry)
         health_records = router_entry.api_connection.get('system/health')
         for record in health_records:
             if 'name' in record:

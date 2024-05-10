@@ -55,9 +55,6 @@ class SystemResourceCollector(LoadingCollector):
         self.version_metric_store.create_gauge_metric('system_latest_version_built', 'Latest RouterOS version built time', 'latest_built')
 
     def load(self, router_entry: 'RouterEntry'):
-        self.metric_store.clear_metrics()
-        self.version_metric_store.clear_metrics()
-        #resource_records = SystemResourceMetricsDataSource.metric_records(router_entry)
         resource_records = router_entry.api_connection.get('system/resource')
 
         # Check for updates

@@ -31,8 +31,6 @@ class PoolCollector(LoadingCollector):
         self.metric_store.create_info_metric('ip_pool_device', 'Used Addresses in IP Pool')
 
     def load(self, router_entry: 'RouterEntry'):
-        self.metric_store.clear_metrics()
-        #pool_used_records = PoolUsedMetricsDataSource.metric_records(router_entry)
         pool_used_records = router_entry.api_connection.get('ip/pool/used')
         self.metric_store.set_metrics(pool_used_records)
 

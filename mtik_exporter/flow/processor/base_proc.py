@@ -63,7 +63,6 @@ class ExportProcessor:
             for c in collector_registry.slow_collectors:
                 logging.info('%s: Adding Slow Collector %s', router.router_name, c.name)
                 REGISTRY.register(c)
-            
 
         logging.info('Running HTTP metrics server on port %i', config_handler.system_entry().port)
 
@@ -79,7 +78,7 @@ class ExportProcessor:
 
             slow_interval = registry.router_entry.config_entry.slow_polling_interval
             if registry.slow_collectors:
-                self.s.enter((i+1)*10, 2, self.run_collectors, argument=(router, registry.slow_collectors, slow_interval))
+                self.s.enter((i+1)*10, 2, self.run_collectors, argument=(router, registry.slow_collectors + [registry.interal_collector], slow_interval))
 
         self.s.run()
 
@@ -99,11 +98,14 @@ class ExportProcessor:
         for collector in collectors:
             logging.debug('Running %s', collector.name)
             start = time()
-            collector.load(router_entry)
 
-            stats = router_entry.data_loader_stats.get(collector.get_name(), {})
+            try:
+                collector.load(router_entry)
 
-            stats['count'] = stats.get('count', 0) + 1
-            stats['duration'] = stats.get('duration', 0) + (time() - start)
-            stats['name'] = collector.get_name()
-            router_entry.data_loader_stats[collector.get_name()] = stats
+            finally:
+                stats = router_entry.data_loader_stats.get(collector.get_name(), {})
+
+                stats['count'] = stats.get('count', 0) + 1
+                stats['duration'] = stats.get('duration', 0) + (time() - start)
+                stats['name'] = collector.get_name()
+                router_entry.data_loader_stats[collector.get_name()] = stats

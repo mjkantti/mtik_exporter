@@ -44,7 +44,6 @@ class POECollector(LoadingCollector):
                 for poe_r, mon_r in zip(poe_records, monitor_records):
                     poe_r.update(mon_r)
 
-
         self.metric_store.set_metrics(poe_records)
 
     def collect(self):

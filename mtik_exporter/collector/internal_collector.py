@@ -24,17 +24,20 @@ class InternalCollector(LoadingCollector):
     ''' System Identity Metrics collector
     '''
 
-    def __init__(self, router_id: dict[str, str]):
+    def __init__(self, router: 'RouterEntry'):
         self.name = 'InternalCollector'
+        self.router = router
         #self.collect_metrics = MetricStore(router_id, ['name'], ['duration'])
-        self.load_metrics = MetricStore(router_id, ['name'], ['duration', 'count'])
+        self.load_metrics = MetricStore(router.router_id, ['name'], ['duration', 'count', 'last_run'])
 
         # Metrics
         self.load_metrics.create_counter_metric('data_load_time', 'Time spent loading metrics in seconds', 'duration')
         self.load_metrics.create_counter_metric('data_load_count', 'Total count of metrics loads since reboot', 'count')
+        self.load_metrics.create_gauge_metric('data_load_last_run', 'Last run timestamp of metrics load', 'last_run')
 
     def load(self, router_entry: 'RouterEntry'):
-        self.load_metrics.set_metrics(router_entry.data_loader_stats.values())
+        pass
 
     def collect(self):
+        self.load_metrics.set_metrics(self.router.data_loader_stats.values())
         yield from self.load_metrics.get_metrics()

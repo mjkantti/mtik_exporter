@@ -63,6 +63,8 @@ class ExportProcessor:
             for c in collector_registry.slow_collectors:
                 logging.info('%s: Adding Slow Collector %s', router.router_name, c.name)
                 REGISTRY.register(c)
+            
+            REGISTRY.register(collector_registry.interal_collector)
 
         logging.info('Running HTTP metrics server on port %i', config_handler.system_entry().port)
 
@@ -107,5 +109,6 @@ class ExportProcessor:
 
                 stats['count'] = stats.get('count', 0) + 1
                 stats['duration'] = stats.get('duration', 0) + (time() - start)
+                stats['last_run'] = start
                 stats['name'] = collector.get_name()
                 router_entry.data_loader_stats[collector.get_name()] = stats

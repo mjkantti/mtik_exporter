@@ -39,7 +39,7 @@ class MetricStore():
         self.metric_values = metric_values
         self.translation_table = translation_table
 
-        self.metrics: tuple[Metric, list[str], str | None] = []
+        self.metrics: list[tuple[Metric, list[str], str | None]] = []
 
     def create_info_metric(self, name: str, decription: str):
         self.metrics.append((InfoMetricFamily(f'mtik_exporter_{name}', decription, labels=self.metric_labels), self.metric_labels, None))

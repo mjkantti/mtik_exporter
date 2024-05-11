@@ -86,7 +86,7 @@ class CollectorRegistry:
         self.slow_polling_interval = router_entry.config_entry.slow_polling_interval
 
         router_id = router_entry.router_id
-        self.fast_collectors: list[LoadingCollector] = [InternalCollector(router_id)]
+        self.fast_collectors: list[LoadingCollector] = []
         self.slow_collectors: list[LoadingCollector] = []
 
         for key in router_entry.config_entry.collectors:
@@ -105,4 +105,4 @@ class CollectorRegistry:
 
             self.slow_collectors.append(cls(router_id))
 
-        self.interal_collector = InternalCollector(router_id)
+        self.interal_collector = InternalCollector(router_entry)

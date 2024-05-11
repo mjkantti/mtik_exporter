@@ -80,7 +80,7 @@ class ExportProcessor:
 
             slow_interval = registry.router_entry.config_entry.slow_polling_interval
             if registry.slow_collectors:
-                self.s.enter((i+1)*10, 2, self.run_collectors, argument=(router, registry.slow_collectors + [registry.interal_collector], slow_interval))
+                self.s.enter((i+1)*10, 2, self.run_collectors, argument=(router, registry.slow_collectors, slow_interval))
 
         self.s.run()
 

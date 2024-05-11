@@ -95,7 +95,7 @@ class CollectorRegistry:
                 logging.warning('Fast Collector not found: %s ignoring')
                 continue
 
-            self.fast_collectors.append(cls(router_id))
+            self.fast_collectors.append(cls(router_id, self.polling_interval))
 
         for key in router_entry.config_entry.slow_collectors:
             cls = self.collector_mapping.get(key)
@@ -103,6 +103,6 @@ class CollectorRegistry:
                 logging.warning('Slow Collector not found: %s ignoring')
                 continue
 
-            self.slow_collectors.append(cls(router_id))
+            self.slow_collectors.append(cls(router_id, self.slow_polling_interval))
 
         self.interal_collector = InternalCollector(router_entry)

@@ -24,7 +24,7 @@ class DHCPCollector(LoadingCollector):
     ''' DHCP Metrics collector
     '''
 
-    def __init__(self, router_id: dict[str, str]):
+    def __init__(self, router_id: dict[str, str], interval: int):
         self.name = 'DHCPCollector'
         self.lease_metric_store = MetricStore(
             router_id,
@@ -33,7 +33,8 @@ class DHCPCollector(LoadingCollector):
             {
                 'expires_after': lambda ea: BaseOutputProcessor.parse_timedelta(ea) if ea else None,
                 'last_seen': lambda ls: BaseOutputProcessor.parse_timedelta(ls) if ls else None,
-            }
+            },
+            interval=interval
         )
 
         # Metrics

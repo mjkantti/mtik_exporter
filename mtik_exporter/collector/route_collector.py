@@ -22,11 +22,12 @@ if TYPE_CHECKING:
 class RouteCollector(LoadingCollector):
     ''' IP Route Metrics collector
     '''
-    def __init__(self, router_id: dict[str, str]):
+    def __init__(self, router_id: dict[str, str], interval: int):
         self.name = 'RouteCollector'
         self.metric_store = MetricStore(
             router_id,
-            ['comment', 'type', 'dst_address', 'gateway', 'distance', 'connect', 'dynamic', 'bgp', 'ospf', 'active']
+            ['comment', 'type', 'dst_address', 'gateway', 'distance', 'connect', 'dynamic', 'bgp', 'ospf', 'active'],
+            interval=interval
         )
 
         # Metrics
@@ -42,11 +43,12 @@ class RouteCollector(LoadingCollector):
 class IPv6RouteCollector(LoadingCollector):
     ''' IP Route Metrics collector
     '''
-    def __init__(self, router_id: dict[str, str]):
+    def __init__(self, router_id: dict[str, str], interval: int):
         self.name = 'IPv6RouteCollector'
         self.metric_store = MetricStore(
             router_id,
-            ['comment', 'type', 'dst_address', 'gateway', 'distance', 'connect', 'dynamic', 'bgp', 'ospf', 'active']
+            ['comment', 'type', 'dst_address', 'gateway', 'distance', 'connect', 'dynamic', 'bgp', 'ospf', 'active'],
+            interval=interval
         )
 
         # Metrics

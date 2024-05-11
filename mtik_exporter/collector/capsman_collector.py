@@ -22,9 +22,9 @@ if TYPE_CHECKING:
 class CapsmanCollector(LoadingCollector):
     ''' CAPsMAN Metrics collector
     '''
-    def __init__(self, router_id: dict[str, str]):
+    def __init__(self, router_id: dict[str, str], interval: int):
         self.name = 'CapsmanCollector'
-        self.metric_store = MetricStore(router_id, ['identity', 'version', 'base_mac', 'board', 'base_mac'])
+        self.metric_store = MetricStore(router_id, ['identity', 'version', 'base_mac', 'board', 'base_mac'], interval=interval)
 
         # Metrics
         self.metric_store.create_info_metric('capsman_remote_caps', 'CAPsMAN remote caps')

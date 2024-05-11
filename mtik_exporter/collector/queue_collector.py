@@ -22,12 +22,13 @@ if TYPE_CHECKING:
 class QueueTreeCollector(LoadingCollector):
     '''Queue Tree collector'''
 
-    def __init__(self, router_id: dict[str, str]):
+    def __init__(self, router_id: dict[str, str], interval: int):
         self.name = 'QueueTreeCollector'
         self.metric_store = MetricStore(
             router_id,
             ['name', 'parent', 'packet_mark', 'limit_at', 'max_limit', 'priority', 'disabled'],
-            ['rate', 'bytes', 'queued_bytes', 'dropped']
+            ['rate', 'bytes', 'queued_bytes', 'dropped'],
+            interval=interval
         )
 
         # Metrics
@@ -46,12 +47,13 @@ class QueueTreeCollector(LoadingCollector):
 
 
 class QueueSimpleCollector(LoadingCollector):
-    def __init__(self, router_id: dict[str, str]):
+    def __init__(self, router_id: dict[str, str], interval: int):
         self.name = 'QueueSimpleCollector'
         self.mestric_store = MetricStore(
             router_id,
             ['name', 'parent', 'packet_mark', 'limit_at', 'max_limit', 'priority', 'bytes', 'packets', 'queued_bytes', 'queued_packets','dropped', 'rate', 'packet_rate', 'disabled'],
-            ['bytes_up', 'bytes_down', 'queued_bytes_up', 'queued_bytes_down', 'dropped_up', 'dropped_down']
+            ['bytes_up', 'bytes_down', 'queued_bytes_up', 'queued_bytes_down', 'dropped_up', 'dropped_down'],
+            interval=interval
         )
 
         # Metrics

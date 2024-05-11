@@ -25,7 +25,7 @@ class SystemResourceCollector(LoadingCollector):
     ''' System Resource Metrics collector
     '''
 
-    def __init__(self, router_id: dict[str, str]):
+    def __init__(self, router_id: dict[str, str], interval: int):
         self.name = 'SystemResourceCollector'
         self.metric_store = MetricStore(
             router_id,
@@ -34,9 +34,10 @@ class SystemResourceCollector(LoadingCollector):
             {
                 'uptime': lambda c: BaseOutputProcessor.parse_timedelta(c) if c else 0,
                 'bad_blocks': lambda b: b.strip('%') if b else b
-            }
+            },
+            interval=interval
         )
-        self.version_metric_store = MetricStore(router_id, ['current_version', 'channel', 'latest_version'])
+        self.version_metric_store = MetricStore(router_id, ['current_version', 'channel', 'latest_version'], interval=interval)
 
         # Metrics
         self.metric_store.create_counter_metric('system_uptime', 'Time interval since boot-up', 'uptime', ['version', 'board_name', 'cpu', 'architecture_name'])

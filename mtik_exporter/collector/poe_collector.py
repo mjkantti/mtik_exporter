@@ -23,9 +23,9 @@ class POECollector(LoadingCollector):
     ''' POE Metrics collector
     '''
 
-    def __init__(self, router_id: dict[str, str]):
+    def __init__(self, router_id: dict[str, str], interval: int):
         self.name = 'POECollector'
-        self.metric_store = MetricStore(router_id, ['id', 'name', 'comment', 'poe_out', 'poe_priority', 'poe_voltage', 'poe_out_status', 'poe_out_voltage', 'poe_out_current', 'poe_out_power'])
+        self.metric_store = MetricStore(router_id, ['id', 'name', 'comment', 'poe_out', 'poe_priority', 'poe_voltage', 'poe_out_status', 'poe_out_voltage', 'poe_out_current', 'poe_out_power'], interval=interval)
 
         # Metrics
         self.metric_store.create_info_metric('poe', 'POE Metrics')

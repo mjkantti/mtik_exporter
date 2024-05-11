@@ -24,12 +24,13 @@ class InterfaceCollector(LoadingCollector):
     ''' Router Interface Metrics collector
     '''
 
-    def __init__(self, router_id: dict[str, str]):
+    def __init__(self, router_id: dict[str, str], interval: int):
         self.name = 'InterfaceCollector'
         self.interface_metric_store = MetricStore(
             router_id,
             ['id', 'name', 'comment', 'type', 'mtu', 'mac_address', 'running'],
-            ['rx_byte', 'tx_byte', 'rx_packet', 'tx_packet', 'rx_error', 'tx_error', 'rx_drop', 'tx_drop', 'link_downs']
+            ['rx_byte', 'tx_byte', 'rx_packet', 'tx_packet', 'rx_error', 'tx_error', 'rx_drop', 'tx_drop', 'link_downs'],
+            interval=interval
         )
 
         # Metrics
@@ -60,7 +61,7 @@ class InterfaceMonitorCollector(LoadingCollector):
     ''' Router Interface Monitor Metrics collector
     '''
 
-    def __init__(self, router_id: dict[str, str]):
+    def __init__(self, router_id: dict[str, str], interval: int):
         self.name = 'InterfaceMonitorCollector'
         self.interface_monitor_metric_store = MetricStore(
             router_id,
@@ -71,7 +72,8 @@ class InterfaceMonitorCollector(LoadingCollector):
                 'rate': BaseOutputProcessor.parse_rates,
                 'full_duplex': lambda value: '1' if value=='true' else (None if value is None else '0'),
                 'sfp_temperature': lambda value: None if value is None else value
-            }
+            },
+            interval=interval
         )
 
         self.interface_monitor_metric_store.create_gauge_metric('interface_status', 'Current interface link status', 'status')

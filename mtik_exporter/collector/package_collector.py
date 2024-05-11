@@ -23,9 +23,9 @@ if TYPE_CHECKING:
 class PackageCollector(LoadingCollector):
     '''Installed Packages collector'''
 
-    def __init__(self, router_id: dict[str, str]):
+    def __init__(self, router_id: dict[str, str], interval: int):
         self.name = 'PackageCollector'
-        self.metric_store = MetricStore(router_id, ['name', 'version', 'build_time', 'disabled'])
+        self.metric_store = MetricStore(router_id, ['name', 'version', 'build_time', 'disabled'], interval=interval)
         #self.metric_store_updates = MetricStore(router_id, ['channel', 'latest_version', 'build_time', 'status'], polling_interval=polling_interval)
 
         # Metrics

@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
 class BGPCollector(LoadingCollector):
     '''BGP collector'''
-    def __init__(self, router_id: dict[str, str]):
+    def __init__(self, router_id: dict[str, str], interval: int):
         self.name = 'BGPCollector'
         self.metric_store = MetricStore(
             router_id,
@@ -31,7 +31,8 @@ class BGPCollector(LoadingCollector):
             {
                 'established': lambda value: '1' if value=='true' else '0',
                 'uptime': lambda value: BaseOutputProcessor.parse_timedelta(value) if value else None
-            })
+            },
+            interval=interval)
 
         # Metrics
         self.metric_store.create_info_metric('bgp_sessions_info', 'BGP sessions info')

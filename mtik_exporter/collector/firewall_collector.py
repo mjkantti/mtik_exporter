@@ -22,14 +22,14 @@ if TYPE_CHECKING:
 class FirewallCollector(LoadingCollector):
     ''' Firewall rules traffic metrics collector
     '''
-    def __init__(self, router_id: dict[str, str]):
+    def __init__(self, router_id: dict[str, str], interval: int):
         self.name = 'FirewallCollector'
         firewall_labels = ['chain', 'action', 'comment']
         firewall_values = ['bytes', 'packets']
 
-        self.ipv4_filter_metric_store = MetricStore(router_id, firewall_labels, firewall_values)
-        self.ipv4_mangle_metric_store = MetricStore(router_id, firewall_labels, firewall_values)
-        self.ipv4_raw_metric_store = MetricStore(router_id, firewall_labels, firewall_values)
+        self.ipv4_filter_metric_store = MetricStore(router_id, firewall_labels, firewall_values, interval=interval)
+        self.ipv4_mangle_metric_store = MetricStore(router_id, firewall_labels, firewall_values, interval=interval)
+        self.ipv4_raw_metric_store = MetricStore(router_id, firewall_labels, firewall_values, interval=interval)
 
         # Metrics
         self.ipv4_filter_metric_store.create_counter_metric('firewall_filter_bytes', 'Total amount of bytes matched by firewall rules', 'bytes')
@@ -63,14 +63,14 @@ class FirewallCollector(LoadingCollector):
 class IPv6FirewallCollector(LoadingCollector):
     ''' Firewall rules traffic metrics collector
     '''
-    def __init__(self, router_id: dict[str, str]):
+    def __init__(self, router_id: dict[str, str], interval: int):
         self.name = 'IPv6FirewallCollector'
         firewall_labels = ['chain', 'action', 'comment']
         firewall_values = ['bytes', 'packets']
 
-        self.ipv6_filter_metric_store = MetricStore(router_id, firewall_labels, firewall_values)
-        self.ipv6_mangle_metric_store = MetricStore(router_id, firewall_labels, firewall_values)
-        self.ipv6_raw_metric_store = MetricStore(router_id, firewall_labels, firewall_values)
+        self.ipv6_filter_metric_store = MetricStore(router_id, firewall_labels, firewall_values, interval=interval)
+        self.ipv6_mangle_metric_store = MetricStore(router_id, firewall_labels, firewall_values, interval=interval)
+        self.ipv6_raw_metric_store = MetricStore(router_id, firewall_labels, firewall_values, interval=interval)
 
         # Metrics
         self.ipv6_filter_metric_store.create_counter_metric('firewall_filter_ipv6_bytes', 'Total amount of bytes matched by firewall rules (IPv6)', 'bytes')

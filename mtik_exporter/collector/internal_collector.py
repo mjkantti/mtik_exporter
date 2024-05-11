@@ -13,14 +13,15 @@
 ## GNU General Public License for more details.
 
 
-from mtik_exporter.collector.metric_store import MetricStore, LoadingCollector
+from mtik_exporter.collector.metric_store import MetricStore
+from prometheus_client.registry import Collector
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from mtik_exporter.flow.router_entry import RouterEntry
 
 
-class InternalCollector(LoadingCollector):
+class InternalCollector(Collector):
     ''' System Identity Metrics collector
     '''
 
@@ -28,15 +29,12 @@ class InternalCollector(LoadingCollector):
         self.name = 'InternalCollector'
         self.router = router
         #self.collect_metrics = MetricStore(router_id, ['name'], ['duration'])
-        self.load_metrics = MetricStore(router.router_id, ['name'], ['duration', 'count', 'last_run'])
+        self.load_metrics = MetricStore(router.router_id, ['name'], ['duration', 'count', 'last_run'], interval=1)
 
         # Metrics
         self.load_metrics.create_counter_metric('data_load_time', 'Time spent loading metrics in seconds', 'duration')
         self.load_metrics.create_counter_metric('data_load_count', 'Total count of metrics loads since reboot', 'count')
         self.load_metrics.create_gauge_metric('data_load_last_run', 'Last run timestamp of metrics load', 'last_run')
-
-    def load(self, router_entry: 'RouterEntry'):
-        pass
 
     def collect(self):
         self.load_metrics.set_metrics(self.router.data_loader_stats.values())

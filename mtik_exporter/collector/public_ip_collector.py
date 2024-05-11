@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 class PublicIPAddressCollector(LoadingCollector):
     '''Public IP address collector'''
 
-    def __init__(self, router_id: dict[str, str]):
+    def __init__(self, router_id: dict[str, str], interval: int):
         self.name = 'PublicIPAddressCollector'
         self.metric_store = MetricStore(
             router_id,
@@ -32,7 +32,8 @@ class PublicIPAddressCollector(LoadingCollector):
                 'dns_name': lambda name: 'ddns_disabled' if not name else name,
                 'public_address_ipv6': lambda addr: '' if not addr else addr,
                 'public_address_ipv4': lambda addr: '' if not addr else addr,
-            }
+            },
+            interval=interval
         )
 
         # Metrics

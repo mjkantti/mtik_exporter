@@ -21,11 +21,12 @@ if TYPE_CHECKING:
 
 class ARPCollector(LoadingCollector):
     '''ARP Entry collector'''
-    def __init__(self, router_id: dict[str, str]):
+    def __init__(self, router_id: dict[str, str], interval):
         self.name = 'ARPCollector'
         self.metric_store = MetricStore(
             router_id,
-            ['mac_address', 'address', 'interface', 'status', 'dynamic', 'dhcp_name', 'dhcp_comment']
+            ['mac_address', 'address', 'interface', 'status', 'dynamic', 'dhcp_name', 'dhcp_comment'],
+            interval=interval
             )
 
         # Metrics

@@ -75,16 +75,40 @@ class ExportProcessor:
             router.api_connection.connect()
 
             interval = registry.router_entry.config_entry.polling_interval
-            if registry.fast_collectors:
-                self.s.enter((i+1), 1, self.run_collectors, argument=(router, registry.fast_collectors, interval))
+            for c in registry.fast_collectors:
+                self.s.enter((i+1), 1, self.run_collector, argument=(router, c, interval))
 
             slow_interval = registry.router_entry.config_entry.slow_polling_interval
-            if registry.slow_collectors:
-                self.s.enter((i+1)*10, 2, self.run_collectors, argument=(router, registry.slow_collectors, slow_interval))
+            for c in registry.slow_collectors:
+                self.s.enter((i+1)*10, 2, self.run_collector, argument=(router, c, slow_interval))
 
         self.s.run()
 
         logging.info(f'Shut Down Done')
+
+    def run_collector(self, router_entry, collector,  interval):
+        self.s.enter(interval, 1, self.run_collector, argument=(router_entry, collector, interval))
+        if not router_entry.api_connection.is_connected():
+            logging.info('Router not connected, reconnecting, waiting for 3 seconds')
+            router_entry.api_connection.connect()
+            return
+
+        logging.debug('Starting data load, polling interval set to: %i', interval)
+        
+        logging.debug('Running %s', collector.name)
+        start = time()
+
+        try:
+            collector.load(router_entry)
+
+        finally:
+            stats = router_entry.data_loader_stats.get(collector.get_name(), {})
+
+            stats['count'] = stats.get('count', 0) + 1
+            stats['duration'] = stats.get('duration', 0) + (time() - start)
+            stats['last_run'] = start
+            stats['name'] = collector.get_name()
+            router_entry.data_loader_stats[collector.get_name()] = stats
 
 
     def run_collectors(self, router_entry, collectors,  interval):

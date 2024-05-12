@@ -29,8 +29,8 @@ class SystemResourceCollector(LoadingCollector):
         self.name = 'SystemResourceCollector'
         self.metric_store = MetricStore(
             router_id,
-            ['version', 'channel', 'free_memory', 'total_memory', 'cpu', 'cpu_count', 'cpu_frequency', 'cpu_load', 'free_hdd_space', 'total_hdd_space', 'architecture_name', 'board_name'],
-            ['uptime', 'write-sect-total', 'bad_blocks'],
+            ['version', 'channel', 'cpu', 'architecture_name', 'board_name'],
+            ['uptime', 'write-sect-total', 'bad_blocks', 'cpu_count', 'cpu_frequency', 'free_memory', 'total_memory', 'cpu_load', 'free_hdd_space', 'total_hdd_space'],
             {
                 'uptime': lambda c: BaseOutputProcessor.parse_timedelta(c) if c else 0,
                 'bad_blocks': lambda b: b.strip('%') if b else b,
@@ -40,7 +40,7 @@ class SystemResourceCollector(LoadingCollector):
         self.version_metric_store = MetricStore(router_id, ['current_version', 'channel', 'latest_version'], interval=interval)
 
         # Metrics
-        self.metric_store.create_info_metric('system_info', 'System Resource Information')
+        self.metric_store.create_info_metric('system', 'System Resource Information')
 
         self.metric_store.create_counter_metric('system_uptime', 'Time interval since boot-up', 'uptime', ['board_name', 'cpu', 'architecture_name'])
         self.metric_store.create_gauge_metric('system_free_memory', 'Unused amount of RAM', 'free_memory', ['board_name', 'cpu', 'architecture_name'])

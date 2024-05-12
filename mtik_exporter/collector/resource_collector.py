@@ -15,7 +15,7 @@
 
 from mtik_exporter.collector.metric_store import MetricStore, LoadingCollector
 from mtik_exporter.flow.processor.output import BaseOutputProcessor
-from mtik_exporter.utils.utils import parse_ros_version, get_available_updates
+from mtik_exporter.utils.utils import parse_channel_from_version
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -29,27 +29,29 @@ class SystemResourceCollector(LoadingCollector):
         self.name = 'SystemResourceCollector'
         self.metric_store = MetricStore(
             router_id,
-            ['version', 'free_memory', 'total_memory', 'cpu', 'cpu_count', 'cpu_frequency', 'cpu_load', 'free_hdd_space', 'total_hdd_space', 'architecture_name', 'board_name'],
+            ['version', 'channel', 'free_memory', 'total_memory', 'cpu', 'cpu_count', 'cpu_frequency', 'cpu_load', 'free_hdd_space', 'total_hdd_space', 'architecture_name', 'board_name'],
             ['uptime', 'write-sect-total', 'bad_blocks'],
             {
                 'uptime': lambda c: BaseOutputProcessor.parse_timedelta(c) if c else 0,
-                'bad_blocks': lambda b: b.strip('%') if b else b
+                'bad_blocks': lambda b: b.strip('%') if b else b,
             },
             interval=interval
         )
         self.version_metric_store = MetricStore(router_id, ['current_version', 'channel', 'latest_version'], interval=interval)
 
         # Metrics
-        self.metric_store.create_counter_metric('system_uptime', 'Time interval since boot-up', 'uptime', ['version', 'board_name', 'cpu', 'architecture_name'])
-        self.metric_store.create_gauge_metric('system_free_memory', 'Unused amount of RAM', 'free_memory', ['version', 'board_name', 'cpu', 'architecture_name'])
-        self.metric_store.create_gauge_metric('system_total_memory', 'Amount of installed RAM', 'total_memory', ['version', 'board_name', 'cpu', 'architecture_name'])
-        self.metric_store.create_gauge_metric('system_free_hdd_space', 'Free space on hard drive or NAND', 'free_hdd_space', ['version', 'board_name', 'cpu', 'architecture_name'])
-        self.metric_store.create_gauge_metric('system_total_hdd_space', 'Size of the hard drive or NAND', 'total_hdd_space', ['version', 'board_name', 'cpu', 'architecture_name'])
-        self.metric_store.create_gauge_metric('system_cpu_load', 'Percentage of used CPU resources', 'cpu_load', ['version', 'board_name', 'cpu', 'architecture_name'])
-        self.metric_store.create_gauge_metric('system_cpu_count', 'Number of CPUs present on the system', 'cpu_count', ['version', 'board_name', 'cpu', 'architecture_name'])
-        self.metric_store.create_gauge_metric('system_cpu_frequency', 'Current CPU frequency', 'cpu_frequency', ['version', 'board_name', 'cpu', 'architecture_name'])
-        self.metric_store.create_gauge_metric('system_hdd_bad_blocks_percent', 'HDD Bad Block percentage', 'bad_blocks', ['version', 'board_name', 'cpu', 'architecture_name'])
-        self.metric_store.create_counter_metric('system_hdd_write_sector_count', 'HDD Written Sector Count', 'write_sect_total', ['version', 'board_name', 'cpu', 'architecture_name'])
+        self.metric_store.create_info_metric('system_info', 'System Resource Information')
+
+        self.metric_store.create_counter_metric('system_uptime', 'Time interval since boot-up', 'uptime', ['board_name', 'cpu', 'architecture_name'])
+        self.metric_store.create_gauge_metric('system_free_memory', 'Unused amount of RAM', 'free_memory', ['board_name', 'cpu', 'architecture_name'])
+        self.metric_store.create_gauge_metric('system_total_memory', 'Amount of installed RAM', 'total_memory', ['board_name', 'cpu', 'architecture_name'])
+        self.metric_store.create_gauge_metric('system_free_hdd_space', 'Free space on hard drive or NAND', 'free_hdd_space', ['board_name', 'cpu', 'architecture_name'])
+        self.metric_store.create_gauge_metric('system_total_hdd_space', 'Size of the hard drive or NAND', 'total_hdd_space', ['board_name', 'cpu', 'architecture_name'])
+        self.metric_store.create_gauge_metric('system_cpu_load', 'Percentage of used CPU resources', 'cpu_load', ['board_name', 'cpu', 'architecture_name'])
+        self.metric_store.create_gauge_metric('system_cpu_count', 'Number of CPUs present on the system', 'cpu_count', ['board_name', 'cpu', 'architecture_name'])
+        self.metric_store.create_gauge_metric('system_cpu_frequency', 'Current CPU frequency', 'cpu_frequency', ['board_name', 'cpu', 'architecture_name'])
+        self.metric_store.create_gauge_metric('system_hdd_bad_blocks_percent', 'HDD Bad Block percentage', 'bad_blocks', ['board_name', 'cpu', 'architecture_name'])
+        self.metric_store.create_counter_metric('system_hdd_write_sector_count', 'HDD Written Sector Count', 'write_sect_total', ['board_name', 'cpu', 'architecture_name'])
 
         # Updates
         self.version_metric_store.create_info_metric('system_latest_version', 'Latest RouterOS version available')
@@ -57,22 +59,25 @@ class SystemResourceCollector(LoadingCollector):
 
     def load(self, router_entry: 'RouterEntry'):
         resource_records = router_entry.api_connection.get('system/resource')
+        for r in resource_records:
+            channel = parse_channel_from_version(r['version'])
+            if channel:
+                r['channel'] = channel
 
         # Check for updates
-        if resource_records and router_entry.config_entry.check_for_updates:
-            latest_version_rec = {}
-            version, channel = parse_ros_version(resource_records[0].get('version'))
-            latest_version_rec['current_version'] = version
-            latest_version_rec['channel'] = channel
+        #if resource_records and router_entry.config_entry.check_for_updates:
+            #latest_version_rec = {}
+            #version, channel = parse_ros_version(resource_records[0].get('version'))
+            #latest_version_rec['current_version'] = version
+            #latest_version_rec['channel'] = channel
 
-            newest, built = get_available_updates(channel)
-            latest_version_rec['latest_version'] = newest
-            latest_version_rec['latest_built'] = built
+            #newest, built = get_available_updates(channel)
+            #latest_version_rec['latest_version'] = newest
+            #latest_version_rec['latest_built'] = built
 
-            self.version_metric_store.set_metrics([latest_version_rec])
+            #self.version_metric_store.set_metrics([latest_version_rec])
 
         self.metric_store.set_metrics(resource_records)
 
     def collect(self):
         yield from self.metric_store.get_metrics()
-        yield from self.version_metric_store.get_metrics()

@@ -13,44 +13,31 @@
 ## GNU General Public License for more details.
 
 
-from mtik_exporter.collector.metric_store import MetricStore
-from urllib import request, error as urlerror
-from datetime import datetime, timezone
+from mtik_exporter.collector.metric_store import MetricStore, LoadingCollector
+from mtik_exporter.utils.utils import get_available_updates
 
-class LatestVersionCollector():
+class LatestVersionCollector(LoadingCollector):
     ''' Latest RouterOS Version Collector
     '''
 
-    def __init__(self):
-        self.ms = MetricStore({}, ['version'], ['ts'], {
-            'ts': lambda v: datetime.fromtimestamp(int(v), timezone.utc),
-        })
+    def __init__(self, channel: str, interval: int):
+        self.name = 'LatestVersionCollector'
+        self.channel = channel
+        self.interval = interval
+        self.version_metric_store = MetricStore({}, ['channel', 'latest_version'], interval=interval)
+
+        self.version_metric_store.create_info_metric('system_latest_version', 'Latest RouterOS version available')
+        self.version_metric_store.create_gauge_metric('system_latest_version_built', 'Latest RouterOS version built time', 'latest_built')
 
     def load(self, _):
-        contents_stable = ''
-        contents_dev = ''
+        latest_version_rec = {}
+        latest_version_rec['channel'] = self.channel
 
-        try:
-            b_contents_stable = request.urlopen("https://upgrade.mikrotik.com/routeros/NEWESTa7.stable").read()
-            contents_stable = b_contents_stable.decode("utf-8")
-            v_stable, ts_stable = contents_stable.split()
+        newest, built = get_available_updates(self.channel)
+        latest_version_rec['latest_version'] = newest
+        latest_version_rec['latest_built'] = built
 
-            b_contents_dev = request.urlopen("https://upgrade.mikrotik.com/routeros/NEWESTa7.development").read()
-            contents_dev = b_contents_dev.decode("utf-8")
-            v_dev, ts_dev = contents_dev.split()
-
-            self.ms.set_metrics([
-                {'channel': 'stable', 'version': v_stable, 'ts': ts_stable},
-                {'channel': 'development', 'version': v_dev, 'ts': ts_dev},
-            ])
-        #except urlerror.URLError as e:
-        #    ResponseData = e.reason
-        except Exception as exc:
-            print(f'Error fetching latest RouterOS Version info: {exc}')
-            return None
-
+        self.version_metric_store.set_metrics([latest_version_rec])
 
     def collect(self):
-        if self.ms.have_metrics():
-            yield self.ms.info_collector('latest_routeros', 'Latest RouterOS Versions')
-            yield self.ms.gauge_collector('latest_routeros_published', 'Latest RouterOS Version publish timestamp', 'ts')
+        yield from self.version_metric_store.get_metrics()

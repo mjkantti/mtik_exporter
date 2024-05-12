@@ -38,10 +38,13 @@ class ConfigKeys:
 
     POLLING_INTERVAL_KEY = 'polling_interval'
     SLOW_POLLING_INTERVAL_KEY = 'slow_polling_interval'
-    CHECK_FOR_UPDATES_KEY = 'check_for_updates'
 
     FAST_POLLING_KEYS = 'collectors'
     SLOW_POLLING_KEYS = 'slow_collectors'
+
+    CHECK_FOR_UPDATES_KEY = 'check_for_updates'
+    CHECK_FOR_UPDATES_CHANNEL_KEY = 'check_for_updates_channel'
+    CHECK_FOR_UPDATES_INTERVAL_KEY = 'check_for_updates_interval'
 
     EXPORTER_SOCKET_TIMEOUT = 'socket_timeout'
     EXPORTER_INITIAL_DELAY = 'initial_delay_on_failure'
@@ -72,13 +75,14 @@ class ConfigKeys:
     DEFAULT_TOTAL_MAX_SCRAPE_DURATION = 30
 
 
-    ROUTER_BOOLEAN_KEYS = {ENABLED_KEY, SSL_KEY, NO_SSL_CERTIFICATE, SSL_CERTIFICATE_VERIFY, CHECK_FOR_UPDATES_KEY}
+    ROUTER_BOOLEAN_KEYS = {ENABLED_KEY, SSL_KEY, NO_SSL_CERTIFICATE, SSL_CERTIFICATE_VERIFY}
     ROUTER_INT_KEYS = {POLLING_INTERVAL_KEY, SLOW_POLLING_INTERVAL_KEY, PORT_KEY}
     ROUTER_STR_KEYS = {HOST_KEY, USER_KEY, PASSWD_KEY}
     ROUTER_LIST_KEYS = {FAST_POLLING_KEYS, SLOW_POLLING_KEYS}
 
-    SYSTEM_BOOLEAN_KEYS = {EXPORTER_VERBOSE_MODE}
-    SYSTEM_INT_KEYS = {PORT_KEY, EXPORTER_SOCKET_TIMEOUT, EXPORTER_INITIAL_DELAY, EXPORTER_MAX_DELAY, EXPORTER_INC_DIV, EXPORTER_MAX_SCRAPE_DURATION, EXPORTER_TOTAL_MAX_SCRAPE_DURATION}
+    SYSTEM_BOOLEAN_KEYS = {EXPORTER_VERBOSE_MODE, CHECK_FOR_UPDATES_KEY}
+    SYSTEM_STRING_KEYS = {CHECK_FOR_UPDATES_CHANNEL_KEY}
+    SYSTEM_INT_KEYS = {PORT_KEY, EXPORTER_SOCKET_TIMEOUT, EXPORTER_INITIAL_DELAY, EXPORTER_MAX_DELAY, EXPORTER_INC_DIV, EXPORTER_MAX_SCRAPE_DURATION, EXPORTER_TOTAL_MAX_SCRAPE_DURATION, CHECK_FOR_UPDATES_INTERVAL_KEY}
 
     # mtik_exporter config entry name
     SYSTEM_CONFIG_ENTRY_NAME = 'SYSTEM'
@@ -86,8 +90,7 @@ class ConfigKeys:
 
 class ConfigEntry:
     RouterConfigEntry = namedtuple('RouterConfigEntry', list(ConfigKeys.ROUTER_BOOLEAN_KEYS | ConfigKeys.ROUTER_STR_KEYS | ConfigKeys.ROUTER_INT_KEYS | ConfigKeys.ROUTER_LIST_KEYS))
-    SystemConfigEntry = namedtuple('SystemConfigEntry', list(ConfigKeys.SYSTEM_BOOLEAN_KEYS | ConfigKeys.SYSTEM_INT_KEYS))
-
+    SystemConfigEntry = namedtuple('SystemConfigEntry', list(ConfigKeys.SYSTEM_BOOLEAN_KEYS | ConfigKeys.SYSTEM_INT_KEYS | ConfigKeys.SYSTEM_STRING_KEYS))
 
 class OSConfig(metaclass=ABCMeta):
     ''' OS-related config
@@ -200,7 +203,6 @@ class SystemConfigHandler:
 
     def _config_entry_reader(self, entry_name):
         config_entry_reader = {}
-        new_keys = []
 
         for key in ConfigKeys.ROUTER_BOOLEAN_KEYS:
             if self.config[entry_name].get(key) is not None:
@@ -213,7 +215,6 @@ class SystemConfigHandler:
                 config_entry_reader[key] = self.config[entry_name].get(key, raw=True)
             else:
                 config_entry_reader[key] = self._default_value_for_key(key)
-                new_keys.append(key) # read from disk next time
 
         for key in ConfigKeys.ROUTER_LIST_KEYS:
             collectors = json.loads(self.config[entry_name].get(key))
@@ -249,6 +250,12 @@ class SystemConfigHandler:
                 system_entry_reader[key] = self.config.getboolean(entry_name, key)
             else:
                 system_entry_reader[key] = False
+
+        for key in ConfigKeys.SYSTEM_STRING_KEYS:
+            if self.config[entry_name].get(key) is not None:
+                system_entry_reader[key] = self.config.get(entry_name, key)
+            else:
+                system_entry_reader[key] = self._default_value_for_key(key)
 
         return system_entry_reader
 

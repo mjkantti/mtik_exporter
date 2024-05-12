@@ -55,12 +55,13 @@ class MetricStore():
         self.metrics.append((CounterMetricFamily(f'mtik_exporter_{name}', decription, labels=labels), labels, value))
 
     def get_metrics(self):
+        if not self.ts:
+            return
+
         lag = time() - self.ts
         if lag > self.interval * 1.5:
             metric_names = [m[0].name for m in self.metrics]
             logging.warn('Metrics too old to show for: %s, last updated: %is ago', ', '.join(metric_names), lag)
-            return
-        if not self.ts:
             return
         for metric, _, _ in self.metrics:
             yield metric
@@ -70,8 +71,8 @@ class MetricStore():
             metric.samples.clear()
 
     def set_metrics(self, router_records: list[dict[str, str | float]] = []):
-        self.ts = time()
         self._clear_metrics()
+        self.ts = time()
 
         if not router_records:
             router_records = []

@@ -95,17 +95,11 @@ class UniquePartialMatchList(list):
 
 UPDATE_BASE_URL = 'https://upgrade.mikrotik.com/routeros/NEWESTa7'
 
-def get_ttl_hash(seconds: int = 3600) -> float:
-    """Return the same value withing `seconds` time period"""
-    return round(time.time() / seconds)
-
-@lru_cache(maxsize=5)
-def get_available_updates(channel: str, ttl_hash=get_ttl_hash()) -> tuple[str, str]:
+def get_available_updates(channel: str) -> tuple[str, str]:
     """Check the RSS feed for available updates for a given update channel.
     This method fetches the RSS feed and returns all version from the parsed XML.
     Version numbers are parsed into version.Version instances (part of setuptools)."""
     url = f'{UPDATE_BASE_URL}.{channel}'
-    del(ttl_hash)
 
     logging.info(f'Fetching available ROS releases from {url}')
     try:
@@ -128,6 +122,17 @@ def parse_ros_version(ver: str) -> tuple[str, str]:
     version, channel = re.findall(r'(.+)\s[\[|\(]?([a-z]+)?[\]|\)]?', ver)[0]
 
     return version, channel
+
+def parse_channel_from_version(ver: str) -> str:
+    """Parse the version returned from the /system/resource command.
+    Returns a tuple: (<version>, <channel>).
+
+    >>> parse_ros_version('1.2.3 (stable)')
+    stable
+    """
+    _, channel = re.findall(r'(.+)\s[\[|\(]?([a-z]+)?[\]|\)]?', ver)[0]
+
+    return channel
 
 def parse_ros_version_old(ver: str) -> tuple[str, str]:
     """Parse the version returned from the /system/resource command.

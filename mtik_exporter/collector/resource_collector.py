@@ -15,7 +15,7 @@
 
 from mtik_exporter.collector.metric_store import MetricStore, LoadingCollector
 from mtik_exporter.flow.processor.output import BaseOutputProcessor
-from mtik_exporter.utils.utils import parse_channel_from_version
+from mtik_exporter.utils.utils import parse_ros_version
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ class SystemResourceCollector(LoadingCollector):
         self.name = 'SystemResourceCollector'
         self.metric_store = MetricStore(
             router_id,
-            ['version', 'channel', 'cpu', 'architecture_name', 'board_name'],
+            ['version', 'channel', 'current_version', 'cpu', 'architecture_name', 'board_name'],
             ['uptime', 'write-sect-total', 'bad_blocks', 'cpu_count', 'cpu_frequency', 'free_memory', 'total_memory', 'cpu_load', 'free_hdd_space', 'total_hdd_space'],
             {
                 'uptime': lambda c: BaseOutputProcessor.parse_timedelta(c) if c else 0,
@@ -60,22 +60,10 @@ class SystemResourceCollector(LoadingCollector):
     def load(self, router_entry: 'RouterEntry'):
         resource_records = router_entry.api_connection.get('system/resource')
         for r in resource_records:
-            channel = parse_channel_from_version(r['version'])
+            ver, channel = parse_ros_version(r['version'])
             if channel:
+                r['current_version'] = ver
                 r['channel'] = channel
-
-        # Check for updates
-        #if resource_records and router_entry.config_entry.check_for_updates:
-            #latest_version_rec = {}
-            #version, channel = parse_ros_version(resource_records[0].get('version'))
-            #latest_version_rec['current_version'] = version
-            #latest_version_rec['channel'] = channel
-
-            #newest, built = get_available_updates(channel)
-            #latest_version_rec['latest_version'] = newest
-            #latest_version_rec['latest_built'] = built
-
-            #self.version_metric_store.set_metrics([latest_version_rec])
 
         self.metric_store.set_metrics(resource_records)
 

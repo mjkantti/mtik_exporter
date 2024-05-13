@@ -83,21 +83,21 @@ class ExportProcessor:
 
             interval = registry.router_entry.config_entry.polling_interval
             for c in registry.fast_collectors:
-                self.s.enter((i+1), 1, self.run_collector, argument=(router, c, interval))
+                self.s.enter((i+1), 1, self.run_collector, argument=(router, c, interval, 1))
 
             slow_interval = registry.router_entry.config_entry.slow_polling_interval
             for c in registry.slow_collectors:
-                self.s.enter((i+1)*10, 2, self.run_collector, argument=(router, c, slow_interval))
+                self.s.enter((i+1)*10, 2, self.run_collector, argument=(router, c, slow_interval, 2))
         
         for i, c in enumerate(system_collector_registry.system_collectors):
-            self.s.enter((i+1)*10, 2, self.run_system_collector, argument=(c, c.interval))
+            self.s.enter((i+1)*15, 3, self.run_system_collector, argument=(c, c.interval))
 
         self.s.run()
 
         logging.info(f'Shut Down Done')
     
     def run_system_collector(self, collector,  interval):
-        self.s.enter(interval, 1, self.run_system_collector, argument=(collector, interval))
+        self.s.enter(interval, 3, self.run_system_collector, argument=(collector, interval))
 
         logging.debug('Starting data load, polling interval set to: %i', interval)
         
@@ -116,8 +116,8 @@ class ExportProcessor:
             #stats['name'] = collector.get_name()
             #router_entry.data_loader_stats[collector.get_name()] = stats
 
-    def run_collector(self, router_entry, collector,  interval):
-        self.s.enter(interval, 1, self.run_collector, argument=(router_entry, collector, interval))
+    def run_collector(self, router_entry, collector,  interval, priority):
+        self.s.enter(interval, priority, self.run_collector, argument=(router_entry, collector, interval, priority))
         if not router_entry.api_connection.is_connected():
             logging.info('Router not connected, reconnecting, waiting for 3 seconds')
             router_entry.api_connection.connect()

@@ -75,11 +75,12 @@ class ExportProcessor:
                 REGISTRY.register(c)
             
         system_collector_registry = SystemCollectorRegistry()
-        for i, c in enumerate(system_collector_registry.system_collectors):
+        for c in system_collector_registry.system_collectors:
             logging.info('%s: Adding System Collector %s', router.router_name, c.name)
             REGISTRY.register(c)
-            
-        self.s.enter((i+1)*15, 3, self.run_collectors, argument=(None, system_collector_registry.system_collectors, c.interval, 3))
+
+        if system_collector_registry.system_collectors:
+            self.s.enter(15, 3, self.run_collectors, argument=(None, system_collector_registry.system_collectors, c.interval, 3))
 
         self.internal_collector = system_collector_registry.interal_collector
 

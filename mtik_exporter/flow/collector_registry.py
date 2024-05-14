@@ -106,5 +106,3 @@ class CollectorRegistry:
                 continue
 
             self.slow_collectors.append(cls(router_id, self.slow_polling_interval))
-
-        self.interal_collector = InternalCollector(router_entry)

@@ -18,7 +18,7 @@ from prometheus_client import start_http_server
 from sched import scheduler
 from signal import signal, SIGTERM, SIGINT
 
-from mtik_exporter.cli.config.config import config_handler
+from mtik_exporter.cli.config.config import config_handler, ConfigKeys
 from mtik_exporter.flow.collector_registry import CollectorRegistry
 from mtik_exporter.flow.system_collector_registry import SystemCollectorRegistry
 from mtik_exporter.flow.router_entries_handler import RouterEntriesHandler
@@ -65,13 +65,13 @@ class ExportProcessor:
                 logging.info('%s: Adding Slow Collector %s', router.router_name, c.name)
                 REGISTRY.register(c)
             
-            REGISTRY.register(collector_registry.interal_collector)
-        
         system_collector_registry = SystemCollectorRegistry()
         for c in system_collector_registry.system_collectors:
             logging.info('%s: Adding System Collector %s', router.router_name, c.name)
             REGISTRY.register(c)
 
+        self.internal_collector = system_collector_registry.interal_collector
+        #REGISTRY.register(self.internal_collector)
 
         logging.info('Running HTTP metrics server on port %i', config_handler.system_entry().port)
 
@@ -102,19 +102,13 @@ class ExportProcessor:
         logging.debug('Starting data load, polling interval set to: %i', interval)
         
         logging.debug('Running %s', collector.name)
-        start = time()
+        
+        internal_labels = {'name': collector.name, ConfigKeys.ROUTERBOARD_ADDRESS: '', ConfigKeys.ROUTERBOARD_NAME: ''}
 
-        #try:
-        collector.load(None)
-
-        #finally:
-            #stats = router_entry.data_loader_stats.get(collector.get_name(), {})
-
-            #stats['count'] = stats.get('count', 0) + 1
-            #stats['duration'] = stats.get('duration', 0) + (time() - start)
-            #stats['last_run'] = start
-            #stats['name'] = collector.get_name()
-            #router_entry.data_loader_stats[collector.get_name()] = stats
+        with self.internal_collector.load_metrics.labels(**internal_labels).time(), self.internal_collector.load_exceptions.labels(**internal_labels).count_exceptions():
+            collector.load(None)
+        self.internal_collector.load_last_run.labels(**internal_labels).set_to_current_time()
+        self.internal_collector.load_count.labels(**internal_labels).inc()
 
     def run_collector(self, router_entry, collector,  interval, priority):
         self.s.enter(interval, priority, self.run_collector, argument=(router_entry, collector, interval, priority))
@@ -126,19 +120,13 @@ class ExportProcessor:
         logging.debug('Starting data load, polling interval set to: %i', interval)
         
         logging.debug('Running %s', collector.name)
-        start = time()
+        internal_labels = {'name': collector.name}
+        internal_labels.update(router_entry.router_id)
 
-        try:
+        with self.internal_collector.load_metrics.labels(**internal_labels).time(), self.internal_collector.load_exceptions.labels(**internal_labels).count_exceptions():
             collector.load(router_entry)
-
-        finally:
-            stats = router_entry.data_loader_stats.get(collector.get_name(), {})
-
-            stats['count'] = stats.get('count', 0) + 1
-            stats['duration'] = stats.get('duration', 0) + (time() - start)
-            stats['last_run'] = start
-            stats['name'] = collector.get_name()
-            router_entry.data_loader_stats[collector.get_name()] = stats
+        self.internal_collector.load_last_run.labels(**internal_labels).set_to_current_time()
+        self.internal_collector.load_count.labels(**internal_labels).inc()
 
 
     def run_collectors(self, router_entry, collectors,  interval):
@@ -150,7 +138,7 @@ class ExportProcessor:
 
         logging.debug('Starting data load, polling interval set to: %i', interval)
         self.s.enter(interval, 1, self.run_collectors, argument=(router_entry, collectors, interval))
-        
+
         for collector in collectors:
             logging.debug('Running %s', collector.name)
             start = time()

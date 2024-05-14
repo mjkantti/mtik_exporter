@@ -14,6 +14,7 @@
 
 from mtik_exporter.cli.config.config import config_handler
 from mtik_exporter.collector.latest_version import LatestVersionCollector
+from mtik_exporter.collector.internal_collector import InternalCollector
 
 from typing import TYPE_CHECKING
 
@@ -27,6 +28,7 @@ class SystemCollectorRegistry:
 
     def __init__(self) -> None:
         self.system_collectors: list['LoadingCollector'] = []
+        self.interal_collector = InternalCollector()
 
         # SYSTEM Collectors
         if config_handler.system_entry().check_for_updates:

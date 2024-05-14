@@ -12,7 +12,6 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
-from time import time
 from prometheus_client.core import REGISTRY
 from prometheus_client import start_http_server
 from sched import scheduler
@@ -78,7 +77,7 @@ class ExportProcessor:
             logging.info('%s: Adding System Collector %s', router.router_name, c.name)
             REGISTRY.register(c)
             
-            self.s.enter((i+1)*15, 3, self.run_system_collector, argument=(c, c.interval))
+            self.s.enter((i+1)*15, 3, self.run_collector, argument=(None, c, c.interval, 3))
 
         self.internal_collector = system_collector_registry.interal_collector
 
@@ -90,61 +89,22 @@ class ExportProcessor:
 
         logging.info(f'Shut Down Done')
     
-    def run_system_collector(self, collector,  interval):
-        self.s.enter(interval, 3, self.run_system_collector, argument=(collector, interval))
-
-        logging.debug('Starting data load, polling interval set to: %i', interval)
-        
-        logging.debug('Running %s', collector.name)
-        
-        internal_labels = {'name': collector.name, ConfigKeys.ROUTERBOARD_ADDRESS: '', ConfigKeys.ROUTERBOARD_NAME: ''}
-
-        with self.internal_collector.load_metrics.labels(**internal_labels).time(), self.internal_collector.load_exceptions.labels(**internal_labels).count_exceptions():
-            collector.load(None)
-        self.internal_collector.load_last_run.labels(**internal_labels).set_to_current_time()
-        self.internal_collector.load_count.labels(**internal_labels).inc()
-
     def run_collector(self, router_entry, collector,  interval, priority):
         self.s.enter(interval, priority, self.run_collector, argument=(router_entry, collector, interval, priority))
-        if not router_entry.api_connection.is_connected():
-            logging.info('Router not connected, reconnecting, waiting for 3 seconds')
-            router_entry.api_connection.connect()
-            return
+
+        internal_labels = {'name': collector.name, ConfigKeys.ROUTERBOARD_ADDRESS: '', ConfigKeys.ROUTERBOARD_NAME: ''}
+        if router_entry:
+            if not router_entry.api_connection.is_connected():
+                logging.info('Router not connected, reconnecting, waiting for 3 seconds')
+                router_entry.api_connection.connect()
+                return
+            internal_labels.update(router_entry.router_id)
 
         logging.debug('Starting data load, polling interval set to: %i', interval)
         
         logging.debug('Running %s', collector.name)
-        internal_labels = {'name': collector.name}
-        internal_labels.update(router_entry.router_id)
 
         with self.internal_collector.load_metrics.labels(**internal_labels).time(), self.internal_collector.load_exceptions.labels(**internal_labels).count_exceptions():
             collector.load(router_entry)
         self.internal_collector.load_last_run.labels(**internal_labels).set_to_current_time()
         self.internal_collector.load_count.labels(**internal_labels).inc()
-
-
-    def run_collectors(self, router_entry, collectors,  interval):
-        if not router_entry.api_connection.is_connected():
-            logging.info('Router not connected, reconnecting, waiting for 3 seconds')
-            router_entry.api_connection.connect()
-            self.s.enter(3, 1, self.run_collectors, argument=(router_entry, collectors, interval))
-            return
-
-        logging.debug('Starting data load, polling interval set to: %i', interval)
-        self.s.enter(interval, 1, self.run_collectors, argument=(router_entry, collectors, interval))
-
-        for collector in collectors:
-            logging.debug('Running %s', collector.name)
-            start = time()
-
-            try:
-                collector.load(router_entry)
-
-            finally:
-                stats = router_entry.data_loader_stats.get(collector.get_name(), {})
-
-                stats['count'] = stats.get('count', 0) + 1
-                stats['duration'] = stats.get('duration', 0) + (time() - start)
-                stats['last_run'] = start
-                stats['name'] = collector.get_name()
-                router_entry.data_loader_stats[collector.get_name()] = stats

@@ -34,7 +34,6 @@ class ExportProcessor:
         signal(SIGTERM, self.exit_gracefully)
 
         self.s = scheduler()
-        self.collector_registries: list[CollectorRegistry] = []
 
         self.server = None
         self.thr = None
@@ -54,43 +53,40 @@ class ExportProcessor:
 
     def start(self):
         router_entries_handler = RouterEntriesHandler()
-        for router in router_entries_handler.router_entries:
-            collector_registry = CollectorRegistry(router)
-            self.collector_registries.append(collector_registry)
-            for c in collector_registry.fast_collectors:
+        for i, router in enumerate(router_entries_handler.router_entries):
+            registry = CollectorRegistry(router)
+            
+            router = registry.router_entry
+            router.api_connection.connect()
+            
+            for c in registry.fast_collectors:
                 logging.info('%s: Adding Fast Collector %s', router.router_name, c.name)
                 REGISTRY.register(c)
             
-            for c in collector_registry.slow_collectors:
+                interval = registry.router_entry.config_entry.polling_interval
+                for cf in registry.fast_collectors:
+                    self.s.enter((i+1), 1, self.run_collector, argument=(router, cf, interval, 1))
+            
+            for c in registry.slow_collectors:
                 logging.info('%s: Adding Slow Collector %s', router.router_name, c.name)
                 REGISTRY.register(c)
             
+                slow_interval = registry.router_entry.config_entry.slow_polling_interval
+                for cs in registry.slow_collectors:
+                    self.s.enter((i+1)*10, 2, self.run_collector, argument=(router, cs, slow_interval, 2))
+            
         system_collector_registry = SystemCollectorRegistry()
-        for c in system_collector_registry.system_collectors:
+        for i, c in enumerate(system_collector_registry.system_collectors):
             logging.info('%s: Adding System Collector %s', router.router_name, c.name)
             REGISTRY.register(c)
+            
+            self.s.enter((i+1)*15, 3, self.run_system_collector, argument=(c, c.interval))
 
         self.internal_collector = system_collector_registry.interal_collector
-        #REGISTRY.register(self.internal_collector)
 
         logging.info('Running HTTP metrics server on port %i', config_handler.system_entry().port)
 
         self.server, self.thr = start_http_server(config_handler.system_entry().port)
-
-        for i, registry in enumerate(self.collector_registries):
-            router = registry.router_entry
-            router.api_connection.connect()
-
-            interval = registry.router_entry.config_entry.polling_interval
-            for c in registry.fast_collectors:
-                self.s.enter((i+1), 1, self.run_collector, argument=(router, c, interval, 1))
-
-            slow_interval = registry.router_entry.config_entry.slow_polling_interval
-            for c in registry.slow_collectors:
-                self.s.enter((i+1)*10, 2, self.run_collector, argument=(router, c, slow_interval, 2))
-        
-        for i, c in enumerate(system_collector_registry.system_collectors):
-            self.s.enter((i+1)*15, 3, self.run_system_collector, argument=(c, c.interval))
 
         self.s.run()
 

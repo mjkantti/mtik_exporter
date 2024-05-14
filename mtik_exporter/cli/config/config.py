@@ -73,6 +73,8 @@ class ConfigKeys:
     DEFAULT_INC_DIV = 5
     DEFAULT_MAX_SCRAPE_DURATION = 10
     DEFAULT_TOTAL_MAX_SCRAPE_DURATION = 30
+    DEFAULT_CHECK_FOR_UPDATES_CHANNEL = ['stable']
+    DEFAULT_CHECK_FOR_UPDATES_INTERVAL = 3600
 
 
     ROUTER_BOOLEAN_KEYS = {ENABLED_KEY, SSL_KEY, NO_SSL_CERTIFICATE, SSL_CERTIFICATE_VERIFY}
@@ -81,7 +83,7 @@ class ConfigKeys:
     ROUTER_LIST_KEYS = {FAST_POLLING_KEYS, SLOW_POLLING_KEYS}
 
     SYSTEM_BOOLEAN_KEYS = {EXPORTER_VERBOSE_MODE, CHECK_FOR_UPDATES_KEY}
-    SYSTEM_STRING_KEYS = {CHECK_FOR_UPDATES_CHANNEL_KEY}
+    SYSTEM_LIST_KEYS = {CHECK_FOR_UPDATES_CHANNEL_KEY}
     SYSTEM_INT_KEYS = {PORT_KEY, EXPORTER_SOCKET_TIMEOUT, EXPORTER_INITIAL_DELAY, EXPORTER_MAX_DELAY, EXPORTER_INC_DIV, EXPORTER_MAX_SCRAPE_DURATION, EXPORTER_TOTAL_MAX_SCRAPE_DURATION, CHECK_FOR_UPDATES_INTERVAL_KEY}
 
     # mtik_exporter config entry name
@@ -90,7 +92,7 @@ class ConfigKeys:
 
 class ConfigEntry:
     RouterConfigEntry = namedtuple('RouterConfigEntry', list(ConfigKeys.ROUTER_BOOLEAN_KEYS | ConfigKeys.ROUTER_STR_KEYS | ConfigKeys.ROUTER_INT_KEYS | ConfigKeys.ROUTER_LIST_KEYS))
-    SystemConfigEntry = namedtuple('SystemConfigEntry', list(ConfigKeys.SYSTEM_BOOLEAN_KEYS | ConfigKeys.SYSTEM_INT_KEYS | ConfigKeys.SYSTEM_STRING_KEYS))
+    SystemConfigEntry = namedtuple('SystemConfigEntry', list(ConfigKeys.SYSTEM_BOOLEAN_KEYS | ConfigKeys.SYSTEM_INT_KEYS | ConfigKeys.SYSTEM_LIST_KEYS))
 
 class OSConfig(metaclass=ABCMeta):
     ''' OS-related config
@@ -246,14 +248,15 @@ class SystemConfigHandler:
                 system_entry_reader[key] = self._default_value_for_key(key)
 
         for key in ConfigKeys.SYSTEM_BOOLEAN_KEYS:
-            if self.config[entry_name].get(key) is not None:
+            if self.config[entry_name].get(key):
                 system_entry_reader[key] = self.config.getboolean(entry_name, key)
             else:
-                system_entry_reader[key] = False
+                system_entry_reader[key] = self._default_value_for_key(key)
 
-        for key in ConfigKeys.SYSTEM_STRING_KEYS:
+        for key in ConfigKeys.SYSTEM_LIST_KEYS:
             if self.config[entry_name].get(key) is not None:
-                system_entry_reader[key] = self.config.get(entry_name, key)
+                collectors = json.loads(self.config[entry_name].get(key))
+                system_entry_reader[key] = collectors
             else:
                 system_entry_reader[key] = self._default_value_for_key(key)
 
@@ -271,6 +274,8 @@ class SystemConfigHandler:
             ConfigKeys.EXPORTER_INC_DIV: lambda _: ConfigKeys.DEFAULT_INC_DIV,
             ConfigKeys.EXPORTER_MAX_SCRAPE_DURATION: lambda _: ConfigKeys.DEFAULT_MAX_SCRAPE_DURATION,
             ConfigKeys.EXPORTER_TOTAL_MAX_SCRAPE_DURATION: lambda _: ConfigKeys.DEFAULT_TOTAL_MAX_SCRAPE_DURATION,
+            ConfigKeys.CHECK_FOR_UPDATES_CHANNEL_KEY: lambda _: ConfigKeys.DEFAULT_CHECK_FOR_UPDATES_CHANNEL,
+            ConfigKeys.CHECK_FOR_UPDATES_INTERVAL_KEY: lambda _: ConfigKeys.DEFAULT_CHECK_FOR_UPDATES_INVERVAL,
         }[key](value)
 
 

@@ -64,16 +64,14 @@ class ExportProcessor:
                 REGISTRY.register(c)
             
                 interval = registry.router_entry.config_entry.polling_interval
-                for cf in registry.fast_collectors:
-                    self.s.enter((i+1), 1, self.run_collector, argument=(router, cf, interval, 1))
+                self.s.enter((i+1), 1, self.run_collector, argument=(router, c, interval, 1))
             
             for c in registry.slow_collectors:
                 logging.info('%s: Adding Slow Collector %s', router.router_name, c.name)
                 REGISTRY.register(c)
             
                 slow_interval = registry.router_entry.config_entry.slow_polling_interval
-                for cs in registry.slow_collectors:
-                    self.s.enter((i+1)*10, 2, self.run_collector, argument=(router, cs, slow_interval, 2))
+                self.s.enter((i+1)*10, 2, self.run_collector, argument=(router, c, slow_interval, 2))
             
         system_collector_registry = SystemCollectorRegistry()
         for i, c in enumerate(system_collector_registry.system_collectors):

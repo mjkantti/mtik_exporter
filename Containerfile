@@ -1,6 +1,7 @@
 FROM python:3-alpine
 
 ENV VIRTUAL_ENV=/home/exporter/venv
+ENV PROMETHEUS_DISABLE_CREATED_SERIES=True
 
 WORKDIR /mtik_exporter
 COPY . .

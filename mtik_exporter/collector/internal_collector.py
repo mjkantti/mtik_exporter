@@ -35,7 +35,7 @@ class InternalCollector():
         # Metrics
         #self.load_metrics.create_counter_metric('data_load_time', 'Time spent loading metrics in seconds', 'duration')
         labels = ['name', ConfigKeys.ROUTERBOARD_NAME, ConfigKeys.ROUTERBOARD_ADDRESS] 
-        self.load_metrics = Gauge(f'mtik_exporter_data_load_time', 'Time spent loading metrics in seconds', labelnames=labels)
+        self.load_time = Counter(f'mtik_exporter_data_load_time', 'Total time spent loading metrics in seconds', labelnames=labels)
         #self.load_metrics.create_counter_metric('data_load_count', 'Total count of metrics loads since reboot', 'count')
         self.load_count = Counter(f'mtik_exporter_data_load_count', 'Total count of metrics loads since reboot', labelnames=labels)
         #self.load_metrics.create_gauge_metric('data_load_last_run', 'Last run timestamp of metrics load', 'last_run')

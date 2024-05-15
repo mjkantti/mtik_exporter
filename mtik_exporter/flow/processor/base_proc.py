@@ -14,6 +14,7 @@
 
 from prometheus_client.core import REGISTRY
 from prometheus_client import start_http_server
+from prometheus_client.context_managers import Timer
 from sched import scheduler
 from signal import signal, SIGTERM, SIGINT
 
@@ -108,27 +109,7 @@ class ExportProcessor:
         
             logging.debug('Running %s', c.name)
 
-            with self.internal_collector.load_metrics.labels(**internal_labels).time(), self.internal_collector.load_exceptions.labels(**internal_labels).count_exceptions():
+            with Timer(self.internal_collector.load_time.labels(**internal_labels), 'inc'), self.internal_collector.load_exceptions.labels(**internal_labels).count_exceptions():
                 c.load(router_entry)
             self.internal_collector.load_last_run.labels(**internal_labels).set_to_current_time()
             self.internal_collector.load_count.labels(**internal_labels).inc()
-
-    def run_collector(self, router_entry, collector,  interval, priority):
-        self.s.enter(interval, priority, self.run_collector, argument=(router_entry, collector, interval, priority))
-
-        internal_labels = {'name': collector.name, ConfigKeys.ROUTERBOARD_ADDRESS: '', ConfigKeys.ROUTERBOARD_NAME: ''}
-        if router_entry:
-            if not router_entry.api_connection.is_connected():
-                logging.info('Router not connected, reconnecting, waiting for 3 seconds')
-                router_entry.api_connection.connect()
-                return
-            internal_labels.update(router_entry.router_id)
-
-        logging.debug('Starting data load, polling interval set to: %i', interval)
-        
-        logging.debug('Running %s', collector.name)
-
-        with self.internal_collector.load_metrics.labels(**internal_labels).time(), self.internal_collector.load_exceptions.labels(**internal_labels).count_exceptions():
-            collector.load(router_entry)
-        self.internal_collector.load_last_run.labels(**internal_labels).set_to_current_time()
-        self.internal_collector.load_count.labels(**internal_labels).inc()

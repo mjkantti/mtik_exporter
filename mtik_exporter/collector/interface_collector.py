@@ -80,20 +80,19 @@ class InterfaceMonitorCollector(LoadingCollector):
         self.metric_store.create_gauge_metric('interface_sfp_temperature', 'Current SFP temperature', 'sfp_temperature')
 
     def load(self, router_entry: 'RouterEntry'):
-        #interface_traffic_records = router_entry.api_connection.call('interface/ether','print', {'proplist':'.id,name,comment,running'} )
-        interface_traffic_records = router_entry.rest_api.get('interface/ether', {'proplist':'.id,name,comment,running'})
+        interface_traffic_records = router_entry.rest_api.get('interface/ether', {'.proplist':'.id,name,comment,running'})
 
         if interface_traffic_records:
             monitor_records = []
             if_ids = []
             for ifc in interface_traffic_records:
                 if ifc.get('running', 'true') == 'false' or ifc.get('disabled', 'false') == 'true':
-                    monitor_records.append({ 'id': ifc.get('id', ''), 'name': ifc.get('name', ''), 'comment': ifc.get('comment', ''), 'status': 'link-down' })
+                    monitor_records.append({'id': ifc.get('id', ''), 'name': ifc.get('name', ''), 'comment': ifc.get('comment', ''), 'status': 'link-down'})
                 else:
-                    if_ids.append({'id': str(ifc.get('id')), 'name': str(ifc.get('name')), 'comment': str(ifc.get('comment'))})
+                    if_ids.append({'id': str(ifc.get('.id')), 'name': str(ifc.get('name')), 'comment': str(ifc.get('comment'))})
 
-            id_str = ','.join([i.get('id') for i in if_ids])
-            monitor_records_running = router_entry.rest_api.post('interface/ether', 'monitor', {'once': True, '.id': id_str})
+            id_str = ','.join([i.get('id') for i in if_ids if i])
+            monitor_records_running = router_entry.rest_api.post('interface/ether', 'monitor', data = {'once': True, '.id': id_str})
             for if_info, mr in zip(if_ids, monitor_records_running):
                 if_info.update(mr)
                 monitor_records.append(if_info)

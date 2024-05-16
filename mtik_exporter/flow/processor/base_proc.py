@@ -14,7 +14,6 @@
 
 from prometheus_client.core import REGISTRY
 from prometheus_client import start_http_server
-from prometheus_client.context_managers import Timer
 from sched import scheduler
 from signal import signal, SIGTERM, SIGINT
 
@@ -109,7 +108,7 @@ class ExportProcessor:
         
             logging.debug('Running %s', c.name)
 
-            with Timer(self.internal_collector.load_time.labels(**internal_labels), 'inc'), self.internal_collector.load_exceptions.labels(**internal_labels).count_exceptions():
+            with self.internal_collector.time(internal_labels), self.internal_collector.count_exceptions(internal_labels):
                 c.load(router_entry)
-            self.internal_collector.load_last_run.labels(**internal_labels).set_to_current_time()
-            self.internal_collector.load_count.labels(**internal_labels).inc()
+                self.internal_collector.set_last_run(internal_labels)
+                self.internal_collector.inc_load_count(internal_labels)

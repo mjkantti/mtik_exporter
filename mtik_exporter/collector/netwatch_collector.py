@@ -77,5 +77,5 @@ class NetwatchCollector(LoadingCollector):
 
         self.metric_store.set_metrics(nw_records)
 
-    def collect(self):
-        yield from self.metric_store.get_metrics()
+    #def collect(self):
+    #    yield from self.metric_store.get_metrics()

@@ -33,6 +33,6 @@ class IdentityCollector(LoadingCollector):
         identity_records = router_entry.api_connection.get('system/identity')
         self.metric_store.set_metrics(identity_records)
 
-    def collect(self):
-        yield from self.metric_store.get_metrics()
+    #def collect(self):
+    #    yield from self.metric_store.get_metrics()
 

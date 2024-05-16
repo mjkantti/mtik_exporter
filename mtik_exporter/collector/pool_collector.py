@@ -34,5 +34,5 @@ class PoolCollector(LoadingCollector):
         pool_used_records = router_entry.api_connection.get('ip/pool/used')
         self.metric_store.set_metrics(pool_used_records)
 
-    def collect(self):
-        yield from self.metric_store.get_metrics()
+    #def collect(self):
+    #    yield from self.metric_store.get_metrics()

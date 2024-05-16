@@ -59,5 +59,5 @@ class KidDeviceCollector(LoadingCollector):
 
         self.metric_store.set_metrics(device_records)
 
-    def collect(self):
-        yield from self.metric_store.get_metrics()
+    #def collect(self):
+    #    yield from self.metric_store.get_metrics()

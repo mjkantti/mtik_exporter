@@ -59,18 +59,18 @@ class WifiClientCollector(LoadingCollector):
 
     def __init__(self, router_id: dict[str, str], interval: int):
         self.name = 'WifiClientCollector'
-        self.wifi_registration_metric_store = MetricStore(router_id, ['interface', 'ssid', 'mac_address', 'dhcp_name', 'dhcp_comment', 'dhcp_address'], ['tx_rate', 'rx_rate', 'rx_signal', 'signal', 'uptime', 'rx_bytes', 'tx_bytes'], interval=interval)
+        self.metric_store = MetricStore(router_id, ['interface', 'ssid', 'mac_address', 'dhcp_name', 'dhcp_comment', 'dhcp_address'], ['tx_rate', 'rx_rate', 'rx_signal', 'signal', 'uptime', 'rx_bytes', 'tx_bytes'], interval=interval)
 
         # Metrics
-        self.wifi_registration_metric_store.create_info_metric('wifi_clients_devices', 'Registered client devices info')
+        self.metric_store.create_info_metric('wifi_clients_devices', 'Registered client devices info')
 
-        self.wifi_registration_metric_store.create_counter_metric('wifi_clients_tx_bytes', 'Number of sent packet bytes',     'tx_bytes', ['mac_address', 'dhcp_name', 'dhcp_comment'])
-        self.wifi_registration_metric_store.create_counter_metric('wifi_clients_rx_bytes', 'Number of received packet bytes', 'rx_bytes', ['mac_address', 'dhcp_name', 'dhcp_comment'])
+        self.metric_store.create_counter_metric('wifi_clients_tx_bytes', 'Number of sent packet bytes',     'tx_bytes', ['mac_address', 'dhcp_name', 'dhcp_comment'])
+        self.metric_store.create_counter_metric('wifi_clients_rx_bytes', 'Number of received packet bytes', 'rx_bytes', ['mac_address', 'dhcp_name', 'dhcp_comment'])
 
-        self.wifi_registration_metric_store.create_gauge_metric('wifi_clients_signal_strength', 'Client devices signal strength', 'signal', ['mac_address', 'dhcp_name', 'dhcp_comment'])
-        self.wifi_registration_metric_store.create_gauge_metric('wifi_clients_uptime', 'Client devices uptime', 'uptime', ['mac_address', 'dhcp_name', 'dhcp_comment'])
-        self.wifi_registration_metric_store.create_gauge_metric('wifi_clients_rx_rate', 'Client devices RX bitrate', 'rx_rate', ['mac_address', 'dhcp_name', 'dhcp_comment'])
-        self.wifi_registration_metric_store.create_gauge_metric('wifi_clients_tx_rate', 'Client devices TX bitrate', 'tx_rate', ['mac_address', 'dhcp_name', 'dhcp_comment'])
+        self.metric_store.create_gauge_metric('wifi_clients_signal_strength', 'Client devices signal strength', 'signal', ['mac_address', 'dhcp_name', 'dhcp_comment'])
+        self.metric_store.create_gauge_metric('wifi_clients_uptime', 'Client devices uptime', 'uptime', ['mac_address', 'dhcp_name', 'dhcp_comment'])
+        self.metric_store.create_gauge_metric('wifi_clients_rx_rate', 'Client devices RX bitrate', 'rx_rate', ['mac_address', 'dhcp_name', 'dhcp_comment'])
+        self.metric_store.create_gauge_metric('wifi_clients_tx_rate', 'Client devices TX bitrate', 'tx_rate', ['mac_address', 'dhcp_name', 'dhcp_comment'])
 
     def load(self, router_entry: 'RouterEntry'):
         registration_records = router_entry.api_connection.get('interface/wifi/registration-table')
@@ -82,7 +82,7 @@ class WifiClientCollector(LoadingCollector):
                 r['uptime'] = BaseOutputProcessor.parse_timedelta(str(r['uptime']))
 
                 BaseOutputProcessor.add_dhcp_info(router_entry, r, str(r.get('mac-address')))
-        self.wifi_registration_metric_store.set_metrics(registration_records)
+        self.metric_store.set_metrics(registration_records)
 
-    def collect(self):
-        yield from self.wifi_registration_metric_store.get_metrics()
+    #def collect(self):
+    #    yield from self.wifi_registration_metric_store.get_metrics()

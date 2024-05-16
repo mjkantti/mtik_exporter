@@ -50,5 +50,5 @@ class BGPCollector(LoadingCollector):
         bgp_records = router_entry.api_connection.get('routing/bgp/session')
         self.metric_store.set_metrics(bgp_records)
 
-    def collect(self):
-        yield from self.metric_store.get_metrics()
+    #def collect(self):
+    #    yield from self.metric_store.get_metrics()

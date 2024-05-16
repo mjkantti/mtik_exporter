@@ -35,7 +35,7 @@ class HealthCollector(LoadingCollector):
         # Metrics
         self.metric_store.create_gauge_metric('system_routerboard_voltage', 'Supplied routerboard voltage', 'voltage')
         self.metric_store.create_gauge_metric('system_routerboard_temperature', 'Routerboard current temperature', 'temperature')
-        self.metric_store.create_gauge_metric('system_routerboard_temperature', 'Routerboard current temperature', 'phy_temperature')
+        self.metric_store.create_gauge_metric('system_routerboard_phy_temperature', 'Routerboard current temperature', 'phy_temperature')
         self.metric_store.create_gauge_metric('system_cpu_temperature', 'CPU current temperature', 'cpu_temperature')
         self.metric_store.create_gauge_metric('system_switch_temperature', 'Switch chip current temperature', 'switch_temperature')
         self.metric_store.create_gauge_metric('system_fan_one_speed', 'System fan 1 current speed', 'fan1_speed')
@@ -58,5 +58,5 @@ class HealthCollector(LoadingCollector):
 
         self.metric_store.set_metrics(health_records)
 
-    def collect(self):
-        yield from self.metric_store.get_metrics()
+    #def collect(self):
+    #    yield from self.metric_store.get_metrics()

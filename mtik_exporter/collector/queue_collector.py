@@ -42,14 +42,14 @@ class QueueTreeCollector(LoadingCollector):
         qt_records = router_entry.api_connection.get('queue/tree')
         self.metric_store.set_metrics(qt_records)
 
-    def collect(self):
-        yield from self.metric_store.get_metrics()
+    #def collect(self):
+    #    yield from self.metric_store.get_metrics()
 
 
 class QueueSimpleCollector(LoadingCollector):
     def __init__(self, router_id: dict[str, str], interval: int):
         self.name = 'QueueSimpleCollector'
-        self.mestric_store = MetricStore(
+        self.metric_store = MetricStore(
             router_id,
             ['name', 'parent', 'packet_mark', 'limit_at', 'max_limit', 'priority', 'bytes', 'packets', 'queued_bytes', 'queued_packets','dropped', 'rate', 'packet_rate', 'disabled'],
             ['bytes_up', 'bytes_down', 'queued_bytes_up', 'queued_bytes_down', 'dropped_up', 'dropped_down'],
@@ -57,16 +57,16 @@ class QueueSimpleCollector(LoadingCollector):
         )
 
         # Metrics
-        self.mestric_store.create_info_metric('queue_simple', 'Queue Simple Info')
+        self.metric_store.create_info_metric('queue_simple', 'Queue Simple Info')
 
-        self.mestric_store.create_counter_metric('queue_simple_bytes_upload', 'Number of upload processed bytes', 'bytes_up', ['name'])
-        self.mestric_store.create_counter_metric('queue_simple_bytes_download', 'Number of download processed bytes', 'bytes_down', ['name'])
+        self.metric_store.create_counter_metric('queue_simple_bytes_upload', 'Number of upload processed bytes', 'bytes_up', ['name'])
+        self.metric_store.create_counter_metric('queue_simple_bytes_download', 'Number of download processed bytes', 'bytes_down', ['name'])
 
-        self.mestric_store.create_counter_metric('queue_simple_queued_bytes_upload', 'Number of upload queued bytes', 'queued_bytes_up', ['name'])
-        self.mestric_store.create_counter_metric('queue_simple_queued_bytes_download', 'Number of download queued bytes', 'queued_bytes_down', ['name'])
+        self.metric_store.create_counter_metric('queue_simple_queued_bytes_upload', 'Number of upload queued bytes', 'queued_bytes_up', ['name'])
+        self.metric_store.create_counter_metric('queue_simple_queued_bytes_download', 'Number of download queued bytes', 'queued_bytes_down', ['name'])
 
-        self.mestric_store.create_counter_metric('queue_simple_dropped_upload', 'Number of upload dropped bytes', 'dropped_up', ['name'])
-        self.mestric_store.create_counter_metric('queue_simple_dropped_download', 'Number of download dropped bytes', 'dropped_down', ['name'])
+        self.metric_store.create_counter_metric('queue_simple_dropped_upload', 'Number of upload dropped bytes', 'dropped_up', ['name'])
+        self.metric_store.create_counter_metric('queue_simple_dropped_download', 'Number of download dropped bytes', 'dropped_down', ['name'])
 
     def load(self, router_entry: 'RouterEntry'):
         queue_records = router_entry.api_connection.get('queue/simple')
@@ -84,8 +84,8 @@ class QueueSimpleCollector(LoadingCollector):
                     splitted_queue_record[key] = value
             splitted_queue_records.append(splitted_queue_record)   
 
-        self.mestric_store.set_metrics(splitted_queue_records)
+        self.metric_store.set_metrics(splitted_queue_records)
 
-    '''Simple Queue collector'''
-    def collect(self):
-        yield from self.mestric_store.get_metrics()
+    #'''Simple Queue collector'''
+    #def collect(self):
+    #    yield from self.metric_store.get_metrics()

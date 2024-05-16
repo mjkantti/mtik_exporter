@@ -122,6 +122,7 @@ class MetricStore():
 
 class LoadingCollector(Collector):
     name: str
+    metric_store: MetricStore
 
     def get_name(self):
         return self.name
@@ -129,3 +130,6 @@ class LoadingCollector(Collector):
     @abstractmethod
     def load(self, router_entry: 'RouterEntry', interval: int) -> None:
         pass
+
+    def collect(self):
+        yield from self.metric_store.get_metrics()

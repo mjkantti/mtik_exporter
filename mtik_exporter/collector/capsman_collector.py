@@ -33,5 +33,5 @@ class CapsmanCollector(LoadingCollector):
         recs = router_entry.api_connection.get('interface/wifi/capsman/remote-cap')
         self.metric_store.set_metrics(recs)
 
-    def collect(self):
-        yield from self.metric_store.get_metrics()
+    #def collect(self):
+    #    yield from self.metric_store.get_metrics()

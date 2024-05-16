@@ -26,7 +26,7 @@ class InterfaceCollector(LoadingCollector):
 
     def __init__(self, router_id: dict[str, str], interval: int):
         self.name = 'InterfaceCollector'
-        self.interface_metric_store = MetricStore(
+        self.metric_store = MetricStore(
             router_id,
             ['id', 'name', 'comment', 'type', 'mtu', 'mac_address', 'running'],
             ['rx_byte', 'tx_byte', 'rx_packet', 'tx_packet', 'rx_error', 'tx_error', 'rx_drop', 'tx_drop', 'link_downs'],
@@ -34,28 +34,28 @@ class InterfaceCollector(LoadingCollector):
         )
 
         # Metrics
-        self.interface_metric_store.create_counter_metric('interface_rx_byte', 'Number of received bytes', 'rx_byte')
-        self.interface_metric_store.create_counter_metric('interface_tx_byte', 'Number of transmitted bytes', 'tx_byte')
+        self.metric_store.create_counter_metric('interface_rx_byte', 'Number of received bytes', 'rx_byte')
+        self.metric_store.create_counter_metric('interface_tx_byte', 'Number of transmitted bytes', 'tx_byte')
 
-        self.interface_metric_store.create_counter_metric('interface_rx_packet', 'Number of packets received', 'rx_packet')
-        self.interface_metric_store.create_counter_metric('interface_tx_packet', 'Number of transmitted packets', 'tx_packet')
+        self.metric_store.create_counter_metric('interface_rx_packet', 'Number of packets received', 'rx_packet')
+        self.metric_store.create_counter_metric('interface_tx_packet', 'Number of transmitted packets', 'tx_packet')
 
-        self.interface_metric_store.create_counter_metric('interface_rx_error', 'Number of packets received with an error', 'rx_error')
-        self.interface_metric_store.create_counter_metric('interface_tx_error', 'Number of packets transmitted with an error', 'tx_error')
+        self.metric_store.create_counter_metric('interface_rx_error', 'Number of packets received with an error', 'rx_error')
+        self.metric_store.create_counter_metric('interface_tx_error', 'Number of packets transmitted with an error', 'tx_error')
 
-        self.interface_metric_store.create_counter_metric('interface_rx_drop', 'Number of received packets being dropped', 'rx_drop')
-        self.interface_metric_store.create_counter_metric('interface_tx_drop', 'Number of transmitted packets being dropped', 'tx_drop')
+        self.metric_store.create_counter_metric('interface_rx_drop', 'Number of received packets being dropped', 'rx_drop')
+        self.metric_store.create_counter_metric('interface_tx_drop', 'Number of transmitted packets being dropped', 'tx_drop')
 
-        self.interface_metric_store.create_counter_metric('link_downs', 'Number of times link went down', 'link_downs')
+        self.metric_store.create_counter_metric('link_downs', 'Number of times link went down', 'link_downs')
 
     def load(self, router_entry: 'RouterEntry'):
         interface_traffic_records = router_entry.api_connection.get('interface')
 
         interface_traffic_records_running = [ift for ift in interface_traffic_records if ift['running'] == 'true']
-        self.interface_metric_store.set_metrics(interface_traffic_records_running)
+        self.metric_store.set_metrics(interface_traffic_records_running)
 
-    def collect(self):
-        yield from self.interface_metric_store.get_metrics()
+    #def collect(self):
+    #    yield from self.interface_metric_store.get_metrics()
 
 class InterfaceMonitorCollector(LoadingCollector):
     ''' Router Interface Monitor Metrics collector
@@ -63,7 +63,7 @@ class InterfaceMonitorCollector(LoadingCollector):
 
     def __init__(self, router_id: dict[str, str], interval: int):
         self.name = 'InterfaceMonitorCollector'
-        self.interface_monitor_metric_store = MetricStore(
+        self.metric_store = MetricStore(
             router_id,
             ['id', 'name', 'comment'],
             ['full_duplex', 'status', 'rate', 'sfp_temperature'],
@@ -76,12 +76,12 @@ class InterfaceMonitorCollector(LoadingCollector):
             interval=interval
         )
 
-        self.interface_monitor_metric_store.create_gauge_metric('interface_status', 'Current interface link status', 'status')
-        self.interface_monitor_metric_store.create_gauge_metric('interface_rate', 'Actual interface connection data rate', 'rate')
+        self.metric_store.create_gauge_metric('interface_status', 'Current interface link status', 'status')
+        self.metric_store.create_gauge_metric('interface_rate', 'Actual interface connection data rate', 'rate')
 
-        self.interface_monitor_metric_store.create_gauge_metric('interface_full_duplex', 'Full duplex data transmission', 'full_duplex')
+        self.metric_store.create_gauge_metric('interface_full_duplex', 'Full duplex data transmission', 'full_duplex')
 
-        self.interface_monitor_metric_store.create_gauge_metric('interface_sfp_temperature', 'Current SFP temperature', 'sfp_temperature')
+        self.metric_store.create_gauge_metric('interface_sfp_temperature', 'Current SFP temperature', 'sfp_temperature')
 
     def load(self, router_entry: 'RouterEntry'):
         interface_traffic_records = router_entry.api_connection.call('interface/ether','print', {'proplist':'.id,name,comment,running'} )
@@ -104,7 +104,7 @@ class InterfaceMonitorCollector(LoadingCollector):
                 if_info.update(mr)
                 monitor_records.append(if_info)
 
-            self.interface_monitor_metric_store.set_metrics(monitor_records)
+            self.metric_store.set_metrics(monitor_records)
 
-    def collect(self):
-        yield from self.interface_monitor_metric_store.get_metrics()
+    #def collect(self):
+    #    yield from self.interface_monitor_metric_store.get_metrics()

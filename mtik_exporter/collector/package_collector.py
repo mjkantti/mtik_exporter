@@ -46,8 +46,8 @@ class PackageCollector(LoadingCollector):
 
         #    self.metric_store_updates.set_metrics(package_update_records)
 
-    def collect(self):
-        yield from self.metric_store.get_metrics()
+    #def collect(self):
+    #    yield from self.metric_store.get_metrics()
 
         #if self.metric_store_updates.have_metrics():
         #    yield self.metric_store_updates.info_collector('update', 'Latest package versions info')

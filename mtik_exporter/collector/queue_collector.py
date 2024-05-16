@@ -42,9 +42,6 @@ class QueueTreeCollector(LoadingCollector):
         qt_records = router_entry.api_connection.get('queue/tree')
         self.metric_store.set_metrics(qt_records)
 
-    #def collect(self):
-    #    yield from self.metric_store.get_metrics()
-
 
 class QueueSimpleCollector(LoadingCollector):
     def __init__(self, router_id: dict[str, str], interval: int):
@@ -85,7 +82,3 @@ class QueueSimpleCollector(LoadingCollector):
             splitted_queue_records.append(splitted_queue_record)   
 
         self.metric_store.set_metrics(splitted_queue_records)
-
-    #'''Simple Queue collector'''
-    #def collect(self):
-    #    yield from self.metric_store.get_metrics()

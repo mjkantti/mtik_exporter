@@ -52,6 +52,3 @@ class UserCollector(LoadingCollector):
             filtered_users[k] = usr
 
         self.metric_store.set_metrics(filtered_users.values())
-
-    #def collect(self):
-    #    yield from self.metric_store.get_metrics()

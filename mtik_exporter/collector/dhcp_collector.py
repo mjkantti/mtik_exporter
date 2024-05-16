@@ -46,6 +46,3 @@ class DHCPCollector(LoadingCollector):
         dhcp_lease_records = router_entry.api_connection.get('ip/dhcp-server/lease')
         self.metric_store.set_metrics(dhcp_lease_records)
         router_entry.set_dhcp_entries(dhcp_lease_records)
-
-    #def collect(self):
-    #    yield from self.lease_metric_store.get_metrics()

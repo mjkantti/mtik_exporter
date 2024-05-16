@@ -34,20 +34,3 @@ class PackageCollector(LoadingCollector):
     def load(self, router_entry: 'RouterEntry'):
         package_record = router_entry.api_connection.get('system/package')
         self.metric_store.set_metrics(package_record)
-
-        #if router_entry.config_entry.check_for_updates:
-        #    #package_update_records = PackageMetricsDataSource.metric_records_update(router_entry)
-        #    package_update_records = router_entry.api_connection.get('/system/package/update')
-        #    for pkg_upd in package_update_records:
-        #        if not 'latest-version' in pkg_upd:
-        #            latest_version, build_time = get_available_updates(pkg_upd['channel'])
-        #            pkg_upd['latest_version'] = latest_version
-        #            pkg_upd['build_time'] = build_time
-
-        #    self.metric_store_updates.set_metrics(package_update_records)
-
-    #def collect(self):
-    #    yield from self.metric_store.get_metrics()
-
-        #if self.metric_store_updates.have_metrics():
-        #    yield self.metric_store_updates.info_collector('update', 'Latest package versions info')

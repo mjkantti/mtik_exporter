@@ -37,6 +37,3 @@ class IPv6NeighborCollector(LoadingCollector):
             for registration_record in records:
                 BaseOutputProcessor.add_dhcp_info(router_entry, registration_record, str(registration_record.get('mac-address')))
         self.metric_store.set_metrics(records)
-
-    #def collect(self):
-    #    yield from self.metric_store.get_metrics()

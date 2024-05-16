@@ -57,6 +57,3 @@ class HealthCollector(LoadingCollector):
                 record[name] = val
 
         self.metric_store.set_metrics(health_records)
-
-    #def collect(self):
-    #    yield from self.metric_store.get_metrics()

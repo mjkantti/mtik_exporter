@@ -45,6 +45,3 @@ class POECollector(LoadingCollector):
                     poe_r.update(mon_r)
 
         self.metric_store.set_metrics(poe_records)
-
-    #def collect(self):
-    #    yield from self.metric_store.get_metrics()

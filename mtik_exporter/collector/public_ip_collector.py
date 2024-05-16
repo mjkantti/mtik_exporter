@@ -43,6 +43,3 @@ class PublicIPAddressCollector(LoadingCollector):
         address_records = router_entry.api_connection.get('ip/cloud')
         self.metric_store.set_metrics(address_records)
 
-    #def collect(self):
-    #    yield from self.metric_store.get_metrics()
-

@@ -83,6 +83,3 @@ class WifiClientCollector(LoadingCollector):
 
                 BaseOutputProcessor.add_dhcp_info(router_entry, r, str(r.get('mac-address')))
         self.metric_store.set_metrics(registration_records)
-
-    #def collect(self):
-    #    yield from self.wifi_registration_metric_store.get_metrics()

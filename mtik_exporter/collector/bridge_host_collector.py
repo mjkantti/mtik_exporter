@@ -39,6 +39,3 @@ class BridgeHostCollector(LoadingCollector):
             for r in bridge_host_records:
                 BaseOutputProcessor.add_dhcp_info(router_entry, r, str(r.get('mac-address')))
         self.metric_store.set_metrics(bridge_host_records)
-
-    #def collect(self):
-    #    yield from self.metric_store.get_metrics()

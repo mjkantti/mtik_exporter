@@ -41,6 +41,3 @@ class LatestVersionCollector(LoadingCollector):
             recs.append(latest_version_rec)
 
         self.metric_store.set_metrics(recs)
-
-    #def collect(self):
-    #    yield from self.version_metric_store.get_metrics()

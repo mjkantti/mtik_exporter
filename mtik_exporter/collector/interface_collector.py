@@ -54,9 +54,6 @@ class InterfaceCollector(LoadingCollector):
         interface_traffic_records_running = [ift for ift in interface_traffic_records if ift['running'] == 'true']
         self.metric_store.set_metrics(interface_traffic_records_running)
 
-    #def collect(self):
-    #    yield from self.interface_metric_store.get_metrics()
-
 class InterfaceMonitorCollector(LoadingCollector):
     ''' Router Interface Monitor Metrics collector
     '''
@@ -105,6 +102,3 @@ class InterfaceMonitorCollector(LoadingCollector):
                 monitor_records.append(if_info)
 
             self.metric_store.set_metrics(monitor_records)
-
-    #def collect(self):
-    #    yield from self.interface_monitor_metric_store.get_metrics()

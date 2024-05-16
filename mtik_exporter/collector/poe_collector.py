@@ -34,11 +34,9 @@ class POECollector(LoadingCollector):
         poe_records = router_entry.rest_api.get('interface/ethernet/poe')
 
         if poe_records:
-            if_ids = ','.join([str(i.get('id')) for i in poe_records if i.get('running', 'true') == 'true' and i.get('disabled', 'false') == 'false'])
+            if_ids = ','.join([str(i.get('.id')) for i in poe_records if i.get('running', 'true') == 'true' and i.get('disabled', 'false') == 'false'])
 
             if if_ids:
-                #monitor_records = InterfaceMonitorMetricsDataSource.metric_records(router_entry, if_ids, kind='ethernet/poe')
-                #monitor_records = router_entry.api_connection.call('/interface/ethernet/poe', 'monitor', {'once':'', '.id': if_ids})
                 monitor_records = router_entry.rest_api.post('interface/ethernet/poe', 'monitor', {'once': True, '.id': if_ids})
 
                 for poe_r, mon_r in zip(poe_records, monitor_records):

@@ -40,6 +40,6 @@ class PublicIPAddressCollector(LoadingCollector):
         self.metric_store.create_info_metric('public_ip_address', 'Public IP address')
 
     def load(self, router_entry: 'RouterEntry'):
-        address_records = router_entry.api_connection.get('ip/cloud')
-        self.metric_store.set_metrics(address_records)
+        address_record = router_entry.rest_api.get('ip/cloud')
+        self.metric_store.set_metrics([address_record])
 

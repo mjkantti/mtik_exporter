@@ -57,9 +57,6 @@ class ExportProcessor:
             registry = CollectorRegistry(router)
             self.registries.append(registry)
             
-            router = registry.router_entry
-            router.api_connection.connect()
-            
             interval = registry.router_entry.config_entry.polling_interval
             self.s.enter((i+1), 1, self.run_collectors, argument=(router, registry.fast_collectors, interval, 1))
 
@@ -94,11 +91,6 @@ class ExportProcessor:
     
     def run_collectors(self, router_entry, collectors, interval, priority):
         self.s.enter(interval, priority, self.run_collectors, argument=(router_entry, collectors, interval, priority))
-
-        if router_entry and not router_entry.api_connection.is_connected():
-            logging.info('Router not connected, reconnecting, waiting for 3 seconds')
-            router_entry.api_connection.connect()
-            return
 
         logging.debug('Starting data load, polling interval set to: %i', interval)
         for c in collectors:

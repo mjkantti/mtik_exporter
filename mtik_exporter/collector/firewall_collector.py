@@ -42,16 +42,13 @@ class FirewallCollector(LoadingCollector):
         self.ipv4_raw_metric_store.create_counter_metric('firewall_raw_packets', 'Total amount of packets matched by firewall raw rules', 'packets')
 
     def load(self, router_entry: 'RouterEntry'):
-        #firewall_filter_records = FirewallMetricsDataSource.metric_records_ipv4(router_entry)
-        firewall_filter_records = router_entry.api_connection.get('ip/firewall/filter')
+        firewall_filter_records = router_entry.rest_api.get('ip/firewall/filter')
         self.ipv4_filter_metric_store.set_metrics(firewall_filter_records)
 
-        #firewall_mangle_records = FirewallMetricsDataSource.metric_records_ipv4(router_entry, fw_type='mangle')
-        firewall_mangle_records = router_entry.api_connection.get('ip/firewall/mangle')
+        firewall_mangle_records = router_entry.rest_api.get('ip/firewall/mangle')
         self.ipv4_mangle_metric_store.set_metrics(firewall_mangle_records)
 
-        #firewall_raw_records = FirewallMetricsDataSource.metric_records_ipv4(router_entry, fw_type='raw')
-        firewall_raw_records = router_entry.api_connection.get('ip/firewall/raw')
+        firewall_raw_records = router_entry.rest_api.get('ip/firewall/raw')
         self.ipv4_raw_metric_store.set_metrics(firewall_raw_records)
 
     def collect(self):
@@ -84,21 +81,16 @@ class IPv6FirewallCollector(LoadingCollector):
 
 
     def load(self, router_entry: 'RouterEntry'):
-        #firewall_filter_records_ipv6 =  FirewallMetricsDataSource.metric_records_ipv6(router_entry)
-        firewall_filter_records_ipv6 = router_entry.api_connection.get('ipv6/firewall/filter')
+        firewall_filter_records_ipv6 = router_entry.rest_api.get('ipv6/firewall/filter')
         self.ipv6_filter_metric_store.set_metrics(firewall_filter_records_ipv6)
 
-        #firewall_mangle_records_ipv6 =  FirewallMetricsDataSource.metric_records_ipv6(router_entry, fw_type='mangle')
-        firewall_mangle_records_ipv6 = router_entry.api_connection.get('ipv6/firewall/mangle')
+        firewall_mangle_records_ipv6 = router_entry.rest_api.get('ipv6/firewall/mangle')
         self.ipv6_mangle_metric_store.set_metrics(firewall_mangle_records_ipv6)
 
-        #firewall_raw_records_ipv6 = FirewallMetricsDataSource.metric_records_ipv6(router_entry, fw_type='raw')
-        firewall_raw_records_ipv6 = router_entry.api_connection.get('ipv6/firewall/raw')
+        firewall_raw_records_ipv6 = router_entry.rest_api.get('ipv6/firewall/raw')
         self.ipv6_raw_metric_store.set_metrics(firewall_raw_records_ipv6)
 
     def collect(self):
-        #for metric, _, _ in self.ipv6_filter_metric_store.metrics + self.ipv6_mangle_metric_store.metrics + self.ipv6_raw_metric_store.metrics:
-            #yield metric
         yield from self.ipv6_filter_metric_store.get_metrics()
         yield from self.ipv6_mangle_metric_store.get_metrics()
         yield from self.ipv6_raw_metric_store.get_metrics()

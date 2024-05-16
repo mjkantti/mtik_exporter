@@ -49,8 +49,7 @@ class InterfaceCollector(LoadingCollector):
         self.metric_store.create_counter_metric('link_downs', 'Number of times link went down', 'link_downs')
 
     def load(self, router_entry: 'RouterEntry'):
-        interface_traffic_records = router_entry.api_connection.get('interface')
-
+        interface_traffic_records = router_entry.rest_api.get('interface')
         interface_traffic_records_running = [ift for ift in interface_traffic_records if ift['running'] == 'true']
         self.metric_store.set_metrics(interface_traffic_records_running)
 
@@ -81,7 +80,8 @@ class InterfaceMonitorCollector(LoadingCollector):
         self.metric_store.create_gauge_metric('interface_sfp_temperature', 'Current SFP temperature', 'sfp_temperature')
 
     def load(self, router_entry: 'RouterEntry'):
-        interface_traffic_records = router_entry.api_connection.call('interface/ether','print', {'proplist':'.id,name,comment,running'} )
+        #interface_traffic_records = router_entry.api_connection.call('interface/ether','print', {'proplist':'.id,name,comment,running'} )
+        interface_traffic_records = router_entry.rest_api.get('interface/ether', {'proplist':'.id,name,comment,running'})
 
         if interface_traffic_records:
             monitor_records = []
@@ -92,11 +92,8 @@ class InterfaceMonitorCollector(LoadingCollector):
                 else:
                     if_ids.append({'id': str(ifc.get('id')), 'name': str(ifc.get('name')), 'comment': str(ifc.get('comment'))})
 
-            #monitor_records_running = InterfaceMonitorMetricsDataSource.metric_records(router_entry, if_ids)
             id_str = ','.join([i.get('id') for i in if_ids])
-            #monitor_records_running = router_entry.api_connection.call('/interface/ether', 'monitor', {'once':'', '.id': id_str})
-            #monitor_records_running = router_entry.rest_api.post('interface/ether', 'monitor', {'once': True, '.id': id_str})
-            monitor_records_running = router_entry.api_connection.call('/interface/ether', 'monitor', {'once':'', '.id': id_str})
+            monitor_records_running = router_entry.rest_api.post('interface/ether', 'monitor', {'once': True, '.id': id_str})
             for if_info, mr in zip(if_ids, monitor_records_running):
                 if_info.update(mr)
                 monitor_records.append(if_info)

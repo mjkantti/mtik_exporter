@@ -23,15 +23,13 @@ class RouterEntry:
     def __init__(self, router_name: str):
         self.router_name = router_name
         self.config_entry  = config_handler.config_entry(router_name)
-        #self.rest_api = RouterRestAPI(router_name, self.config_entry)
-        self.api_connection = RouterAPIConnection(router_name, self.config_entry)
+        self.rest_api = RouterRestAPI(router_name, self.config_entry)
+        #self.api_connection = RouterAPIConnection(router_name, self.config_entry)
         self.router_id = {
             ConfigKeys.ROUTERBOARD_NAME: self.router_name,
             ConfigKeys.ROUTERBOARD_ADDRESS: self.config_entry.hostname
         }
 
-        #self.collector_time_spent: dict[str, float] =  {}
-        #self.data_loader_stats: dict[str, dict[str, float]] =  {}
         self._dhcp_entries: list[dict[str, str | float]] = []
 
     def set_dhcp_entries(self, entries: list[dict[str, str | float]]):

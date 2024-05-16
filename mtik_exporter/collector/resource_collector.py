@@ -58,11 +58,11 @@ class SystemResourceCollector(LoadingCollector):
         self.version_metric_store.create_gauge_metric('system_latest_version_built', 'Latest RouterOS version built time', 'latest_built')
 
     def load(self, router_entry: 'RouterEntry'):
-        resource_records = router_entry.api_connection.get('system/resource')
-        for r in resource_records:
-            ver, channel = parse_ros_version(r['version'])
+        resource_record = router_entry.rest_api.get('system/resource')
+        if resource_record:
+            ver, channel = parse_ros_version(resource_record['version'])
             if channel:
-                r['current_version'] = ver
-                r['channel'] = channel
+                resource_record['current_version'] = ver
+                resource_record['channel'] = channel
 
-        self.metric_store.set_metrics(resource_records)
+        self.metric_store.set_metrics([resource_record])

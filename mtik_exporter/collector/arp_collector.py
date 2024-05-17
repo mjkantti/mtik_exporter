@@ -25,7 +25,7 @@ class ARPCollector(LoadingCollector):
         self.name = 'ARPCollector'
         self.metric_store = MetricStore(
             router_id,
-            ['mac_address', 'address', 'interface', 'status', 'dynamic', 'dhcp_name', 'dhcp_comment'],
+            ['mac_address', 'address', 'interface', 'status', 'dynamic', 'dhcp_name', 'dhcp_comment', 'dhcp_lease_type'],
             interval=interval
             )
 
@@ -33,7 +33,7 @@ class ARPCollector(LoadingCollector):
         self.metric_store.create_info_metric('arp_entry', 'ARP Entry Info')
 
     def load(self, router_entry: 'RouterEntry'):
-        arp_records = router_entry.rest_api.get('ip/arp')
+        arp_records = router_entry.rest_api.get('ip/arp', 'status=stale,reachable')
         for r in arp_records:
             BaseOutputProcessor.add_dhcp_info(router_entry, r, str(r.get('mac-address')))
         self.metric_store.set_metrics(arp_records)

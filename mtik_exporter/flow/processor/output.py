@@ -24,12 +24,12 @@ if TYPE_CHECKING:
 
 class BaseOutputProcessor:
     @staticmethod
-    def add_dhcp_info(router_entry: 'RouterEntry', registration_record: dict[str, str | float], key: str, id_key: str = 'mac-address') -> None:
+    def add_dhcp_info(router_entry: 'RouterEntry', registration_record: dict[str, str | float], key: str) -> None:
         dhcp_name = ''
         dhcp_address = 'No DHCP Record'
         dhcp_comment = ''
 
-        dhcp_lease_record = router_entry.dhcp_record(id_key, key)
+        dhcp_lease_record = router_entry.dhcp_record(key)
         if dhcp_lease_record:
             dhcp_comment = dhcp_lease_record.get('comment', '')
             dhcp_name = dhcp_lease_record.get('host-name', '')

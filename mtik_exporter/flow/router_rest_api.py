@@ -31,14 +31,16 @@ class RouterRestAPI:
         self.last_failure_timestamp: float = 0
         self.successive_failure_count: int = 0
         self.auth = (config_entry.username, config_entry.password)
-        #self.base_url = f'http://{config_entry.hostname}:{config_entry.port}/rest'
-        self.base_url = f'http://{config_entry.hostname}/rest'
+
+        protocol = 'https' if config_entry.use_ssl else 'http'
+        host_url = f'{protocol}://{config_entry.hostname}'
+        if config_entry.port:
+            host_url += f':{config_entry.port}'
+        self.base_url = f'{host_url}/rest'
+
         self.timeout = config_handler.system_entry().socket_timeout
         self.retry_timer = time.time()
         self.ses = requests.Session()
-        
-        self.timeout = 10
-
 
     def get(self, path, params = {}):
         if time.time() < self.retry_timer:

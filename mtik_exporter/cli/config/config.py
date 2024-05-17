@@ -62,8 +62,7 @@ class ConfigKeys:
     ROUTERBOARD_ADDRESS = 'routerboard_address'
 
     # Default values
-    DEFAULT_API_PORT = 80
-    DEFAULT_API_SSL_PORT = 443
+    DEFAULT_API_PORT = ''
     DEFAULT_POLLING_INTERVAL = 10
     DEFAULT_SLOW_POLLING_INTERVAL = 60
     DEFAULT_EXPORT_PORT = 49090
@@ -75,7 +74,6 @@ class ConfigKeys:
     DEFAULT_TOTAL_MAX_SCRAPE_DURATION = 30
     DEFAULT_CHECK_FOR_UPDATES_CHANNEL = ['stable']
     DEFAULT_CHECK_FOR_UPDATES_INTERVAL = 3600
-
 
     ROUTER_BOOLEAN_KEYS = {ENABLED_KEY, SSL_KEY, NO_SSL_CERTIFICATE, SSL_CERTIFICATE_VERIFY}
     ROUTER_INT_KEYS = {POLLING_INTERVAL_KEY, SLOW_POLLING_INTERVAL_KEY, PORT_KEY}
@@ -264,8 +262,8 @@ class SystemConfigHandler:
 
     def _default_value_for_key(self, key, value=None):
         return {
-            ConfigKeys.SSL_KEY: lambda value: ConfigKeys.DEFAULT_API_SSL_PORT if value else ConfigKeys.DEFAULT_API_PORT,
-            ConfigKeys.PORT_KEY: lambda _: ConfigKeys.DEFAULT_EXPORT_PORT,
+            ConfigKeys.SSL_KEY: lambda _: False,
+            ConfigKeys.PORT_KEY: lambda _: '',
             ConfigKeys.POLLING_INTERVAL_KEY: lambda _: ConfigKeys.DEFAULT_POLLING_INTERVAL,
             ConfigKeys.SLOW_POLLING_INTERVAL_KEY: lambda _: ConfigKeys.DEFAULT_SLOW_POLLING_INTERVAL,
             ConfigKeys.EXPORTER_SOCKET_TIMEOUT: lambda _: ConfigKeys.DEFAULT_SOCKET_TIMEOUT,
@@ -275,7 +273,7 @@ class SystemConfigHandler:
             ConfigKeys.EXPORTER_MAX_SCRAPE_DURATION: lambda _: ConfigKeys.DEFAULT_MAX_SCRAPE_DURATION,
             ConfigKeys.EXPORTER_TOTAL_MAX_SCRAPE_DURATION: lambda _: ConfigKeys.DEFAULT_TOTAL_MAX_SCRAPE_DURATION,
             ConfigKeys.CHECK_FOR_UPDATES_CHANNEL_KEY: lambda _: ConfigKeys.DEFAULT_CHECK_FOR_UPDATES_CHANNEL,
-            ConfigKeys.CHECK_FOR_UPDATES_INTERVAL_KEY: lambda _: ConfigKeys.DEFAULT_CHECK_FOR_UPDATES_INVERVAL,
+            ConfigKeys.CHECK_FOR_UPDATES_INTERVAL_KEY: lambda _: ConfigKeys.DEFAULT_CHECK_FOR_UPDATES_INTERVAL,
         }[key](value)
 
 

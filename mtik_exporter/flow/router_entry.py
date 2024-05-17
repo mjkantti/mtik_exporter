@@ -28,10 +28,12 @@ class RouterEntry:
             ConfigKeys.ROUTERBOARD_ADDRESS: self.config_entry.hostname
         }
 
-        self._dhcp_entries: list[dict[str, str | float]] = []
+        self._dhcp_entries: dict[str, dict[str, str | float]] = {}
 
     def set_dhcp_entries(self, entries: list[dict[str, str | float]]):
-        self._dhcp_entries = entries
+        self._dhcp_entries.clear()
+        for e in entries:
+            self._dhcp_entries[e.get('mac-address')] = e
 
-    def dhcp_record(self, key: str, value: str):
-        return next((e for e in self._dhcp_entries if e.get(key) == value), None)
+    def dhcp_record(self, key: str):
+        return self._dhcp_entries.get(key)

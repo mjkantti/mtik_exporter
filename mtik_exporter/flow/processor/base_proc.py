@@ -18,10 +18,9 @@ from sched import scheduler
 from signal import signal, SIGTERM, SIGINT
 from time import time, sleep
 
+from mtik_exporter.flow.router_entry import RouterEntry
 from mtik_exporter.cli.config.config import config_handler, ConfigKeys
-from mtik_exporter.flow.collector_registry import CollectorRegistry
-from mtik_exporter.flow.system_collector_registry import SystemCollectorRegistry
-from mtik_exporter.flow.router_entries_handler import RouterEntriesHandler
+from mtik_exporter.flow.collector_registry import CollectorRegistry, SystemCollectorRegistry
 
 import logging
 logging.basicConfig(format='%(levelname)s %(message)s', level=logging.INFO)
@@ -53,8 +52,14 @@ class ExportProcessor:
             self.thr.join(5)
 
     def start(self):
-        router_entries_handler = RouterEntriesHandler()
-        for i, router in enumerate(router_entries_handler.router_entries):
+
+        self._router_entries = {}
+        for i, router_name in enumerate(config_handler.registered_entries()):
+            router = RouterEntry(router_name)
+            if not router.config_entry.enabled:
+                logging.info('%s: Skipping disabled router', router_name)
+                continue
+
             registry = CollectorRegistry(router)
             self.registries.append(registry)
             
@@ -74,7 +79,7 @@ class ExportProcessor:
             
         system_collector_registry = SystemCollectorRegistry()
         for c in system_collector_registry.system_collectors:
-            logging.info('%s: Adding System Collector %s', router.router_name, c.name)
+            logging.info('Adding System Collector %s', c.name)
             REGISTRY.register(c)
 
         if system_collector_registry.system_collectors:

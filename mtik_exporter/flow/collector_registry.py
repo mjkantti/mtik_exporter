@@ -39,6 +39,8 @@ from mtik_exporter.collector.bridge_host_collector import BridgeHostCollector
 from mtik_exporter.collector.kid_control_device_collector import KidDeviceCollector
 from mtik_exporter.collector.bgp_collector import BGPCollector
 from mtik_exporter.collector.arp_collector import ARPCollector
+
+from mtik_exporter.collector.latest_version import LatestVersionCollector
 from mtik_exporter.collector.internal_collector import InternalCollector
 
 from typing import TYPE_CHECKING
@@ -106,3 +108,19 @@ class CollectorRegistry:
                 continue
 
             self.slow_collectors.append(cls(router_id, self.slow_polling_interval))
+
+
+class SystemCollectorRegistry:
+    ''' mtik_exporter Collectors Registry
+    '''
+
+    def __init__(self) -> None:
+        self.system_collectors: list['LoadingCollector'] = []
+        self.interal_collector = InternalCollector()
+
+        # SYSTEM Collectors
+        if config_handler.system_entry().check_for_updates:
+            interval = config_handler.system_entry().check_for_updates_interval
+            channel = config_handler.system_entry().check_for_updates_channel
+
+            self.system_collectors.append(LatestVersionCollector(channel, interval))

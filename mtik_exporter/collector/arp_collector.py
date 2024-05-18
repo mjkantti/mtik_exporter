@@ -11,8 +11,8 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
-from mtik_exporter.flow.processor.output import BaseOutputProcessor
 from mtik_exporter.collector.metric_store import MetricStore, LoadingCollector
+from mtik_exporter.utils.utils import add_dhcp_info
 
 from typing import TYPE_CHECKING
 
@@ -35,5 +35,5 @@ class ARPCollector(LoadingCollector):
     def load(self, router_entry: 'RouterEntry'):
         arp_records = router_entry.rest_api.get('ip/arp', 'status=stale,reachable')
         for r in arp_records:
-            BaseOutputProcessor.add_dhcp_info(router_entry, r, str(r.get('mac-address')))
+            add_dhcp_info(r, router_entry.dhcp_record(str(r.get('mac-address'))))
         self.metric_store.set_metrics(arp_records)

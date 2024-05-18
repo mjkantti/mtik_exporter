@@ -13,7 +13,7 @@
 
 
 from mtik_exporter.collector.metric_store import MetricStore, LoadingCollector
-from mtik_exporter.flow.processor.output import BaseOutputProcessor
+from mtik_exporter.utils.utils import parse_timedelta
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -44,7 +44,7 @@ class WireguardPeerCollector(LoadingCollector):
             ['name', 'interface', 'public_key', 'endpoint_address', 'endpoint_port', 'current_endpoint_address', 'current_endpoint_port', 'allowed_address', 'comment'],
             ['tx', 'rx', 'last_handshake'],
             {
-                'last_handshake': lambda c: BaseOutputProcessor.parse_timedelta(c) if c else 0
+                'last_handshake': lambda c: parse_timedelta(c) if c else 0
             },
             interval=interval
         )

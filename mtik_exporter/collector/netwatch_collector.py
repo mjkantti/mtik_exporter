@@ -14,7 +14,7 @@
 
 
 from mtik_exporter.collector.metric_store import MetricStore, LoadingCollector
-from mtik_exporter.flow.processor.output import BaseOutputProcessor
+from mtik_exporter.utils.utils import parse_timedelta
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -35,13 +35,13 @@ class NetwatchCollector(LoadingCollector):
             {
                 'status': lambda value: 1 if value == 'up' else 0,
                 'since': lambda value: datetime.fromisoformat(value).replace(tzinfo=timezone.utc).timestamp() if value else None,
-                'rtt_avg': lambda value: BaseOutputProcessor.parse_timedelta(value) if value else None,
-                'rtt_jitter': lambda value: BaseOutputProcessor.parse_timedelta(value) if value else None,
-                'rtt_max': lambda value: BaseOutputProcessor.parse_timedelta(value) if value else None,
-                'rtt_min': lambda value: BaseOutputProcessor.parse_timedelta(value) if value else None,
-                'rtt_stdev': lambda value: BaseOutputProcessor.parse_timedelta(value) if value else None,
-                'http_resp_time': lambda value: BaseOutputProcessor.parse_timedelta(value) if value else None,
-                'tcp_connect_time': lambda value: BaseOutputProcessor.parse_timedelta(value) if value else None,
+                'rtt_avg': lambda value: parse_timedelta(value) if value else None,
+                'rtt_jitter': lambda value: parse_timedelta(value) if value else None,
+                'rtt_max': lambda value: parse_timedelta(value) if value else None,
+                'rtt_min': lambda value: parse_timedelta(value) if value else None,
+                'rtt_stdev': lambda value: parse_timedelta(value) if value else None,
+                'http_resp_time': lambda value: parse_timedelta(value) if value else None,
+                'tcp_connect_time': lambda value: parse_timedelta(value) if value else None,
             },
             interval=interval
         )

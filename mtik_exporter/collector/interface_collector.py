@@ -14,7 +14,7 @@
 
 
 from mtik_exporter.collector.metric_store import MetricStore, LoadingCollector
-from mtik_exporter.flow.processor.output import BaseOutputProcessor
+from mtik_exporter.utils.utils import parse_rates
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -65,7 +65,7 @@ class InterfaceMonitorCollector(LoadingCollector):
             ['full_duplex', 'status', 'rate', 'sfp_temperature'],
             {
                 'status': lambda value: '1' if value=='link-ok' else '0',
-                'rate': BaseOutputProcessor.parse_rates,
+                'rate': parse_rates,
                 'full_duplex': lambda value: '1' if value=='true' else (None if value is None else '0'),
                 'sfp_temperature': lambda value: None if value is None else value
             },

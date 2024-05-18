@@ -14,7 +14,7 @@
 
 
 from mtik_exporter.collector.metric_store import MetricStore, LoadingCollector
-from mtik_exporter.flow.processor.output import BaseOutputProcessor
+from mtik_exporter.utils.utils import add_dhcp_info
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -35,5 +35,5 @@ class IPv6NeighborCollector(LoadingCollector):
         # add dhcp info
         if records:
             for registration_record in records:
-                BaseOutputProcessor.add_dhcp_info(router_entry, registration_record, str(registration_record.get('mac-address')))
+                add_dhcp_info(registration_record, router_entry.dhcp_record(str(registration_record.get('mac-address'))))
         self.metric_store.set_metrics(records)

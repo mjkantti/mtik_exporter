@@ -14,7 +14,7 @@
 
 
 from mtik_exporter.collector.metric_store import MetricStore, LoadingCollector
-from mtik_exporter.flow.processor.output import BaseOutputProcessor
+from mtik_exporter.utils.utils import parse_timedelta
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -31,8 +31,8 @@ class DHCPCollector(LoadingCollector):
             ['active_address', 'address', 'mac_address', 'host_name', 'comment', 'server', 'dynamic', 'client_id', 'status', 'address_lists'],
             ['expires_after', 'last_seen'],
             {
-                'expires_after': lambda ea: BaseOutputProcessor.parse_timedelta(ea) if ea else None,
-                'last_seen': lambda ls: BaseOutputProcessor.parse_timedelta(ls) if ls else None,
+                'expires_after': lambda ea: parse_timedelta(ea) if ea else None,
+                'last_seen': lambda ls: parse_timedelta(ls) if ls else None,
             },
             interval=interval
         )

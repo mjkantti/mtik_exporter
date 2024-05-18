@@ -14,8 +14,7 @@
 
 
 from mtik_exporter.collector.metric_store import MetricStore, LoadingCollector
-from mtik_exporter.flow.processor.output import BaseOutputProcessor
-from mtik_exporter.utils.utils import parse_ros_version
+from mtik_exporter.utils.utils import parse_ros_version, parse_timedelta
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -32,7 +31,7 @@ class SystemResourceCollector(LoadingCollector):
             ['version', 'channel', 'current_version', 'cpu', 'architecture_name', 'board_name'],
             ['uptime', 'write-sect-total', 'bad_blocks', 'cpu_count', 'cpu_frequency', 'free_memory', 'total_memory', 'cpu_load', 'free_hdd_space', 'total_hdd_space'],
             {
-                'uptime': lambda c: BaseOutputProcessor.parse_timedelta(c) if c else 0,
+                'uptime': lambda c: parse_timedelta(c) if c else 0,
                 'bad_blocks': lambda b: b.strip('%') if b else b,
             },
             interval=interval

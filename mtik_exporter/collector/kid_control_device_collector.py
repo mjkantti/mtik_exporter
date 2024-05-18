@@ -14,7 +14,7 @@
 
 
 from mtik_exporter.collector.metric_store import MetricStore, LoadingCollector
-from mtik_exporter.flow.processor.output import BaseOutputProcessor
+from mtik_exporter.utils.utils import parse_rates, parse_timedelta
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -31,9 +31,9 @@ class KidDeviceCollector(LoadingCollector):
             ['name', 'user', 'mac_address', 'ip_address', 'disabled'],
             ['bytes_down', 'bytes_up', 'rate_up', 'rate_down', 'bytes_up', 'idle_time'],
             {
-                'rate_up': lambda value: BaseOutputProcessor.parse_rates(value),
-                'rate_down': lambda value: BaseOutputProcessor.parse_rates(value),
-                'idle_time': lambda value: BaseOutputProcessor.parse_timedelta(value) if value else 0,
+                'rate_up': lambda value: parse_rates(value),
+                'rate_down': lambda value: parse_rates(value),
+                'idle_time': lambda value: parse_timedelta(value) if value else 0,
                 'blocked': lambda value: '1' if value == 'true' else '0',
                 'limited': lambda value: '1' if value == 'true' else '0',
                 'inactive': lambda value: '1' if value == 'true' else '0',

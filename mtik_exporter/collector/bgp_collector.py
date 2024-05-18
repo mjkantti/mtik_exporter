@@ -14,7 +14,7 @@
 
 
 from mtik_exporter.collector.metric_store import MetricStore, LoadingCollector
-from mtik_exporter.flow.processor.output import BaseOutputProcessor
+from mtik_exporter.utils.utils import parse_timedelta
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -30,7 +30,7 @@ class BGPCollector(LoadingCollector):
             ['prefix_count', 'local_messages', 'local_bytes', 'remote_messages', 'remote_bytes', 'established', 'uptime'],
             {
                 'established': lambda value: '1' if value=='true' else '0',
-                'uptime': lambda value: BaseOutputProcessor.parse_timedelta(value) if value else None
+                'uptime': lambda value: parse_timedelta(value) if value else None
             },
             interval=interval)
 

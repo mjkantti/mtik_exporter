@@ -13,8 +13,8 @@
 ## GNU General Public License for more details.
 
 
-from mtik_exporter.flow.processor.output import BaseOutputProcessor
 from mtik_exporter.collector.metric_store import MetricStore, LoadingCollector
+from mtik_exporter.utils.utils import parse_timedelta, add_dhcp_info
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -77,7 +77,7 @@ class WifiClientCollector(LoadingCollector):
                 # Split bytes
                 r['tx_bytes'], r['rx_bytes'] = str(r['bytes']).split(',')
                 # Parse Uptime
-                r['uptime'] = BaseOutputProcessor.parse_timedelta(str(r['uptime']))
+                r['uptime'] = parse_timedelta(str(r['uptime']))
 
-                BaseOutputProcessor.add_dhcp_info(router_entry, r, str(r.get('mac-address')))
+                add_dhcp_info(r, router_entry.dhcp_record(str(r.get('mac-address'))))
         self.metric_store.set_metrics(registration_records)

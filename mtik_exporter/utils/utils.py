@@ -117,20 +117,10 @@ def parse_ros_version(ver: str) -> tuple[str, str]:
     >>> parse_ros_version('1.2.3 (stable)')
     1.2.3, stable
     """
-    version, channel = re.findall(r'(.+)\s[\[|\(]?([a-z]+)?[\]|\)]?', ver)[0]
+    ros_version_rgx = re.compile(r'(.+)\s[\[|\(]?([a-z]+)?[\]|\)]?')
+    version, channel = ros_version_rgx.findall(ver)[0]
 
     return version, channel
-
-def parse_channel_from_version(ver: str) -> str:
-    """Parse the version returned from the /system/resource command.
-    Returns a tuple: (<version>, <channel>).
-
-    >>> parse_ros_version('1.2.3 (stable)')
-    stable
-    """
-    _, channel = re.findall(r'(.+)\s[\[|\(]?([a-z]+)?[\]|\)]?', ver)[0]
-
-    return channel
 
 def parse_ros_version_old(ver: str) -> tuple[str, str]:
     """Parse the version returned from the /system/resource command.

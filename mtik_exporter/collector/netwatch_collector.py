@@ -73,6 +73,7 @@ class NetwatchCollector(LoadingCollector):
         for nw in nw_records:
             # Filter high packet loss cases
             if nw['type'] == 'icmp' and float(nw.get('loss-percent', 100)) > 40:
-                [nw.pop(key, None) for key in ['rtt_avg', 'rtt_jitter', 'rtt_max', 'rtt_min', 'rtt_stdev']]
+                for k in ['rtt-avg', 'rtt-jitter', 'rtt-max', 'rtt-min', 'rtt-stdev']:
+                    nw.pop(k, None)
 
         self.metric_store.set_metrics(nw_records)

@@ -13,6 +13,8 @@
 ## GNU General Public License for more details.
 
 import json
+import logging
+
 from collections import namedtuple
 from configparser import ConfigParser
 
@@ -84,22 +86,13 @@ class ConfigKeys:
 
 class ConfigEntry:
     RouterConfigEntry = namedtuple('RouterConfigEntry', list(ConfigKeys.ROUTER_BOOLEAN_KEYS | ConfigKeys.ROUTER_STR_KEYS | ConfigKeys.ROUTER_INT_KEYS | ConfigKeys.ROUTER_LIST_KEYS))
-    SystemConfigEntry = namedtuple('SystemConfigEntry', list(ConfigKeys.SYSTEM_BOOLEAN_KEYS | ConfigKeys.SYSTEM_INT_KEYS | ConfigKeys.SYSTEM_LIST_KEYS | ConfigKeys.SYSTEM_STR_KEYS))
+    SystemConfigEntry = namedtuple('SystemConfigEntry', list(ConfigKeys.SYSTEM_BOOLEAN_KEYS | ConfigKeys.SYSTEM_STR_KEYS | ConfigKeys.SYSTEM_INT_KEYS | ConfigKeys.SYSTEM_LIST_KEYS))
 
 class SystemConfigHandler:
-    # two-phase init
-    def __init__(self):
-        pass
-
     # two-phase init, to enable custom config
     def __call__(self, data_path):
         self.data_path = data_path
         self._read_from_disk()
-        # if needed, stage the user config data
-        #self.usr_conf_data_path = self.mtik_exporter_user_dir_path
-
-        #self.re_compiled = {}
-
 
     # mtik_exporter entries
     def registered_entries(self):
@@ -135,6 +128,7 @@ class SystemConfigHandler:
         self.config.read(self.data_path)
 
     def _config_entry_reader(self, entry_name):
+        logging.info('%s: Reading Config for router', entry_name)
         config_entry_reader = {}
 
         for key in ConfigKeys.ROUTER_BOOLEAN_KEYS:
@@ -162,6 +156,7 @@ class SystemConfigHandler:
         return config_entry_reader
 
     def _system_entry_reader(self):
+        logging.info('Reading System Config')
         system_entry_reader = {}
         entry_name = ConfigKeys.SYSTEM_CONFIG_ENTRY_NAME
 
@@ -193,6 +188,7 @@ class SystemConfigHandler:
         return system_entry_reader
 
     def _default_value_for_key(self, key, value=None):
+        logging.info('Getting Default value for %s', key)
         return {
             ConfigKeys.SSL_KEY: lambda _: False,
             ConfigKeys.PORT_KEY: lambda _: '',

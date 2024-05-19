@@ -76,8 +76,9 @@ class ExportProcessor:
             for c in registry.slow_collectors:
                 logging.info('%s: Adding Slow Collector %s', router.router_name, c.name)
                 REGISTRY.register(c)
-            
-        system_collector_registry = SystemCollectorRegistry(['name', ConfigKeys.ROUTERBOARD_NAME, ConfigKeys.ROUTERBOARD_ADDRESS])
+
+        system_config = config_handler.system_entry()
+        system_collector_registry = SystemCollectorRegistry(system_config, ['name', ConfigKeys.ROUTERBOARD_NAME, ConfigKeys.ROUTERBOARD_ADDRESS])
         for c in system_collector_registry.system_collectors:
             logging.info('Adding System Collector %s', c.name)
             REGISTRY.register(c)
@@ -87,9 +88,9 @@ class ExportProcessor:
 
         self.internal_collector = system_collector_registry.interal_collector
 
-        logging.info('Running HTTP metrics server on address %s port %i', config_handler.system_entry().export_address, config_handler.system_entry().port)
+        logging.info('Running HTTP metrics server on address %s port %i', system_config.export_address, system_config.port)
 
-        self.server, self.thr = start_http_server(port=config_handler.system_entry().port, addr=config_handler.system_entry().export_address)
+        self.server, self.thr = start_http_server(port=system_config.port, addr=system_config.export_address)
 
         self.s.run()
 

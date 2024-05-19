@@ -14,8 +14,6 @@
 
 import logging
 
-from mtik_exporter.cli.config import config_handler
-
 from mtik_exporter.collector.dhcp_collector import DHCPCollector
 from mtik_exporter.collector.package_collector import PackageCollector
 from mtik_exporter.collector.interface_collector import InterfaceCollector, InterfaceMonitorCollector
@@ -114,13 +112,13 @@ class SystemCollectorRegistry:
     ''' mtik_exporter Collectors Registry
     '''
 
-    def __init__(self, keys: list[str]) -> None:
+    def __init__(self, system_config, keys: list[str]) -> None:
         self.system_collectors: list['LoadingCollector'] = []
         self.interal_collector = InternalCollector(keys)
 
         # SYSTEM Collectors
-        if config_handler.system_entry().check_for_updates:
-            interval = config_handler.system_entry().check_for_updates_interval
-            channel = config_handler.system_entry().check_for_updates_channel
+        if system_config.check_for_updates:
+            interval = system_config.check_for_updates_interval
+            channel = system_config.check_for_updates_channel
 
             self.system_collectors.append(LatestVersionCollector(channel, interval))

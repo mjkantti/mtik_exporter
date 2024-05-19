@@ -12,84 +12,11 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
-import os, sys, re
+import re
 import logging
 
 from urllib import request
-from collections.abc import Iterable
-from datetime import datetime, timezone, timedelta
-
-
-
-''' Utilities / Helpers
-'''
-class FSHelper:
-    ''' File System ops helper
-    '''
-    @staticmethod
-    def full_path(path: str, check_parent_path = False):
-        ''' Full path
-        '''
-        if path:
-            path = os.path.expanduser(path)
-            path = os.path.expandvars(path)
-            path = os.path.abspath(path)
-            path = os.path.realpath(path)
-
-        # for files, check that the parent dir exists
-        if check_parent_path:
-            if not os.access(os.path.dirname(path), os.W_OK):
-                print('Non-valid folder path:\n\t "{}"'.format(os.path.dirname(path)))
-                sys.exit(1)
-
-        return path if path else None
-
-class UniquePartialMatchList(list):
-    ''' Enables matching elements by unique "shortcuts"
-        e.g:
-            >> 'Another' in UniquePartialMatchList(['A long string', 'Another longs string'])
-            >> True
-            >>'long' in UniquePartialMatchList(['A long string', 'Another longs string'])
-            >> False
-            >> l.find('Another')
-            >> 'Another longs string'
-    '''
-    def _matched_items(self, partialMatch):
-        ''' Generator expression of <matched items>, where <matched item> is
-            a tuple of (<matched_element>, <is_exact_match>)
-        '''
-        def _contains_or_equal(item):
-            if isinstance(item, Iterable):
-                return (partialMatch in item)
-            else:
-                return (partialMatch == item)
-        return ((item, (partialMatch == item)) for item in self if _contains_or_equal(item))
-
-    def find(self, partialMatch):
-        ''' Returns the element in which <partialMatch> can be found
-            <partialMatch> is found if it either:
-                equals to an element or is contained by exactly one element
-        '''
-        matched_cnt, unique_match = 0, None
-        matched_items = self._matched_items(partialMatch)
-        for match, exact_match in matched_items:
-            if exact_match:
-                # found exact match
-                return match
-            else:
-                # found a partial match
-                if not unique_match:
-                    unique_match = match
-                matched_cnt += 1
-        return unique_match if matched_cnt == 1 else None
-
-    def __contains__(self, partialMatch):
-        ''' Check if <partialMatch> is contained by an element in the list,
-            where <contained> is defined either as:
-                either "equals to element" or "contained by exactly one element"
-        '''
-        return True if self.find(partialMatch) else False
-
+from datetime import timedelta
 
 UPDATE_BASE_URL = 'https://upgrade.mikrotik.com/routeros/NEWESTa7'
 

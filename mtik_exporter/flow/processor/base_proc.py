@@ -87,9 +87,9 @@ class ExportProcessor:
 
         self.internal_collector = system_collector_registry.interal_collector
 
-        logging.info('Running HTTP metrics server on port %i', config_handler.system_entry().port)
+        logging.info('Running HTTP metrics server on address %s port %i', config_handler.system_entry().export_address, config_handler.system_entry().port)
 
-        self.server, self.thr = start_http_server(config_handler.system_entry().port)
+        self.server, self.thr = start_http_server(port=config_handler.system_entry().port, addr=config_handler.system_entry().export_address)
 
         self.s.run()
 

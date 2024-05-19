@@ -12,8 +12,6 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
-from mtik_exporter.cli.config import config_handler
-
 import requests
 import logging
 import json
@@ -38,7 +36,7 @@ class RouterRestAPI:
             host_url += f':{config_entry.port}'
         self.base_url = f'{host_url}/rest'
 
-        self.timeout = config_handler.system_entry().socket_timeout
+        self.timeout = config_entry.socket_timeout
         self.retry_timer = time.time()
         self.ses = requests.Session()
 

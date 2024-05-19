@@ -114,9 +114,9 @@ class SystemCollectorRegistry:
     ''' mtik_exporter Collectors Registry
     '''
 
-    def __init__(self) -> None:
+    def __init__(self, keys: list[str]) -> None:
         self.system_collectors: list['LoadingCollector'] = []
-        self.interal_collector = InternalCollector()
+        self.interal_collector = InternalCollector(keys)
 
         # SYSTEM Collectors
         if config_handler.system_entry().check_for_updates:

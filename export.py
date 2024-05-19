@@ -14,7 +14,6 @@
 ## GNU General Public License for more details.
 
 
-from mtik_exporter.cli.config.config import config_handler
 from mtik_exporter.cli.options import mtik_exporterOptionsParser
 from mtik_exporter.flow.processor.base_proc import ExportProcessor
 

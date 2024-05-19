@@ -77,7 +77,7 @@ class ExportProcessor:
                 logging.info('%s: Adding Slow Collector %s', router.router_name, c.name)
                 REGISTRY.register(c)
             
-        system_collector_registry = SystemCollectorRegistry()
+        system_collector_registry = SystemCollectorRegistry(['name', ConfigKeys.ROUTERBOARD_NAME, ConfigKeys.ROUTERBOARD_ADDRESS])
         for c in system_collector_registry.system_collectors:
             logging.info('Adding System Collector %s', c.name)
             REGISTRY.register(c)

@@ -13,7 +13,6 @@
 ## GNU General Public License for more details.
 
 
-from mtik_exporter.cli.config import ConfigKeys
 from prometheus_client.context_managers import Timer
 from prometheus_client.core import Gauge, Counter
 from typing import TYPE_CHECKING
@@ -23,9 +22,9 @@ class InternalCollector():
     ''' System Identity Metrics collector
     '''
 
-    def __init__(self):
+    def __init__(self, label_names):
         self.name = 'InternalCollector'
-        labels = ['name', ConfigKeys.ROUTERBOARD_NAME, ConfigKeys.ROUTERBOARD_ADDRESS] 
+        labels = label_names
         self.load_time = Counter(f'mtik_exporter_data_load_time', 'Total time spent loading metrics in seconds', labelnames=labels)
         self.load_count = Counter(f'mtik_exporter_data_load_count', 'Total count of metrics loads since reboot', labelnames=labels)
         self.load_last_run = Gauge(f'mtik_exporter_data_load_last_run', 'Last run timestamp of metrics load', labelnames=labels)

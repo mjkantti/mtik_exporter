@@ -15,7 +15,7 @@
 
 import os
 from argparse import ArgumentParser
-from mtik_exporter.cli.config.config import config_handler
+from mtik_exporter.cli.config import config_handler
 
 class mtik_exporterOptionsParser:
     ''' Base mtik_exporter Options Parser

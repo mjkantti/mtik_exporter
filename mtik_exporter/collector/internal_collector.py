@@ -13,13 +13,10 @@
 ## GNU General Public License for more details.
 
 
-from mtik_exporter.cli.config.config import ConfigKeys
+from mtik_exporter.cli.config import ConfigKeys
 from prometheus_client.context_managers import Timer
 from prometheus_client.core import Gauge, Counter
 from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from mtik_exporter.flow.router_entry import RouterEntry
 
 
 class InternalCollector():

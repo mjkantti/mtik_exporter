@@ -12,7 +12,7 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
-from mtik_exporter.cli.config.config import config_handler
+from mtik_exporter.cli.config import config_handler
 
 import requests
 import logging

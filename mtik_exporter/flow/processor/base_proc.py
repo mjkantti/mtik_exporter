@@ -19,7 +19,7 @@ from signal import signal, SIGTERM, SIGINT
 from time import time, sleep
 
 from mtik_exporter.flow.router_entry import RouterEntry
-from mtik_exporter.cli.config.config import config_handler, ConfigKeys
+from mtik_exporter.cli.config import config_handler, ConfigKeys
 from mtik_exporter.flow.collector_registry import CollectorRegistry, SystemCollectorRegistry
 
 import logging

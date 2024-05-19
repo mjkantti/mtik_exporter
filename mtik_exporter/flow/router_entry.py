@@ -13,7 +13,7 @@
 ## GNU General Public License for more details.
 
 
-from mtik_exporter.cli.config.config import config_handler, ConfigKeys
+from mtik_exporter.cli.config import config_handler, ConfigKeys
 from mtik_exporter.flow.router_rest_api import RouterRestAPI
 
 class RouterEntry:

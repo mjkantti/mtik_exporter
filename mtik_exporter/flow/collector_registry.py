@@ -14,7 +14,7 @@
 
 import logging
 
-from mtik_exporter.cli.config.config import config_handler
+from mtik_exporter.cli.config import config_handler
 
 from mtik_exporter.collector.dhcp_collector import DHCPCollector
 from mtik_exporter.collector.package_collector import PackageCollector

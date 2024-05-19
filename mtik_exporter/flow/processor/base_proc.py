@@ -88,9 +88,9 @@ class ExportProcessor:
 
         self.internal_collector = system_collector_registry.interal_collector
 
-        logging.info('Running HTTP metrics server on address %s port %i', system_config.export_address, system_config.port)
+        logging.info('Running HTTP metrics server on address %s port %i', system_config.export_address, system_config.export_port)
 
-        self.server, self.thr = start_http_server(port=system_config.port, addr=system_config.export_address)
+        self.server, self.thr = start_http_server(port=system_config.export_port, addr=system_config.export_address)
 
         self.s.run()
 
@@ -108,7 +108,10 @@ class ExportProcessor:
         
             logging.debug('Running %s', c.name)
 
-            with self.internal_collector.time(internal_labels), self.internal_collector.count_exceptions(internal_labels):
-                c.load(router_entry)
-                self.internal_collector.set_last_run(internal_labels)
+            try:
+                with self.internal_collector.time(internal_labels), self.internal_collector.count_exceptions(internal_labels):
+                        c.load(router_entry)
                 self.internal_collector.inc_load_count(internal_labels)
+            except Exception as e:
+                pass
+            self.internal_collector.set_last_run(internal_labels)

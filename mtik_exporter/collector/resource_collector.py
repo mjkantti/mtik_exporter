@@ -64,4 +64,4 @@ class SystemResourceCollector(LoadingCollector):
                 resource_record['current_version'] = ver
                 resource_record['channel'] = channel
 
-        self.metric_store.set_metrics([resource_record])
+            self.metric_store.set_metrics([resource_record])

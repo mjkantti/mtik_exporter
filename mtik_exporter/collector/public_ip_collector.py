@@ -41,5 +41,6 @@ class PublicIPAddressCollector(LoadingCollector):
 
     def load(self, router_entry: 'RouterEntry'):
         address_record = router_entry.rest_api.get('ip/cloud')
-        self.metric_store.set_metrics([address_record])
+        if address_record:
+            self.metric_store.set_metrics([address_record])
 

@@ -32,8 +32,9 @@ class RouterEntry:
 
     def set_dhcp_entries(self, entries: list[dict[str, str | float]]):
         self._dhcp_entries.clear()
-        for e in entries:
-            self._dhcp_entries[e.get('mac-address')] = e
+        if entries:
+            for e in entries:
+                self._dhcp_entries[e.get('mac-address')] = e
 
     def dhcp_record(self, key: str):
         return self._dhcp_entries.get(key)

@@ -42,7 +42,8 @@ class RouterRestAPI:
 
     def get(self, path, params = {}):
         if time.time() < self.retry_timer:
-            return []
+            logging.critical("Skipping query because of previous exception")
+            raise Exception("Skipping")
 
         url = f"{self.base_url}/{path}"
         logging.debug("Hitting %s", url)
@@ -57,19 +58,21 @@ class RouterRestAPI:
             # Connection error, set retry timer to 30s
             self.retry_timer = time.time() + 30
             logging.critical(f'Connection Error: {connection_error}')
+            raise connection_error
         except requests.exceptions.HTTPError as http_error:
             # HTTP Error, no retry timer
             logging.critical(f'Unsuccesful HTTP Request: {http_error}')
+            raise http_error
         except requests.exceptions.Timeout as timeout_error:
             # Timeout, set retry timer to 30s
             self.retry_timer = time.time() + 30
             logging.critical(f'Timeout Occured: {timeout_error}')
+            raise timeout_error
         except Exception as exc:
             # Other exception set retry timer to 10s
             self.retry_timer = time.time() + 10
             logging.critical(f'Got Exception: {exc}')
-
-        return None
+            raise exc
     
     def post(self, path, command, data):
         if time.time() < self.retry_timer:

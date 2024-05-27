@@ -44,7 +44,7 @@ class ConfigKeys:
 
     CHECK_FOR_UPDATES_KEY = 'check_for_updates'
     CHECK_FOR_UPDATES_CHANNEL_KEY = 'check_for_updates_channel'
-    CHECK_FOR_UPDATES_INTERVAL_KEY = 'check_for_updates_interval'
+    SYSTEM_INTERVAL_KEY = 'system_interval'
 
     EXPORTER_INC_DIV = 'delay_inc_div'
     EXPORTER_VERBOSE_MODE = 'verbose_mode'
@@ -65,7 +65,7 @@ class ConfigKeys:
     DEFAULT_MAX_DELAY = 900
     DEFAULT_INC_DIV = 5
     DEFAULT_CHECK_FOR_UPDATES_CHANNEL = ['stable']
-    DEFAULT_CHECK_FOR_UPDATES_INTERVAL = 3600
+    DEFAULT_SYSTEM_INTERVAL = 3600
     DEFAULT_EXPORT_ADDRESS = '::'
 
     ROUTER_STR_KEYS = {HOST_KEY, USER_KEY, PASSWD_KEY}
@@ -75,7 +75,7 @@ class ConfigKeys:
 
     SYSTEM_STR_KEYS = {EXPORTER_ADDR}
     SYSTEM_BOOLEAN_KEYS = {EXPORTER_VERBOSE_MODE, CHECK_FOR_UPDATES_KEY}
-    SYSTEM_INT_KEYS = {EXPORTER_PORT, EXPORTER_INC_DIV, CHECK_FOR_UPDATES_INTERVAL_KEY}
+    SYSTEM_INT_KEYS = {EXPORTER_PORT, EXPORTER_INC_DIV, SYSTEM_INTERVAL_KEY}
     SYSTEM_LIST_KEYS = {CHECK_FOR_UPDATES_CHANNEL_KEY}
 
     # mtik_exporter config entry name
@@ -195,7 +195,7 @@ class SystemConfigHandler:
             ConfigKeys.SOCKET_TIMEOUT: lambda _: ConfigKeys.DEFAULT_SOCKET_TIMEOUT,
             ConfigKeys.EXPORTER_INC_DIV: lambda _: ConfigKeys.DEFAULT_INC_DIV,
             ConfigKeys.CHECK_FOR_UPDATES_CHANNEL_KEY: lambda _: ConfigKeys.DEFAULT_CHECK_FOR_UPDATES_CHANNEL,
-            ConfigKeys.CHECK_FOR_UPDATES_INTERVAL_KEY: lambda _: ConfigKeys.DEFAULT_CHECK_FOR_UPDATES_INTERVAL,
+            ConfigKeys.SYSTEM_INTERVAL_KEY: lambda _: ConfigKeys.DEFAULT_SYSTEM_INTERVAL,
             ConfigKeys.EXPORTER_ADDR: lambda _: ConfigKeys.DEFAULT_EXPORT_ADDRESS,
             ConfigKeys.EXPORTER_PORT: lambda _: ConfigKeys.DEFAULT_EXPORT_PORT
         }[key](value)

@@ -114,11 +114,11 @@ class SystemCollectorRegistry:
 
     def __init__(self, system_config, keys: list[str]) -> None:
         self.system_collectors: list['LoadingCollector'] = []
+        self.interval: int = system_config.system_interval
         self.interal_collector = InternalCollector(keys)
 
         # SYSTEM Collectors
         if system_config.check_for_updates:
-            interval = system_config.check_for_updates_interval
             channel = system_config.check_for_updates_channel
 
-            self.system_collectors.append(LatestVersionCollector(channel, interval))
+            self.system_collectors.append(LatestVersionCollector(channel, self.interal_collector))

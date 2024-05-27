@@ -23,7 +23,6 @@ class LatestVersionCollector(LoadingCollector):
     def __init__(self, channels: list[str], interval: int):
         self.name = 'LatestVersionCollector'
         self.channels = channels
-        self.interval = interval
         self.metric_store = MetricStore({}, ['channel', 'latest_version'], interval=interval)
 
         self.metric_store.create_info_metric('system_latest_version', 'Latest RouterOS version available')

@@ -54,6 +54,7 @@ class ExportProcessor:
     def start(self):
 
         self._router_entries = {}
+        start_time = round(time(), -1)
         for i, router_name in enumerate(config_handler.registered_entries()):
             router = RouterEntry(router_name)
             if not router.config_entry.enabled:
@@ -64,10 +65,10 @@ class ExportProcessor:
             self.registries.append(registry)
             
             interval = registry.router_entry.config_entry.polling_interval
-            self.s.enter((i+1), 1, self.run_collectors, argument=(router, registry.fast_collectors, interval, time(), 1))
+            self.s.enter(i, 1, self.run_collectors, argument=(router, registry.fast_collectors, interval, start_time, 1))
 
             slow_interval = registry.router_entry.config_entry.slow_polling_interval
-            self.s.enter((i+1)*10, 2, self.run_collectors, argument=(router, registry.slow_collectors, slow_interval, time(), 2))
+            self.s.enter(i, 2, self.run_collectors, argument=(router, registry.slow_collectors, slow_interval, start_time, 2))
 
             for c in registry.fast_collectors:
                 logging.info('%s: Adding Fast Collector %s', router.router_name, c.name)
@@ -84,7 +85,7 @@ class ExportProcessor:
             REGISTRY.register(c)
 
         if system_collector_registry.system_collectors:
-            self.s.enter(15, 3, self.run_collectors, argument=(None, system_collector_registry.system_collectors, c.interval, time(), 3))
+            self.s.enter(i, 3, self.run_collectors, argument=(None, system_collector_registry.system_collectors, c.interval, start_time, 3))
 
         self.internal_collector = system_collector_registry.interal_collector
 
@@ -97,7 +98,10 @@ class ExportProcessor:
         logging.info(f'Shut Down Done')
     
     def run_collectors(self, router_entry, collectors, interval, start_time, priority):
-        next_run = start_time + interval
+        next_run = start_time
+        while next_run < time():
+            next_run += interval
+
         self.s.enterabs(next_run, priority, self.run_collectors, argument=(router_entry, collectors, interval, next_run, priority))
 
         logging.debug('Starting data load, polling interval set to: %i', interval)

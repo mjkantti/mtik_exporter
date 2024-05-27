@@ -55,7 +55,12 @@ class ExportProcessor:
 
         self._router_entries = {}
         start_time = round(time(), -1)
-        for i, router_name in enumerate(config_handler.registered_entries()):
+        
+        system_config = config_handler.system_entry()
+        system_collector_registry = SystemCollectorRegistry(system_config, ['name', ConfigKeys.ROUTERBOARD_NAME, ConfigKeys.ROUTERBOARD_ADDRESS])
+        self.internal_collector = system_collector_registry.interal_collector
+
+        for router_name in config_handler.registered_entries():
             router = RouterEntry(router_name)
             if not router.config_entry.enabled:
                 logging.info('%s: Skipping disabled router', router_name)
@@ -65,10 +70,10 @@ class ExportProcessor:
             self.registries.append(registry)
             
             interval = registry.router_entry.config_entry.polling_interval
-            self.s.enter(i, 1, self.run_collectors, argument=(router, registry.fast_collectors, interval, start_time, 1))
+            self.run_collectors(router, registry.fast_collectors, interval, start_time, 1)
 
             slow_interval = registry.router_entry.config_entry.slow_polling_interval
-            self.s.enter(i, 2, self.run_collectors, argument=(router, registry.slow_collectors, slow_interval, start_time, 2))
+            self.run_collectors(router, registry.slow_collectors, slow_interval, start_time, 2)
 
             for c in registry.fast_collectors:
                 logging.info('%s: Adding Fast Collector %s', router.router_name, c.name)
@@ -77,17 +82,11 @@ class ExportProcessor:
             for c in registry.slow_collectors:
                 logging.info('%s: Adding Slow Collector %s', router.router_name, c.name)
                 REGISTRY.register(c)
-
-        system_config = config_handler.system_entry()
-        system_collector_registry = SystemCollectorRegistry(system_config, ['name', ConfigKeys.ROUTERBOARD_NAME, ConfigKeys.ROUTERBOARD_ADDRESS])
+        
         for c in system_collector_registry.system_collectors:
             logging.info('Adding System Collector %s', c.name)
             REGISTRY.register(c)
-
-        if system_collector_registry.system_collectors:
-            self.s.enter(i, 3, self.run_collectors, argument=(None, system_collector_registry.system_collectors, c.interval, start_time, 3))
-
-        self.internal_collector = system_collector_registry.interal_collector
+        self.run_collectors(None, system_collector_registry.system_collectors, c.interval, start_time, 3)
 
         logging.info('Running HTTP metrics server on address %s port %i', system_config.export_address, system_config.export_port)
 

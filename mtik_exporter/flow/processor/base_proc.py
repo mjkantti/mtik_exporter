@@ -70,10 +70,12 @@ class ExportProcessor:
             self.registries.append(registry)
             
             interval = registry.router_entry.config_entry.polling_interval
-            self.run_collectors(router, registry.fast_collectors, interval, start_time, 1)
+            self.s.enterabs(start_time + interval, 1, self.run_collectors, argument=(router, registry.fast_collectors, interval, start_time, 1))
+            #self.run_collectors(router, registry.fast_collectors, interval, start_time, 1)
 
             slow_interval = registry.router_entry.config_entry.slow_polling_interval
-            self.run_collectors(router, registry.slow_collectors, slow_interval, start_time, 2)
+            self.s.enterabs(start_time + interval, 2, self.run_collectors, argument=(router, registry.slow_collectors, slow_interval, start_time, 2))
+            #self.run_collectors(router, registry.slow_collectors, slow_interval, start_time, 2)
 
             for c in registry.fast_collectors:
                 logging.info('%s: Adding Fast Collector %s', router.router_name, c.name)
@@ -83,7 +85,7 @@ class ExportProcessor:
                 logging.info('%s: Adding Slow Collector %s', router.router_name, c.name)
                 REGISTRY.register(c)
 
-        interval = system_config.system_interval
+        interval = system_collector_registry.interval
         for c in system_collector_registry.system_collectors:
             logging.info('Adding System Collector %s', c.name)
             REGISTRY.register(c)
@@ -99,7 +101,7 @@ class ExportProcessor:
         logging.info(f'Shut Down Done')
     
     def run_collectors(self, router_entry, collectors, interval, start_time, priority):
-        next_run = start_time
+        next_run = start_time + interval
         while next_run < time():
             next_run += interval
 

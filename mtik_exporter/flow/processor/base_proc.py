@@ -15,13 +15,13 @@
 from prometheus_client.core import REGISTRY
 from prometheus_client import start_http_server
 from sched import scheduler
-from signal import signal, SIGTERM, SIGINT
 from time import time, sleep
 
 from mtik_exporter.flow.router_entry import RouterEntry
 from mtik_exporter.cli.config import config_handler, ConfigKeys
 from mtik_exporter.flow.collector_registry import CollectorRegistry, SystemCollectorRegistry
 
+import signal
 import logging
 logging.basicConfig(format='%(levelname)s %(message)s', level=logging.INFO)
 
@@ -29,8 +29,12 @@ class ExportProcessor:
     ''' Base Export Processing
     '''
     def __init__(self):
-        signal(SIGINT, self.exit_gracefully)
-        signal(SIGTERM, self.exit_gracefully)
+        catchable_sigs = set(signal.Signals) - {signal.SIGKILL, signal.SIGSTOP}
+        for sig in catchable_sigs:
+            signal.signal(sig, self.exit_gracefully)        
+
+        #signal(SIGINT, self.exit_gracefully)
+        #signal(SIGTERM, self.exit_gracefully)
 
         self.registries = []
         self.s = scheduler(time, sleep)

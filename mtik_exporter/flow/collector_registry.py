@@ -121,4 +121,4 @@ class SystemCollectorRegistry:
         if system_config.check_for_updates:
             channel = system_config.check_for_updates_channel
 
-            self.system_collectors.append(LatestVersionCollector(channel, self.interal_collector))
+            self.system_collectors.append(LatestVersionCollector(channel, self.interval))

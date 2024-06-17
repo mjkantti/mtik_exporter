@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # coding=utf8
 ## Copyright (c) 2020 Arseniy Kuznetsov
 ## Copyright (c) 2024 Martti Anttila
@@ -13,8 +14,8 @@
 ## GNU General Public License for more details.
 
 import requests
-import logging
 import json
+import logging
 import time
 
 # Mikrotik returns everything with latin1 encoding

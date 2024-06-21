@@ -54,7 +54,7 @@ class RouterRestAPI:
             logging.debug(f"Done, took: {resp.elapsed.total_seconds()}")
 
             c = resp.content.decode(mtik_encoding)
-            return json.loads(c)
+            return json.loads(c, strict = False)
         except ConnectionError as connection_error:
             # Connection error, set retry timer to 30s
             self.retry_timer = time.time() + 30

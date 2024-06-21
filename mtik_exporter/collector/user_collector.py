@@ -28,7 +28,10 @@ class UserCollector(LoadingCollector):
         self.metric_store = MetricStore(
             router_id,
             ['name', 'address', 'via', 'group'],
-            ['when', 'count'],
+            ['when'],
+            {
+                'when': lambda w: datetime.fromisoformat(w).replace(tzinfo=timezone.utc).timestamp()
+            },
             interval=interval
         )
 
@@ -38,17 +41,5 @@ class UserCollector(LoadingCollector):
 
     def load(self, router_entry: 'RouterEntry'):
         user_records = router_entry.rest_api.get('user/active')
-
-        filtered_users = {}
-        for usr in user_records:
-            k = f'{usr.get("name", "")}_{usr.get("address", "")}_{usr.get("via", "")}'
-            t = datetime.fromisoformat(usr.get('when')).replace(tzinfo=timezone.utc).timestamp()
-            u = filtered_users.get(k, {})
-            #print(filtered_users)
-            cnt = u.get('count', 0) + 1
-            t = max(t, u.get('when', 0))
-
-            usr.update({'when': t, 'count': cnt})
-            filtered_users[k] = usr
-
-        self.metric_store.set_metrics(filtered_users.values())
+        print(user_records)
+        self.metric_store.set_metrics(user_records)

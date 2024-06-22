@@ -41,5 +41,4 @@ class UserCollector(LoadingCollector):
 
     def load(self, router_entry: 'RouterEntry'):
         user_records = router_entry.rest_api.get('user/active')
-        print(user_records)
         self.metric_store.set_metrics(user_records)

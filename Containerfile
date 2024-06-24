@@ -6,8 +6,6 @@ ENV PROMETHEUS_DISABLE_CREATED_SERIES=True
 WORKDIR /mtik_exporter
 COPY . .
 
-RUN chmod +x export.py
-
 RUN addgroup -S exporter && adduser -S exporter -G exporter
 USER exporter
 

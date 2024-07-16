@@ -28,7 +28,7 @@ class UserCollector(LoadingCollector):
         self.metric_store = MetricStore(
             router_id,
             ['name', 'address', 'via', 'group'],
-            ['when'],
+            ['when', 'count'],
             {
                 'when': lambda w: datetime.fromisoformat(w).replace(tzinfo=timezone.utc).timestamp()
             },
@@ -41,4 +41,26 @@ class UserCollector(LoadingCollector):
 
     def load(self, router_entry: 'RouterEntry'):
         user_records = router_entry.rest_api.get('user/active')
-        self.metric_store.set_metrics(user_records)
+        filtered = {}
+
+        for ur in user_records:
+            key = f'{ur.get("address", "")}-{ur.get("name", "")}-{ur.get("via", "")}'
+            u = filtered.get(key)
+            if not u:
+                filtered[key] = {
+                        'address': ur.get('address', 'unknown'),
+                        'name': ur.get('name', 'unknown'),
+                        'via': ur.get('via', ''),
+                        'group': ur.get('group', ''),
+                        'when': ur.get('when', ''),
+                        'count': 1
+                    }
+                continue
+
+            if ur.get('when') > u.get('when'):
+                u['when'] = ur.get('when')
+
+            u['count'] += 1
+            filtered[key] = u
+
+        self.metric_store.set_metrics(list(filtered.values()))

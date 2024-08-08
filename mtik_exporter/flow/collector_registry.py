@@ -28,7 +28,7 @@ from mtik_exporter.collector.resource_collector import SystemResourceCollector
 from mtik_exporter.collector.route_collector import RouteCollector, IPv6RouteCollector
 from mtik_exporter.collector.wifi_collector import WifiCollector, WifiClientCollector
 from mtik_exporter.collector.capsman_collector import CapsmanCollector
-from mtik_exporter.collector.firewall_collector import FirewallCollector, IPv6FirewallCollector
+from mtik_exporter.collector.firewall_collector import FirewallFilterCollector, FirewallMangleCollector, FirewallRawCollector, IPv6FirewallFilterCollector, IPv6FirewallMangleCollector, IPv6FirewallRawCollector
 from mtik_exporter.collector.user_collector import UserCollector
 from mtik_exporter.collector.queue_collector import QueueTreeCollector
 from mtik_exporter.collector.queue_collector import QueueSimpleCollector
@@ -60,8 +60,12 @@ class CollectorRegistry:
         'interface': InterfaceCollector,
         'identity': IdentityCollector,
         'interface_monitor': InterfaceMonitorCollector,
-        'firewall': FirewallCollector,
-        'ipv6_firewall': IPv6FirewallCollector,
+        'firewall_filter': FirewallFilterCollector,
+        'firewall_mangle': FirewallMangleCollector,
+        'firewall_raw': FirewallRawCollector,
+        'ipv6_firewall_filter': IPv6FirewallFilterCollector,
+        'ipv6_firewall_mangle': IPv6FirewallMangleCollector,
+        'ipv6_firewall_raw': IPv6FirewallRawCollector,
         'ipv6_neighbor': IPv6NeighborCollector,
         'route': RouteCollector,
         'ipv6_route': IPv6RouteCollector,

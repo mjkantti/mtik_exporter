@@ -32,6 +32,8 @@ class RouteCollector(LoadingCollector):
         self.metric_store.create_info_metric('routes', 'Routes Info')
 
     def load(self, router_entry: 'RouterEntry'):
+        self.metric_store.clear_metrics()
+
         route_records = router_entry.rest_api.get('ip/route')
         self.metric_store.set_metrics(route_records)
 

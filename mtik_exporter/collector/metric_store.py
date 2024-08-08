@@ -120,8 +120,12 @@ class LoadingCollector(Collector):
     def get_name(self):
         return self.name
 
-    @abstractmethod
     def load(self, router_entry: 'RouterEntry') -> None:
+        self.metric_store.clear_metrics()
+        self.load_data(router_entry)
+    
+    @abstractmethod
+    def load_data(self, router_entry: 'RouterEntry') -> None:
         pass
 
     def collect(self):

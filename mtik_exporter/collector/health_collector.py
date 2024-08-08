@@ -42,9 +42,7 @@ class HealthCollector(LoadingCollector):
         self.metric_store.create_gauge_metric('system_fan_four_speed', 'System fan 4 current speed', 'fan4_speed')
         self.metric_store.create_gauge_metric('system_power_consumption', 'System Power Consumption', 'power_consumption')
 
-    def load(self, router_entry: 'RouterEntry'):
-        self.metric_store.clear_metrics()
-
+    def load_data(self, router_entry: 'RouterEntry'):
         health_records = router_entry.rest_api.get('system/health')
         for record in health_records:
             if 'name' in record:

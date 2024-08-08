@@ -26,33 +26,25 @@ class WifiCollector(LoadingCollector):
 
     def __init__(self, router_id: dict[str, str]):
         self.name = 'WifiCollector'
-        self.wifi_interface_metric_store = MetricStore(router_id, ['id', 'name', 'comment', 'configuration', 'configuration_mode', 'configuration_ssid', 'mac_address', 'master'])
-        self.wifi_monitor_metric_store = MetricStore(router_id, ['id', 'name', 'comment', 'state', 'channel', 'tx_power'], ['registered_peers', 'authorized_peers'])
+        self.metric_store = MetricStore(router_id, ['id', 'name', 'comment', 'configuration', 'configuration_mode', 'configuration_ssid', 'mac_address', 'master', 'state', 'channel', 'tx_power'], ['registered_peers', 'authorized_peers'])
 
         # Metrics
-        self.wifi_interface_metric_store.create_info_metric('wifi_interfaces', 'Wifi Interfaces')
-        self.wifi_monitor_metric_store.create_info_metric('wifi_interfaces_monitor', 'Wifi Interfaces Monitor')
-        self.wifi_monitor_metric_store.create_gauge_metric('wifi_interface_registered_peers', 'Wifi interface registered peers', 'registered_peers', ['id', 'name', 'comment'])
-        self.wifi_monitor_metric_store.create_gauge_metric('wifi_interface_authorized_peers', 'Wifi interface authorized peers', 'authorized_peers', ['id', 'name', 'comment'])
+        self.metric_store.create_info_metric('wifi_interfaces', 'Wifi Interfaces')
+        self.metric_store.create_gauge_metric('wifi_interface_registered_peers', 'Wifi interface registered peers', 'registered_peers', ['id', 'name', 'comment'])
+        self.metric_store.create_gauge_metric('wifi_interface_authorized_peers', 'Wifi interface authorized peers', 'authorized_peers', ['id', 'name', 'comment'])
 
-    def load(self, router_entry: 'RouterEntry'):
-        self.wifi_interface_metric_store.clear_metrics()
-        self.wifi_monitor_metric_store.clear_metrics()
-
+    def load_data(self, router_entry: 'RouterEntry'):
         wifi_interface_records = router_entry.rest_api.get('interface/wifi')
-        self.wifi_interface_metric_store.set_metrics(wifi_interface_records)
+        print(wifi_interface_records)
 
         monitor_records = []
         if wifi_interface_records:
             if_ids = ','.join([str(i.get('.id')) for i in wifi_interface_records])
             monitor_records = router_entry.rest_api.post('interface/wifi', 'monitor', {'once': True, '.id': if_ids})
             for mon_r, w_r in zip(monitor_records, wifi_interface_records):
-                mon_r.update({'id': w_r.get('.id', ''), 'name': w_r.get('name', ''), 'comment': w_r.get('comment', '')})
-            self.wifi_monitor_metric_store.set_metrics(monitor_records)
-
-    def collect(self):
-        yield from self.wifi_interface_metric_store.get_metrics()
-        yield from self.wifi_monitor_metric_store.get_metrics()
+                w_r.update(mon_r)
+        print(wifi_interface_records)
+        self.metric_store.set_metrics(wifi_interface_records)
 
 class WifiClientCollector(LoadingCollector):
     ''' Wireless Metrics collector
@@ -73,9 +65,7 @@ class WifiClientCollector(LoadingCollector):
         self.metric_store.create_gauge_metric('wifi_clients_rx_rate', 'Client devices RX bitrate', 'rx_rate', ['mac_address', 'dhcp_name', 'dhcp_comment'])
         self.metric_store.create_gauge_metric('wifi_clients_tx_rate', 'Client devices TX bitrate', 'tx_rate', ['mac_address', 'dhcp_name', 'dhcp_comment'])
 
-    def load(self, router_entry: 'RouterEntry'):
-        self.metric_store.clear_metrics()
-
+    def load_data(self, router_entry: 'RouterEntry'):
         registration_records = router_entry.rest_api.get('interface/wifi/registration-table')
         if registration_records:
             for r in registration_records:
@@ -85,4 +75,5 @@ class WifiClientCollector(LoadingCollector):
                 r['uptime'] = parse_timedelta(str(r['uptime']))
 
                 add_dhcp_info(r, router_entry.dhcp_record(str(r.get('mac-address'))))
+
         self.metric_store.set_metrics(registration_records)

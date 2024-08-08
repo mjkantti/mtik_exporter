@@ -30,9 +30,7 @@ class POECollector(LoadingCollector):
         # Metrics
         self.metric_store.create_info_metric('poe', 'POE Metrics')
 
-    def load(self, router_entry: 'RouterEntry'):
-        self.metric_store.clear_metrics()
-
+    def load_data(self, router_entry: 'RouterEntry'):
         poe_records = router_entry.rest_api.get('interface/ethernet/poe')
 
         if poe_records:

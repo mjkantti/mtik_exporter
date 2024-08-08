@@ -36,9 +36,7 @@ class QueueTreeCollector(LoadingCollector):
         self.metric_store.create_counter_metric('queue_tree_queued_bytes', 'Number of queued bytes', 'queued_bytes', ['name'])
         self.metric_store.create_counter_metric('queue_tree_dropped', 'Number of dropped bytes', 'dropped', ['name'])
 
-    def load(self, router_entry: 'RouterEntry'):
-        self.metric_store.clear_metrics()
-
+    def load_data(self, router_entry: 'RouterEntry'):
         qt_records = router_entry.rest_api.get('queue/tree')
         self.metric_store.set_metrics(qt_records)
 
@@ -63,9 +61,7 @@ class QueueSimpleCollector(LoadingCollector):
         self.metric_store.create_counter_metric('queue_simple_dropped_upload', 'Number of upload dropped bytes', 'dropped_up', ['name'])
         self.metric_store.create_counter_metric('queue_simple_dropped_download', 'Number of download dropped bytes', 'dropped_down', ['name'])
 
-    def load(self, router_entry: 'RouterEntry'):
-        self.metric_store.clear_metrics()
-
+    def load_data(self, router_entry: 'RouterEntry'):
         queue_records = router_entry.rest_api.get('queue/simple')
 
         # simple queue records need splitting upload/download values

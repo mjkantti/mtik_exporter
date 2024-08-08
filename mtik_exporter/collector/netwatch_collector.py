@@ -63,9 +63,7 @@ class NetwatchCollector(LoadingCollector):
         self.metric_store.create_gauge_metric('netwatch_http_response_time', 'Netwatch HTTP Response Time', 'http_resp_time')
         self.metric_store.create_gauge_metric('tcp_connect_time', 'Netwatch HTTP TCP Connect Time', 'tcp_connect_time')
 
-    def load(self, router_entry: 'RouterEntry'):
-        self.metric_store.clear_metrics()
-
+    def load_data(self, router_entry: 'RouterEntry'):
         nw_records = router_entry.rest_api.get('tool/netwatch', {'disabled': 'false'})
         if not nw_records:
             return

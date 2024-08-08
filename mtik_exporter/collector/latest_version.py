@@ -28,9 +28,7 @@ class LatestVersionCollector(LoadingCollector):
         self.metric_store.create_info_metric('system_latest_version', 'Latest RouterOS version available')
         self.metric_store.create_gauge_metric('system_latest_version_built', 'Latest RouterOS version built time', 'latest_built')
 
-    def load(self, _):
-        self.metric_store.clear_metrics()
-
+    def load_data(self, _):
         recs = []
         for c in self.channels:
             latest_version_rec = {}

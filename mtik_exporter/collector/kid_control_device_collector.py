@@ -48,9 +48,7 @@ class KidDeviceCollector(LoadingCollector):
         self.metric_store.create_gauge_metric('kid_control_device_rate_up', 'Device rate up', 'rate_up', ['name', 'mac_address', 'user'])
         self.metric_store.create_gauge_metric('kid_control_device_idle_time', 'Device idle time', 'idle_time', ['name', 'mac_address', 'user'])
 
-    def load(self, router_entry: 'RouterEntry'):
-        self.metric_store.clear_metrics()
-
+    def load_data(self, router_entry: 'RouterEntry'):
         records = router_entry.rest_api.get('ip/kid-control/device')
         device_records = []
         for record in records:

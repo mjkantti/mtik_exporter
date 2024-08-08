@@ -37,9 +37,7 @@ class UserCollector(LoadingCollector):
         self.metric_store.create_gauge_metric('active_users_last_login', 'Active Users', 'when')
         self.metric_store.create_gauge_metric('active_users_count', 'Active Users Count', 'count')
 
-    def load(self, router_entry: 'RouterEntry'):
-        self.metric_store.clear_metrics()
-
+    def load_data(self, router_entry: 'RouterEntry'):
         user_records = router_entry.rest_api.get('user/active')
         filtered = {}
 

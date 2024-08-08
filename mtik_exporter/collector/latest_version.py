@@ -20,15 +20,17 @@ class LatestVersionCollector(LoadingCollector):
     ''' Latest RouterOS Version Collector
     '''
 
-    def __init__(self, channels: list[str], interval: int):
+    def __init__(self, channels: list[str]):
         self.name = 'LatestVersionCollector'
         self.channels = channels
-        self.metric_store = MetricStore({}, ['channel', 'latest_version'], interval=interval)
+        self.metric_store = MetricStore({}, ['channel', 'latest_version'])
 
         self.metric_store.create_info_metric('system_latest_version', 'Latest RouterOS version available')
         self.metric_store.create_gauge_metric('system_latest_version_built', 'Latest RouterOS version built time', 'latest_built')
 
     def load(self, _):
+        self.metric_store.clear_metrics()
+
         recs = []
         for c in self.channels:
             latest_version_rec = {}

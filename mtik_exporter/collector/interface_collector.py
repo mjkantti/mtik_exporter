@@ -24,14 +24,12 @@ class InterfaceCollector(LoadingCollector):
     ''' Router Interface Metrics collector
     '''
 
-    def __init__(self, router_id: dict[str, str], interval: int):
+    def __init__(self, router_id: dict[str, str]):
         self.name = 'InterfaceCollector'
         self.metric_store = MetricStore(
             router_id,
             ['id', 'name', 'comment', 'type', 'mtu', 'mac_address', 'running'],
-            ['rx_byte', 'tx_byte', 'rx_packet', 'tx_packet', 'rx_error', 'tx_error', 'rx_drop', 'tx_drop', 'link_downs'],
-            interval=interval
-        )
+            ['rx_byte', 'tx_byte', 'rx_packet', 'tx_packet', 'rx_error', 'tx_error', 'rx_drop', 'tx_drop', 'link_downs'])
 
         # Metrics
         self.metric_store.create_counter_metric('interface_rx_byte', 'Number of received bytes', 'rx_byte')
@@ -49,6 +47,8 @@ class InterfaceCollector(LoadingCollector):
         self.metric_store.create_counter_metric('link_downs', 'Number of times link went down', 'link_downs')
 
     def load(self, router_entry: 'RouterEntry'):
+        self.metric_store.clear_metrics()
+
         interface_traffic_records = router_entry.rest_api.get('interface')
         interface_traffic_records_running = [ift for ift in interface_traffic_records if ift['running'] == 'true']
         self.metric_store.set_metrics(interface_traffic_records_running)
@@ -57,7 +57,7 @@ class InterfaceMonitorCollector(LoadingCollector):
     ''' Router Interface Monitor Metrics collector
     '''
 
-    def __init__(self, router_id: dict[str, str], interval: int):
+    def __init__(self, router_id: dict[str, str]):
         self.name = 'InterfaceMonitorCollector'
         self.metric_store = MetricStore(
             router_id,
@@ -68,9 +68,7 @@ class InterfaceMonitorCollector(LoadingCollector):
                 'rate': parse_rates,
                 'full_duplex': lambda value: '1' if value=='true' else (None if value is None else '0'),
                 'sfp_temperature': lambda value: None if value is None else value
-            },
-            interval=interval
-        )
+            })
 
         self.metric_store.create_gauge_metric('interface_status', 'Current interface link status', 'status')
         self.metric_store.create_gauge_metric('interface_rate', 'Actual interface connection data rate', 'rate')
@@ -80,6 +78,8 @@ class InterfaceMonitorCollector(LoadingCollector):
         self.metric_store.create_gauge_metric('interface_sfp_temperature', 'Current SFP temperature', 'sfp_temperature')
 
     def load(self, router_entry: 'RouterEntry'):
+        self.metric_store.clear_metrics()
+
         interface_traffic_records = router_entry.rest_api.get('interface/ether', {'.proplist':'.id,name,comment,running'})
 
         if interface_traffic_records:

@@ -26,7 +26,7 @@ class NetwatchCollector(LoadingCollector):
     ''' Netwatch Metrics collector
     '''
 
-    def __init__(self, router_id: dict[str, str], interval: int):
+    def __init__(self, router_id: dict[str, str]):
         self.name = 'NetwatchCollector'
         self.metric_store = MetricStore(
             router_id,
@@ -42,9 +42,7 @@ class NetwatchCollector(LoadingCollector):
                 'rtt_stdev': lambda value: parse_timedelta(value) if value else None,
                 'http_resp_time': lambda value: parse_timedelta(value) if value else None,
                 'tcp_connect_time': lambda value: parse_timedelta(value) if value else None,
-            },
-            interval=interval
-        )
+            })
 
         # Create metrics
         self.metric_store.create_gauge_metric('netwatch_status', 'Netwatch Status Metrics', 'status')
@@ -66,6 +64,8 @@ class NetwatchCollector(LoadingCollector):
         self.metric_store.create_gauge_metric('tcp_connect_time', 'Netwatch HTTP TCP Connect Time', 'tcp_connect_time')
 
     def load(self, router_entry: 'RouterEntry'):
+        self.metric_store.clear_metrics()
+
         nw_records = router_entry.rest_api.get('tool/netwatch', {'disabled': 'false'})
         if not nw_records:
             return

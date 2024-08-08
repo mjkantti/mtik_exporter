@@ -23,14 +23,12 @@ if TYPE_CHECKING:
 class HealthCollector(LoadingCollector):
     ''' System Health Metrics collector
     '''
-    def __init__(self, router_id: dict[str, str], interval: int):
+    def __init__(self, router_id: dict[str, str]):
         self.name = 'HealthCollector'
         self.metric_store = MetricStore(
             router_id,
             [],
-            ['voltage', 'temperature', 'phy_temperature', 'cpu_temperature', 'switch_temperature', 'fan1_speed', 'fan2_speed', 'fan3_speed', 'fan4_speed', 'power_consumption'],
-            interval=interval
-        )
+            ['voltage', 'temperature', 'phy_temperature', 'cpu_temperature', 'switch_temperature', 'fan1_speed', 'fan2_speed', 'fan3_speed', 'fan4_speed', 'power_consumption'])
 
         # Metrics
         self.metric_store.create_gauge_metric('system_routerboard_voltage', 'Supplied routerboard voltage', 'voltage')
@@ -45,6 +43,8 @@ class HealthCollector(LoadingCollector):
         self.metric_store.create_gauge_metric('system_power_consumption', 'System Power Consumption', 'power_consumption')
 
     def load(self, router_entry: 'RouterEntry'):
+        self.metric_store.clear_metrics()
+
         health_records = router_entry.rest_api.get('system/health')
         for record in health_records:
             if 'name' in record:

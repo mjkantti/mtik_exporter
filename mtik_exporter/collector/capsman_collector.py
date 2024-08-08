@@ -22,13 +22,14 @@ if TYPE_CHECKING:
 class CapsmanCollector(LoadingCollector):
     ''' CAPsMAN Metrics collector
     '''
-    def __init__(self, router_id: dict[str, str], interval: int):
+    def __init__(self, router_id: dict[str, str]):
         self.name = 'CapsmanCollector'
-        self.metric_store = MetricStore(router_id, ['identity', 'version', 'base_mac', 'board', 'base_mac'], interval=interval)
+        self.metric_store = MetricStore(router_id, ['identity', 'version', 'base_mac', 'board', 'base_mac'])
 
         # Metrics
         self.metric_store.create_info_metric('capsman_remote_caps', 'CAPsMAN remote caps')
 
     def load(self, router_entry: 'RouterEntry'):
+        self.metric_store.clear_metrics()
         recs = router_entry.rest_api.get('interface/wifi/capsman/remote-cap')
         self.metric_store.set_metrics(recs)

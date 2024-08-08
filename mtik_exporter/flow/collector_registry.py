@@ -97,7 +97,7 @@ class CollectorRegistry:
                 logging.warning('Fast Collector not found: %s ignoring', key)
                 continue
 
-            self.fast_collectors.append(cls(router_id, self.polling_interval))
+            self.fast_collectors.append(cls(router_id))
 
         for key in router_entry.config_entry.slow_collectors:
             cls = self.collector_mapping.get(key)
@@ -105,7 +105,7 @@ class CollectorRegistry:
                 logging.warning('Slow Collector not found: %s ignoring', key)
                 continue
 
-            self.slow_collectors.append(cls(router_id, self.slow_polling_interval))
+            self.slow_collectors.append(cls(router_id))
 
 
 class SystemCollectorRegistry:
@@ -121,4 +121,4 @@ class SystemCollectorRegistry:
         if system_config.check_for_updates:
             channel = system_config.check_for_updates_channel
 
-            self.system_collectors.append(LatestVersionCollector(channel, self.interval))
+            self.system_collectors.append(LatestVersionCollector(channel))

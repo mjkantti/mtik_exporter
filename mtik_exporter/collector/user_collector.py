@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 class UserCollector(LoadingCollector):
     '''Active Users collector'''
 
-    def __init__(self, router_id: dict[str, str], interval: int):
+    def __init__(self, router_id: dict[str, str]):
         self.name = 'UserCollector'
         self.metric_store = MetricStore(
             router_id,
@@ -31,15 +31,15 @@ class UserCollector(LoadingCollector):
             ['when', 'count'],
             {
                 'when': lambda w: datetime.fromisoformat(w).replace(tzinfo=timezone.utc).timestamp()
-            },
-            interval=interval
-        )
+            })
 
         # Metrics
         self.metric_store.create_gauge_metric('active_users_last_login', 'Active Users', 'when')
         self.metric_store.create_gauge_metric('active_users_count', 'Active Users Count', 'count')
 
     def load(self, router_entry: 'RouterEntry'):
+        self.metric_store.clear_metrics()
+
         user_records = router_entry.rest_api.get('user/active')
         filtered = {}
 

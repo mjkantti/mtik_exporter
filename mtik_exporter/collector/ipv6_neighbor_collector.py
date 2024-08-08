@@ -23,14 +23,16 @@ if TYPE_CHECKING:
 class IPv6NeighborCollector(LoadingCollector):
     '''IPv6 Neighbor Collector'''
 
-    def __init__(self, router_id: dict[str, str], interval: int):
+    def __init__(self, router_id: dict[str, str]):
         self.name = 'IPv6NeighborCollector'
-        self.metric_store = MetricStore(router_id, ['address', 'interface', 'mac_address', 'status', 'router', 'dhcp_name', 'dhcp_address', 'dhcp_comment', 'dhcp_lease_type'], interval=interval)
+        self.metric_store = MetricStore(router_id, ['address', 'interface', 'mac_address', 'status', 'router', 'dhcp_name', 'dhcp_address', 'dhcp_comment', 'dhcp_lease_type'])
 
         # Metrics
         self.metric_store.create_info_metric('ipv6_neighbor', 'Reachable IPv6 neighbors')
 
     def load(self, router_entry: 'RouterEntry'):
+        self.metric_store.clear_metrics()
+
         records = router_entry.rest_api.get('ipv6/neighbor', {'status': 'reachable'})
         # add dhcp info
         if records:

@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
 class BGPCollector(LoadingCollector):
     '''BGP collector'''
-    def __init__(self, router_id: dict[str, str], interval: int):
+    def __init__(self, router_id: dict[str, str]):
         self.name = 'BGPCollector'
         self.metric_store = MetricStore(
             router_id,
@@ -31,8 +31,7 @@ class BGPCollector(LoadingCollector):
             {
                 'established': lambda value: '1' if value=='true' else '0',
                 'uptime': lambda value: parse_timedelta(value) if value else None
-            },
-            interval=interval)
+            })
 
         # Metrics
         self.metric_store.create_info_metric('bgp_sessions_info', 'BGP sessions info')
@@ -47,5 +46,6 @@ class BGPCollector(LoadingCollector):
         self.metric_store.create_gauge_metric('bgp_uptime', 'BGP uptime in seconds', 'uptime', session_id_labes)
 
     def load(self, router_entry: 'RouterEntry'):
+        self.metric_store.clear_metrics()
         bgp_records = router_entry.rest_api.get('routing/bgp/session')
         self.metric_store.set_metrics(bgp_records)

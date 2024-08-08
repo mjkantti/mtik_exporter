@@ -21,18 +21,17 @@ if TYPE_CHECKING:
 
 class ARPCollector(LoadingCollector):
     '''ARP Entry collector'''
-    def __init__(self, router_id: dict[str, str], interval):
+    def __init__(self, router_id: dict[str, str]):
         self.name = 'ARPCollector'
         self.metric_store = MetricStore(
             router_id,
-            ['mac_address', 'address', 'interface', 'status', 'dynamic', 'dhcp_name', 'dhcp_comment', 'dhcp_lease_type'],
-            interval=interval
-            )
+            ['mac_address', 'address', 'interface', 'status', 'dynamic', 'dhcp_name', 'dhcp_comment', 'dhcp_lease_type'])
 
         # Metrics
         self.metric_store.create_info_metric('arp_entry', 'ARP Entry Info')
 
     def load(self, router_entry: 'RouterEntry'):
+        self.metric_store.clear_metrics()
         arp_records = router_entry.rest_api.get('ip/arp', 'status=stale,reachable')
         for r in arp_records:
             add_dhcp_info(r, router_entry.dhcp_record(str(r.get('mac-address'))))

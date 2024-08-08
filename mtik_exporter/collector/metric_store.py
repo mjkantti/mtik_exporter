@@ -33,13 +33,12 @@ class MetricStore():
                  metric_labels: list[str],
                  metric_values: list[str] = [],
                  translation_table: dict[str, Callable[[str | None], str | float | None]]={},
-                 interval: int = 0):
+                ):
         self.router_id = router_id
         self.ts: float = 0
         self.metric_labels = self.add_router_labels(metric_labels)
         self.metric_values = metric_values
         self.translation_table = translation_table
-        self.interval = interval
 
         self.metrics: list[tuple[Metric, list[str], str | None]] = []
 
@@ -58,20 +57,14 @@ class MetricStore():
         if not self.ts:
             return
 
-        lag = time() - self.ts
-        if lag > self.interval * 1.5:
-            metric_names = [m[0].name for m in self.metrics]
-            logging.warn('Metrics too old to show for: %s, last updated: %is ago', ', '.join(metric_names), lag)
-            return
         for metric, _, _ in self.metrics:
             yield metric
 
-    def _clear_metrics(self):
+    def clear_metrics(self):
         for metric, _, _ in self.metrics:
             metric.samples.clear()
 
     def set_metrics(self, router_records: list[dict[str, str | float]] = []):
-        self._clear_metrics()
         self.ts = time()
 
         if not router_records:
@@ -128,7 +121,7 @@ class LoadingCollector(Collector):
         return self.name
 
     @abstractmethod
-    def load(self, router_entry: 'RouterEntry', interval: int) -> None:
+    def load(self, router_entry: 'RouterEntry') -> None:
         pass
 
     def collect(self):

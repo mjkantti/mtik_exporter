@@ -23,13 +23,15 @@ class PoolCollector(LoadingCollector):
     ''' IP Pool Metrics collector
     '''
 
-    def __init__(self, router_id: dict[str, str], interval: int):
+    def __init__(self, router_id: dict[str, str]):
         self.name = 'PoolCollector'
-        self.metric_store = MetricStore(router_id, ['pool', 'address', 'owner', 'info'], interval=interval)
+        self.metric_store = MetricStore(router_id, ['pool', 'address', 'owner', 'info'])
 
         # Metrics
         self.metric_store.create_info_metric('ip_pool_device', 'Used Addresses in IP Pool')
 
     def load(self, router_entry: 'RouterEntry'):
+        self.metric_store.clear_metrics()
+
         pool_used_records = router_entry.rest_api.get('ip/pool/used')
         self.metric_store.set_metrics(pool_used_records)

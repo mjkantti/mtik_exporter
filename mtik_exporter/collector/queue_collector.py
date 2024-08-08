@@ -22,14 +22,12 @@ if TYPE_CHECKING:
 class QueueTreeCollector(LoadingCollector):
     '''Queue Tree collector'''
 
-    def __init__(self, router_id: dict[str, str], interval: int):
+    def __init__(self, router_id: dict[str, str]):
         self.name = 'QueueTreeCollector'
         self.metric_store = MetricStore(
             router_id,
             ['name', 'parent', 'packet_mark', 'limit_at', 'max_limit', 'priority', 'disabled'],
-            ['rate', 'bytes', 'queued_bytes', 'dropped'],
-            interval=interval
-        )
+            ['rate', 'bytes', 'queued_bytes', 'dropped'])
 
         # Metrics
         self.metric_store.create_info_metric('queue_tree', 'Queue Tree Info')
@@ -39,19 +37,19 @@ class QueueTreeCollector(LoadingCollector):
         self.metric_store.create_counter_metric('queue_tree_dropped', 'Number of dropped bytes', 'dropped', ['name'])
 
     def load(self, router_entry: 'RouterEntry'):
+        self.metric_store.clear_metrics()
+
         qt_records = router_entry.rest_api.get('queue/tree')
         self.metric_store.set_metrics(qt_records)
 
 
 class QueueSimpleCollector(LoadingCollector):
-    def __init__(self, router_id: dict[str, str], interval: int):
+    def __init__(self, router_id: dict[str, str]):
         self.name = 'QueueSimpleCollector'
         self.metric_store = MetricStore(
             router_id,
             ['name', 'parent', 'packet_mark', 'limit_at', 'max_limit', 'priority', 'bytes', 'packets', 'queued_bytes', 'queued_packets','dropped', 'rate', 'packet_rate', 'disabled'],
-            ['bytes_up', 'bytes_down', 'queued_bytes_up', 'queued_bytes_down', 'dropped_up', 'dropped_down'],
-            interval=interval
-        )
+            ['bytes_up', 'bytes_down', 'queued_bytes_up', 'queued_bytes_down', 'dropped_up', 'dropped_down'])
 
         # Metrics
         self.metric_store.create_info_metric('queue_simple', 'Queue Simple Info')
@@ -66,6 +64,8 @@ class QueueSimpleCollector(LoadingCollector):
         self.metric_store.create_counter_metric('queue_simple_dropped_download', 'Number of download dropped bytes', 'dropped_down', ['name'])
 
     def load(self, router_entry: 'RouterEntry'):
+        self.metric_store.clear_metrics()
+
         queue_records = router_entry.rest_api.get('queue/simple')
 
         # simple queue records need splitting upload/download values

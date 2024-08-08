@@ -24,7 +24,7 @@ class SystemResourceCollector(LoadingCollector):
     ''' System Resource Metrics collector
     '''
 
-    def __init__(self, router_id: dict[str, str], interval: int):
+    def __init__(self, router_id: dict[str, str]):
         self.name = 'SystemResourceCollector'
         self.metric_store = MetricStore(
             router_id,
@@ -33,10 +33,8 @@ class SystemResourceCollector(LoadingCollector):
             {
                 'uptime': lambda c: parse_timedelta(c) if c else 0,
                 'bad_blocks': lambda b: b.strip('%') if b else b,
-            },
-            interval=interval
-        )
-        self.version_metric_store = MetricStore(router_id, ['current_version', 'channel', 'latest_version'], interval=interval)
+            })
+        self.version_metric_store = MetricStore(router_id, ['current_version', 'channel', 'latest_version'])
 
         # Metrics
         self.metric_store.create_info_metric('system', 'System Resource Information')
@@ -57,6 +55,8 @@ class SystemResourceCollector(LoadingCollector):
         self.version_metric_store.create_gauge_metric('system_latest_version_built', 'Latest RouterOS version built time', 'latest_built')
 
     def load(self, router_entry: 'RouterEntry'):
+        self.metric_store.clear_metrics()
+
         resource_record = router_entry.rest_api.get('system/resource')
         if resource_record:
             ver, channel = parse_ros_version(resource_record['version'])

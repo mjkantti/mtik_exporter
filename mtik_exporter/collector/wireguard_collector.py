@@ -22,14 +22,16 @@ if TYPE_CHECKING:
 class WireguardCollector(LoadingCollector):
     '''Wireguard collector'''
 
-    def __init__(self, router_id: dict[str, str], interval: int):
+    def __init__(self, router_id: dict[str, str]):
         self.name = 'WireguardCollector'
-        self.metric_store = MetricStore(router_id, ['name', 'mtu', 'listen_port', 'public_key', 'comment', 'running'], interval=interval)
+        self.metric_store = MetricStore(router_id, ['name', 'mtu', 'listen_port', 'public_key', 'comment', 'running'])
 
         # Metrics
         self.metric_store.create_info_metric('wireguard_interfaces', 'Wireguard Interfaces')
 
     def load(self, router_entry: 'RouterEntry'):
+        self.metric_store.clear_metrics()
+
         recs = router_entry.rest_api.get('interface/wireguard')
         self.metric_store.set_metrics(recs)
 
@@ -37,7 +39,7 @@ class WireguardCollector(LoadingCollector):
 class WireguardPeerCollector(LoadingCollector):
     '''Wireguard collector'''
 
-    def __init__(self, router_id: dict[str, str], interval: int):
+    def __init__(self, router_id: dict[str, str]):
         self.name = 'WireguardPeerCollector'
         self.metric_store = MetricStore(
             router_id,
@@ -45,9 +47,7 @@ class WireguardPeerCollector(LoadingCollector):
             ['tx', 'rx', 'last_handshake'],
             {
                 'last_handshake': lambda c: parse_timedelta(c) if c else 0
-            },
-            interval=interval
-        )
+            })
 
         # Metrics
         self.metric_store.create_info_metric('wireguard_peer', 'Wireguard Peer Info')
@@ -58,5 +58,7 @@ class WireguardPeerCollector(LoadingCollector):
         self.metric_store.create_counter_metric('wireguard_peer_rx_bytes', 'Wireguard Peer RX Bytes', 'rx', wg_peer_labels)
 
     def load(self, router_entry: 'RouterEntry'):
+        self.metric_store.clear_metrics()
+
         recs = router_entry.rest_api.get('interface/wireguard/peers')
         self.metric_store.set_metrics(recs)

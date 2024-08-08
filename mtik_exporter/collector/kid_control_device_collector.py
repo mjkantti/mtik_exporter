@@ -24,7 +24,7 @@ class KidDeviceCollector(LoadingCollector):
     """ Kid-control device Metrics collector
     """
 
-    def __init__(self, router_id: dict[str, str], interval: int):
+    def __init__(self, router_id: dict[str, str]):
         self.name = 'KidDeviceCollector'
         self.metric_store = MetricStore(
             router_id,
@@ -33,14 +33,12 @@ class KidDeviceCollector(LoadingCollector):
             {
                 'rate_up': lambda value: parse_rates(value),
                 'rate_down': lambda value: parse_rates(value),
-                'idle_time': lambda value: parse_timedelta(value) if value else 0,
+                'idle_time': lambda value: parse_timedelta(value) if value else 0, 
                 'blocked': lambda value: '1' if value == 'true' else '0',
                 'limited': lambda value: '1' if value == 'true' else '0',
                 'inactive': lambda value: '1' if value == 'true' else '0',
                 'disabled': lambda value: '1' if value == 'true' else '0'
-            },
-            interval=interval
-        )
+            })
 
         # Metrics
         self.metric_store.create_info_metric('kid_control_device', 'Kid-control device Info')
@@ -51,6 +49,8 @@ class KidDeviceCollector(LoadingCollector):
         self.metric_store.create_gauge_metric('kid_control_device_idle_time', 'Device idle time', 'idle_time', ['name', 'mac_address', 'user'])
 
     def load(self, router_entry: 'RouterEntry'):
+        self.metric_store.clear_metrics()
+
         records = router_entry.rest_api.get('ip/kid-control/device')
         device_records = []
         for record in records:

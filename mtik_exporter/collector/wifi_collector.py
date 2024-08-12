@@ -35,7 +35,6 @@ class WifiCollector(LoadingCollector):
 
     def load_data(self, router_entry: 'RouterEntry'):
         wifi_interface_records = router_entry.rest_api.get('interface/wifi')
-        print(wifi_interface_records)
 
         monitor_records = []
         if wifi_interface_records:
@@ -43,7 +42,6 @@ class WifiCollector(LoadingCollector):
             monitor_records = router_entry.rest_api.post('interface/wifi', 'monitor', {'once': True, '.id': if_ids})
             for mon_r, w_r in zip(monitor_records, wifi_interface_records):
                 w_r.update(mon_r)
-        print(wifi_interface_records)
         self.metric_store.set_metrics(wifi_interface_records)
 
 class WifiClientCollector(LoadingCollector):

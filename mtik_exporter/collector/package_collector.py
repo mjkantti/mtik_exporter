@@ -14,7 +14,7 @@
 
 
 from mtik_exporter.collector.metric_store import MetricStore, LoadingCollector
-from mtik_exporter.utils.utils import get_available_updates
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -25,11 +25,17 @@ class PackageCollector(LoadingCollector):
 
     def __init__(self, router_id: dict[str, str]):
         self.name = 'PackageCollector'
-        self.metric_store = MetricStore(router_id, ['name', 'version', 'build_time', 'disabled'])
+        self.metric_store = MetricStore(router_id,
+                                        ['name', 'version', 'disabled'],
+                                        ['build_time'],
+                                        {
+                                            'build_time': lambda value: datetime.fromisoformat(value).replace(tzinfo=timezone.utc).timestamp() if value else None,
+                                        })
         #self.metric_store_updates = MetricStore(router_id, ['channel', 'latest_version', 'build_time', 'status'], polling_interval=polling_interval)
 
         # Metrics
         self.metric_store.create_info_metric('installed_packages', 'Installed Packages')
+        self.metric_store.create_gauge_metric('installed_packages_build_time', 'Installed Package Build Time', 'build_time')
 
     def load_data(self, router_entry: 'RouterEntry'):
         package_record = router_entry.rest_api.get('system/package')

@@ -21,6 +21,7 @@ from collector.health_collector import HealthCollector
 from collector.identity_collector import IdentityCollector
 from collector.public_ip_collector import PublicIPAddressCollector
 from collector.ipv6_neighbor_collector import IPv6NeighborCollector
+from collector.lte_collector import LTECollector
 from collector.poe_collector import POECollector
 from collector.netwatch_collector import NetwatchCollector
 from collector.pool_collector import PoolCollector
@@ -60,6 +61,7 @@ class CollectorRegistry:
         'interface': InterfaceCollector,
         'identity': IdentityCollector,
         'interface_monitor': InterfaceMonitorCollector,
+        'lte': LTECollector,
         'firewall_filter': FirewallFilterCollector,
         'firewall_mangle': FirewallMangleCollector,
         'firewall_raw': FirewallRawCollector,

@@ -153,6 +153,8 @@ Metrics are collected in two intervals, (which can be same), polling_interval an
 
 `bgp` - BGP Metrics
 
+`lte` - LTE Interface Metrics
+
 `bridge_hosts` - MAC Table, NOTE this is very slow (takes up to 5 seconds on my devices)
 
 #### Installation

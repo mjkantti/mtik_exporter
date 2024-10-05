@@ -158,6 +158,11 @@ Metrics are collected in two intervals, (which can be same), polling_interval an
 `bridge_hosts` - MAC Table, NOTE this is very slow (takes up to 5 seconds on my devices)
 
 #### Installation
+- from Docker Registry
+```
+❯ podman pull quay.io/mjkantti/mtik_exporter
+❯ podman run --rm -it -p 49090:49090 -v {path_to_config_file}:/mtik_exporter/config/config.ini mtik_exporter_img
+```
 - from sources
 
 ```

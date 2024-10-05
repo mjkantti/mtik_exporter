@@ -161,7 +161,7 @@ Metrics are collected in two intervals, (which can be same), polling_interval an
 - from Docker Registry
 ```
 ❯ podman pull quay.io/mjkantti/mtik_exporter
-❯ podman run --rm -it -p 49090:49090 -v {path_to_config_file}:/mtik_exporter/config/config.ini mtik_exporter_img
+❯ podman run --rm -it -p 49090:49090 -v {path_to_config_file}:/mtik_exporter/config/config.ini mtik_exporter
 ```
 - from sources
 

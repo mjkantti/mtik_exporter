@@ -27,68 +27,68 @@ To Create
 
 ##### System
 ```
-[SYSTEM]
-    port = 49090
-    socket_timeout = 10
+system:
+  port: 49090
+  socket_timeout: 10
 
-    initial_delay_on_failure = 120
-    max_delay_on_failure = 900
-    delay_inc_div = 5
+  initial_delay_on_failure: 120
+  max_delay_on_failure: 900
+  delay_inc_div: 5
 
-    verbose_mode = False
+  verbose_mode: False
 
-    check_for_updates = True
-    check_for_updates_channel = ["development", "stable"]
-    check_for_updates_interval = 3600
+  check_for_updates: True
+  check_for_updates_channel:
+    - development
+    - stable
+  check_for_updates_interval: 3600
 ```
 
 ##### Router(s)
 ```
 [Sample-Router]
-    enabled = False
+  enabled: False
 
-    hostname = localhost
+  hostname: localhost
 
-    username = username
-    password = password
+  username: username
+  password: password
 
-    use_ssl = False
-    no_ssl_certificate = False
-    ssl_certificate_verify = False
+  use_ssl: False
+  no_ssl_certificate: False
+  ssl_certificate_verify: False
 
-    polling_interval = 10
-    slow_polling_interval = 60
+  polling_interval: 10
+  slow_polling_interval: 60
 
-    collectors = [
-        "dhcp",
-        "system_resource",
-        "health",
-        "interface",
-        "firewall_filter",
-        "firewall_mangle",
-        "ipv6_firewall_filter",
-        "ipv6_firewall_mangle",
-        "ipv6_neighbor",
-        "wifi_clients",
-        "netwatch",
-        "arp",
-        "user",
-        "queue_simple",
-        "queue_tree",
-        "wireguard_peers"
-        ]
+  collectors:
+    - dhcp
+    - system_resource
+    - health
+    - interface
+    - firewall_filter
+    - firewall_mangle
+    - ipv6_firewall_filter
+    - ipv6_firewall_mangle
+    - ipv6_neighbor
+    - wifi_clients
+    - netwatch
+    - arp
+    - user
+    - queue_simple
+    - queue_tree
+    - wireguard_peers
 
-    slow_collectors = [
-        "route",
-        "ipv6_route",
-        "installed_packages",
-        "interface_monitor",
-        "capsman",
-        "identity",
-        "wifi",
-        "public_ip",
-        "wireguard"
-        ]
+  slow_collectors:
+    - route
+    - ipv6_route
+    - installed_packages
+    - interface_monitor
+    - capsman
+    - identity
+    - wifi
+    - public_ip
+    - wireguard
 ```
 ##### Collectors
 Metrics are collected in two intervals, (which can be same), polling_interval and slow_polling_interval, default values for these are 10 seconds and 60 seconds.

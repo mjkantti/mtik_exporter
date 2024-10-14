@@ -16,7 +16,6 @@ import yaml
 import logging
 
 from collections import namedtuple
-from configparser import ConfigParser
 
 
 ''' mtik_exporter conf file handling
@@ -97,14 +96,7 @@ class SystemConfigHandler:
         ''' All mtik_exporter registered entries
         '''
         # This is sections
-        return (entry_name for entry_name in self.config if entry_name != ConfigKeys.SYSTEM_CONFIG_ENTRY_NAME)
-
-    def registered_entry(self, entry_name):
-        ''' A specific mtik_exporter registered entry by name
-        '''
-        if entry_name in self.config:
-            return self.config[entry_name]
-        return None
+        return (entry_name for entry_name in self.routers_config)
 
     def config_entry(self, entry_name):
         ''' Given an entry name, reads and returns the entry info
@@ -122,35 +114,47 @@ class SystemConfigHandler:
     def _read_from_disk(self):
         ''' (Force-)Read conf data from disk
         '''
-        self.config = {}
-        with open(self.data_path) as cfgstr:
-            self.config = yaml.safe_load(cfgstr)
+        self.system_config = {}
+        self.routers_config = {}
+        config = {}
+        try:
+            with open(self.data_path) as cfgstr:
+                config = yaml.safe_load(cfgstr)
+        except:
+            logging.exception(f'Could not reaad {self.data_path}')
+
+        try:
+            self.system_config = config.pop(ConfigKeys.SYSTEM_CONFIG_ENTRY_NAME)
+        except:
+            logging.exception(f'Could not find "system" entry in config file {self.data_path}')
+
+        self.routers_config = config
+
 
     def _config_entry_reader(self, entry_name):
         logging.info('%s: Reading Config for router', entry_name)
         config_entry_reader = {}
 
         for key in ConfigKeys.ROUTER_BOOLEAN_KEYS:
-            config_entry_reader[key] = self.config[entry_name].get(key, False)
+            config_entry_reader[key] = self.routers_config[entry_name].get(key, False)
 
         for key in ConfigKeys.ROUTER_STR_KEYS | ConfigKeys.ROUTER_INT_KEYS:
-            config_entry_reader[key] = self.config[entry_name].get(key, self._default_value_for_key(key))
+            config_entry_reader[key] = self.routers_config[entry_name].get(key, self._default_value_for_key(key))
 
         for key in ConfigKeys.ROUTER_LIST_KEYS:
-            config_entry_reader[key] = self.config[entry_name].get(key, [])
+            config_entry_reader[key] = self.routers_config[entry_name].get(key, [])
 
         return config_entry_reader
 
     def _system_entry_reader(self):
         logging.info('Reading System Config')
         system_entry_reader = {}
-        entry_name = ConfigKeys.SYSTEM_CONFIG_ENTRY_NAME
 
         for key in ConfigKeys.SYSTEM_BOOLEAN_KEYS:
-            system_entry_reader[key] = self.config[entry_name].get(key, False)
+            system_entry_reader[key] = self.system_config.get(key, False)
 
         for key in ConfigKeys.SYSTEM_STR_KEYS | ConfigKeys.SYSTEM_INT_KEYS | ConfigKeys.SYSTEM_LIST_KEYS:
-            system_entry_reader[key] = self.config[entry_name].get(key, self._default_value_for_key(key))
+            system_entry_reader[key] = self.system_config.get(key, self._default_value_for_key(key))
 
         return system_entry_reader
 

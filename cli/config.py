@@ -12,7 +12,7 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
-import json
+import yaml
 import logging
 
 from collections import namedtuple
@@ -79,7 +79,7 @@ class ConfigKeys:
     SYSTEM_LIST_KEYS = {CHECK_FOR_UPDATES_CHANNEL_KEY}
 
     # mtik_exporter config entry name
-    SYSTEM_CONFIG_ENTRY_NAME = 'SYSTEM'
+    SYSTEM_CONFIG_ENTRY_NAME = 'system'
 
 
 class ConfigEntry:
@@ -97,7 +97,7 @@ class SystemConfigHandler:
         ''' All mtik_exporter registered entries
         '''
         # This is sections
-        return (entry_name for entry_name in self.config.sections() if entry_name != ConfigKeys.SYSTEM_CONFIG_ENTRY_NAME)
+        return (entry_name for entry_name in self.config if entry_name != ConfigKeys.SYSTEM_CONFIG_ENTRY_NAME)
 
     def registered_entry(self, entry_name):
         ''' A specific mtik_exporter registered entry by name
@@ -122,34 +122,22 @@ class SystemConfigHandler:
     def _read_from_disk(self):
         ''' (Force-)Read conf data from disk
         '''
-        self.config = ConfigParser()
-        self.config.read(self.data_path)
+        self.config = {}
+        with open(self.data_path) as cfgstr:
+            self.config = yaml.safe_load(cfgstr)
 
     def _config_entry_reader(self, entry_name):
         logging.info('%s: Reading Config for router', entry_name)
         config_entry_reader = {}
 
         for key in ConfigKeys.ROUTER_BOOLEAN_KEYS:
-            if self.config[entry_name].get(key) is not None:
-                config_entry_reader[key] = self.config.getboolean(entry_name, key)
-            else:
-                config_entry_reader[key] = False
+            config_entry_reader[key] = self.config[entry_name].get(key, False)
 
-        for key in ConfigKeys.ROUTER_STR_KEYS:
-            if self.config[entry_name].get(key, raw=True):
-                config_entry_reader[key] = self.config[entry_name].get(key, raw=True)
-            else:
-                config_entry_reader[key] = self._default_value_for_key(key)
+        for key in ConfigKeys.ROUTER_STR_KEYS | ConfigKeys.ROUTER_INT_KEYS:
+            config_entry_reader[key] = self.config[entry_name].get(key, self._default_value_for_key(key))
 
         for key in ConfigKeys.ROUTER_LIST_KEYS:
-            collectors = json.loads(self.config[entry_name].get(key))
-            config_entry_reader[key] = collectors
-
-        for key in ConfigKeys.ROUTER_INT_KEYS:
-            if self.config[entry_name].get(key):
-                config_entry_reader[key] = self.config.getint(entry_name, key)
-            else:
-                config_entry_reader[key] = self._default_value_for_key(key)
+            config_entry_reader[key] = self.config[entry_name].get(key, [])
 
         return config_entry_reader
 
@@ -158,47 +146,28 @@ class SystemConfigHandler:
         system_entry_reader = {}
         entry_name = ConfigKeys.SYSTEM_CONFIG_ENTRY_NAME
 
-        for key in ConfigKeys.SYSTEM_INT_KEYS:
-            if self.config[entry_name].get(key):
-                system_entry_reader[key] = self.config.getint(entry_name, key)
-            else:
-                system_entry_reader[key] = self._default_value_for_key(key)
-
         for key in ConfigKeys.SYSTEM_BOOLEAN_KEYS:
-            if self.config[entry_name].get(key):
-                system_entry_reader[key] = self.config.getboolean(entry_name, key)
-            else:
-                system_entry_reader[key] = self._default_value_for_key(key)
-        
-        for key in ConfigKeys.SYSTEM_STR_KEYS:
-            if self.config[entry_name].get(key):
-                system_entry_reader[key] = self.config.get(entry_name, key)
-            else:
-                system_entry_reader[key] = self._default_value_for_key(key)
+            system_entry_reader[key] = self.config[entry_name].get(key, False)
 
-        for key in ConfigKeys.SYSTEM_LIST_KEYS:
-            if self.config[entry_name].get(key) is not None:
-                collectors = json.loads(self.config[entry_name].get(key))
-                system_entry_reader[key] = collectors
-            else:
-                system_entry_reader[key] = self._default_value_for_key(key)
+        for key in ConfigKeys.SYSTEM_STR_KEYS | ConfigKeys.SYSTEM_INT_KEYS | ConfigKeys.SYSTEM_LIST_KEYS:
+            system_entry_reader[key] = self.config[entry_name].get(key, self._default_value_for_key(key))
 
         return system_entry_reader
 
-    def _default_value_for_key(self, key, value=None):
+    def _default_value_for_key(self, key):
         logging.info('Getting Default value for %s', key)
         return {
-            ConfigKeys.SSL_KEY: lambda _: False,
-            ConfigKeys.PORT_KEY: lambda _: '',
-            ConfigKeys.POLLING_INTERVAL_KEY: lambda _: ConfigKeys.DEFAULT_POLLING_INTERVAL,
-            ConfigKeys.SLOW_POLLING_INTERVAL_KEY: lambda _: ConfigKeys.DEFAULT_SLOW_POLLING_INTERVAL,
-            ConfigKeys.SOCKET_TIMEOUT: lambda _: ConfigKeys.DEFAULT_SOCKET_TIMEOUT,
-            ConfigKeys.EXPORTER_INC_DIV: lambda _: ConfigKeys.DEFAULT_INC_DIV,
-            ConfigKeys.CHECK_FOR_UPDATES_CHANNEL_KEY: lambda _: ConfigKeys.DEFAULT_CHECK_FOR_UPDATES_CHANNEL,
-            ConfigKeys.SYSTEM_INTERVAL_KEY: lambda _: ConfigKeys.DEFAULT_SYSTEM_INTERVAL,
-            ConfigKeys.EXPORTER_ADDR: lambda _: ConfigKeys.DEFAULT_EXPORT_ADDRESS,
-            ConfigKeys.EXPORTER_PORT: lambda _: ConfigKeys.DEFAULT_EXPORT_PORT
-        }[key](value)
+            ConfigKeys.SSL_KEY: False,
+            ConfigKeys.PORT_KEY: '',
+            ConfigKeys.POLLING_INTERVAL_KEY: ConfigKeys.DEFAULT_POLLING_INTERVAL,
+            ConfigKeys.SLOW_POLLING_INTERVAL_KEY: ConfigKeys.DEFAULT_SLOW_POLLING_INTERVAL,
+            ConfigKeys.SOCKET_TIMEOUT: ConfigKeys.DEFAULT_SOCKET_TIMEOUT,
+            ConfigKeys.EXPORTER_INC_DIV: ConfigKeys.DEFAULT_INC_DIV,
+            ConfigKeys.CHECK_FOR_UPDATES_CHANNEL_KEY: ConfigKeys.DEFAULT_CHECK_FOR_UPDATES_CHANNEL,
+            ConfigKeys.SYSTEM_INTERVAL_KEY: ConfigKeys.DEFAULT_SYSTEM_INTERVAL,
+            ConfigKeys.EXPORTER_ADDR: ConfigKeys.DEFAULT_EXPORT_ADDRESS,
+            ConfigKeys.EXPORTER_PORT: ConfigKeys.DEFAULT_EXPORT_PORT
+        }.get(key)
 
 
 # Simplest possible Singleton impl

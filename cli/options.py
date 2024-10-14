@@ -54,7 +54,7 @@ Selected metrics info can be printed on the command line. For more information, 
         '''
         parser.add_argument('--cfg-file', dest = 'cfg_file',
                     type = lambda d: self._is_valid_file_path(parser, d),
-                    default = 'config/config.ini',
+                    default = 'config/config.yml',
                     help = 'mtik_exporter config files directory (optional)')
 
     # Internal helpers

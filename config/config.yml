@@ -6,8 +6,6 @@ system:
     max_delay_on_failure: 900
     delay_inc_div: 5
 
-    verbose_mode: False
-
     check_for_updates: True
     check_for_updates_channel:
       - development

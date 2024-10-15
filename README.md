@@ -46,7 +46,7 @@ system:
 
 ##### Router(s)
 ```
-[Sample-Router]
+Sample-Router:
   enabled: False
 
   hostname: localhost

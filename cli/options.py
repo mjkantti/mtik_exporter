@@ -23,7 +23,6 @@ class OptionsParser:
     '''
     def __init__(self):
         self._script_name = f'mtik_exporter'
-        #version = pkg_resources.require("mtik_exporter")[0].version
         self._description =  \
 f'''
 Prometheus Exporter for Mikrotik RouterOS

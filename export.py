@@ -21,11 +21,10 @@ from time import time, sleep
 from flow.collector_registry import CollectorRegistry, SystemCollectorRegistry
 from flow.router_entry import RouterEntry
 from cli.config import config_handler, ConfigKeys
-from cli.options import mtik_exporterOptionsParser
+from cli.options import OptionsParser
 
 import logging
 import sys
-logging.basicConfig(format='%(levelname)s %(message)s', level=logging.INFO)
 
 class ExportProcessor:
     ''' Base Export Processing
@@ -34,7 +33,7 @@ class ExportProcessor:
         signal(SIGINT, self.exit_gracefully)
         signal(SIGTERM, self.exit_gracefully)
 
-        self.option_parser = mtik_exporterOptionsParser()
+        self.option_parser = OptionsParser()
         self.registries = []
         self.s = scheduler(time, sleep)
 

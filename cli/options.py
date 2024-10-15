@@ -14,10 +14,11 @@
 
 
 import os
+import logging
 from argparse import ArgumentParser
 from cli.config import config_handler
 
-class mtik_exporterOptionsParser:
+class OptionsParser:
     ''' Base mtik_exporter Options Parser
     '''
     def __init__(self):
@@ -47,6 +48,7 @@ Selected metrics info can be printed on the command line. For more information, 
         global_options_parser = ArgumentParser(add_help=False)
         self.parse_global_options(global_options_parser)
         namespace, _ = global_options_parser.parse_known_args()
+        logging.basicConfig(format='%(levelname)s %(message)s', level=namespace.loglevel)
         config_handler(namespace.cfg_file)
 
     def parse_global_options(self, parser):
@@ -56,6 +58,14 @@ Selected metrics info can be printed on the command line. For more information, 
                     type = lambda d: self._is_valid_file_path(parser, d),
                     default = 'config/config.yml',
                     help = 'mtik_exporter config files directory (optional)')
+        parser.add_argument('--debug', dest = 'loglevel',
+                    const = logging.DEBUG, action = 'store_const',
+                    default=logging.WARNING,
+                    help='Debug Logging')
+        parser.add_argument('--verbose', dest = 'loglevel',
+                    const = logging.INFO, action = 'store_const',
+                    help = "More Verbose output")
+
 
     # Internal helpers
     @staticmethod

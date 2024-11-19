@@ -32,7 +32,7 @@ class BridgeHostCollector(LoadingCollector):
         self.metric_store.create_info_metric('bridge_host', 'Wireguard Interfaces')
 
     def load_data(self, router_entry: 'RouterEntry'):
-        bridge_host_records = router_entry.rest_api.get('interface/bridge/host', {'local': 'false', 'external':'true'})
+        bridge_host_records = router_entry.rest_api.get('interface/bridge/host', {'local': 'false'})
         if bridge_host_records:
             for r in bridge_host_records:
                 add_dhcp_info(r, router_entry.dhcp_record(str(r.get('mac-address'))))

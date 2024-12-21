@@ -39,6 +39,7 @@ from collector.container_collector import ContainerCollector
 from collector.kid_control_device_collector import KidDeviceCollector
 from collector.bgp_collector import BGPCollector
 from collector.arp_collector import ARPCollector
+from collector.zerotier_collector import ZeroTierInterfaceCollector, ZeroTierPeerCollector, ZeroTierControllerCollector
 
 from collector.latest_version import LatestVersionCollector
 from collector.internal_collector import InternalCollector
@@ -88,6 +89,9 @@ class CollectorRegistry:
         'kid_control_devices': KidDeviceCollector,
         'bridge_hosts': BridgeHostCollector,
         'containers': ContainerCollector,
+        'zerotier_peers': ZeroTierPeerCollector,
+        'zerotier': ZeroTierInterfaceCollector,
+        'zerotier_controller': ZeroTierControllerCollector,
     }
 
     def __init__(self, router_entry: 'RouterEntry') -> None:

@@ -43,8 +43,7 @@ class RouterRestAPI:
 
     def get(self, path, params = {}):
         if time.time() < self.retry_timer:
-            logging.critical("Skipping query because of previous exception")
-            raise Exception("Skipping")
+            raise Exception("retry_timer_skip")
 
         url = f"{self.base_url}/{path}"
         logging.debug("Hitting %s", url)

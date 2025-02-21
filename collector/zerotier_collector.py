@@ -44,7 +44,7 @@ class ZeroTierPeerCollector(LoadingCollector):
         self.name = 'ZeroTierPeerCollector'
         self.metric_store = MetricStore(
             router_id,
-            ['zt_address', 'instance', 'bonded', 'role', 'endpoints'],
+            ['zt_address', 'instance', 'bonded', 'role', 'preferred_endpoint'],
             ['latency'],
             {
                 'latency': parse_timedelta
@@ -56,31 +56,11 @@ class ZeroTierPeerCollector(LoadingCollector):
     def load_data(self, router_entry: 'RouterEntry'):
         # Not usable yet
         zerotier_peer_records = router_entry.rest_api.get('zerotier/peer')
-        path_keys = ['status', 'endpoint', 'recvd', 'sent']
         for peer in zerotier_peer_records:
             path = peer.get('path', '').split(',')
-            paths = {}
-            p = {}
-            i = 0
-            for x in path:
+            for i, x in enumerate(path):
                 if x == 'preferred':
-                    p['type'] = x
-                    continue
-                elif x.startswith('recvd:') or x.startswith('sent:'):
-                    x = parse_timedelta(x.split(':')[1])
-                    
-                p[path_keys[i]] = x
-                i += 1
-                if i == len(path_keys):
-                    if p['endpoint'] not in paths:
-                        paths[p['endpoint']] = p
-                    i = 0
-            endps = []
-            for p in paths:
-                address, port = p.split('/')
-                if address not in endps:
-                    endps.append(address)
-            peer['endpoints'] = ','.join(endps)
+                    peer['preferred_endpoint'] = path[i + 1]
         
         self.metric_store.set_metrics(zerotier_peer_records)
 

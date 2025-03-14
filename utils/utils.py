@@ -21,6 +21,7 @@ from mac_vendor_lookup import MacLookup, VendorNotFoundError
 
 UPDATE_BASE_URL = 'https://upgrade.mikrotik.com/routeros/NEWESTa7'
 mac_lookup = MacLookup()
+mac_lookup.update_vendors()
 
 def get_available_updates(channel: str) -> tuple[str, str]:
     """Check the RSS feed for available updates for a given update channel.

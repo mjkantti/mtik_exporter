@@ -25,7 +25,7 @@ class ARPCollector(LoadingCollector):
         self.name = 'ARPCollector'
         self.metric_store = MetricStore(
             router_id,
-            ['mac_address', 'address', 'interface', 'status', 'dynamic', 'dhcp_name', 'dhcp_comment', 'dhcp_lease_type'])
+            ['mac_address', 'mac_vendor', 'address', 'interface', 'status', 'dynamic', 'dhcp_name', 'dhcp_comment', 'dhcp_lease_type'])
 
         # Metrics
         self.metric_store.create_info_metric('arp_entry', 'ARP Entry Info')

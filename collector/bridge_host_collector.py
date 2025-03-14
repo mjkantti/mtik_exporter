@@ -25,7 +25,7 @@ class BridgeHostCollector(LoadingCollector):
         self.name = 'BridgeHostsCollector'
         self.metric_store = MetricStore(
             router_id,
-            ['mac_address', 'vid', 'bridge', 'interface', 'on_interface', 'dhcp_name', 'dhcp_comment', 'dhcp_address'],
+            ['mac_address', 'mac_vendor', 'vid', 'bridge', 'interface', 'on_interface', 'dhcp_name', 'dhcp_comment', 'dhcp_address'],
             ['prefix_count', 'local_messages', 'local_bytes', 'remote_messages', 'remote_bytes', 'established', 'uptime'])
 
         # Metrics

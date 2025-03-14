@@ -17,8 +17,10 @@ import re
 
 from datetime import datetime, timedelta, timezone
 from urllib import request
+from mac_vendor_lookup import MacLookup, VendorNotFoundError
 
 UPDATE_BASE_URL = 'https://upgrade.mikrotik.com/routeros/NEWESTa7'
+mac_lookup = MacLookup()
 
 def get_available_updates(channel: str) -> tuple[str, str]:
     """Check the RSS feed for available updates for a given update channel.
@@ -128,7 +130,19 @@ def add_dhcp_info(registration_record: dict[str, str | float], dhcp_lease_record
         dhcp_address = dhcp_lease_record.get('address', '')
         dhcp_lease_type = 'dynamic' if dhcp_lease_record.get('dynamic') == 'true' else 'static'
 
+    registration_record['mac_vendor'] = dhcp_lease_record.get('mac-vendor') if dhcp_lease_record else get_vendor(registration_record['mac-address'])
+
     registration_record['dhcp_name'] = dhcp_name
     registration_record['dhcp_comment'] = dhcp_comment
     registration_record['dhcp_address'] = dhcp_address
     registration_record['dhcp_lease_type'] = dhcp_lease_type
+
+def add_mac_vendor(registration_record: dict[str, str | float]) -> None:
+    registration_record['mac-vendor'] = get_vendor(registration_record.get('mac-address'))
+
+def get_vendor(mac: str) -> str:
+    if mac:
+        try:
+            return mac_lookup.lookup(mac)
+        except VendorNotFoundError:
+            return ""

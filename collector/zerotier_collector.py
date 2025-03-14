@@ -54,13 +54,13 @@ class ZeroTierPeerCollector(LoadingCollector):
         self.metric_store.create_gauge_metric('zerotier_peer_latency', 'ZeroTier Peer Latency', 'latency')
 
     def load_data(self, router_entry: 'RouterEntry'):
-        # Not usable yet
         zerotier_peer_records = router_entry.rest_api.get('zerotier/peer')
         for peer in zerotier_peer_records:
             path = peer.get('path', '').split(',')
             for i, x in enumerate(path):
                 if x == 'preferred':
                     peer['preferred_endpoint'] = path[i + 1]
+                    break
         
         self.metric_store.set_metrics(zerotier_peer_records)
 

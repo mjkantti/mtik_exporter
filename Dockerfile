@@ -13,5 +13,7 @@ RUN python -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 RUN pip install -r requirements.txt
+RUN python -c 'from mac_vendor_lookup import MacLookup; MacLookup().update_vendors()'
+
 EXPOSE 49090
 CMD ["python", "/mtik_exporter/export.py"]

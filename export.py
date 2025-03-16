@@ -136,8 +136,5 @@ class ExportProcessor:
                 logging.exception('Catched exception while loading')
             self.internal_collector.set_last_run(internal_labels)
 
-def main():
-    ExportProcessor().start()
-
 if __name__ == '__main__':
-    main()
+    ExportProcessor().start()

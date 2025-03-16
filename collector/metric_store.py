@@ -18,6 +18,8 @@ from prometheus_client.registry import Collector
 from collections.abc import Callable
 from time import time
 
+from utils.utils import get_mac_vendor
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -31,12 +33,14 @@ class MetricStore():
                  metric_labels: list[str],
                  metric_values: list[str] = [],
                  translation_table: dict[str, Callable[[str | None], str | float | None]]={},
+                 resolve_mac_vendor: bool = False
                 ):
         self.router_id = router_id
         self.ts: float = 0
         self.metric_labels = self.add_router_labels(metric_labels)
         self.metric_values = metric_values
         self.translation_table = translation_table
+        self.resolve_mac_vendor = resolve_mac_vendor
 
         self.metrics: list[tuple[Metric, list[str], str | None]] = []
 
@@ -94,6 +98,12 @@ class MetricStore():
                 val = func(str(translated_record.get(key)) if key in translated_record else None)
                 if val != None:
                     translated_record[key] = val
+
+            # add mac vendor
+            if self.resolve_mac_vendor:
+                mac = translated_record.get('mac_address')
+                if mac:
+                    translated_record['mac_vendor'] = get_mac_vendor(mac)
 
             for metric, labels, value in self.metrics:
                 v = None

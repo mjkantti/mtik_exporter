@@ -12,7 +12,6 @@
 ## GNU General Public License for more details.
 
 from collector.metric_store import MetricStore, LoadingCollector
-from utils.utils import add_dhcp_info
 
 from typing import TYPE_CHECKING
 
@@ -25,13 +24,12 @@ class ARPCollector(LoadingCollector):
         self.name = 'ARPCollector'
         self.metric_store = MetricStore(
             router_id,
-            ['mac_address', 'mac_vendor', 'address', 'interface', 'status', 'dynamic', 'dhcp_name', 'dhcp_comment', 'dhcp_lease_type'])
+            ['mac_address', 'mac_vendor', 'address', 'interface', 'status', 'dynamic'],
+            resolve_mac_vendor = True)
 
         # Metrics
         self.metric_store.create_info_metric('arp_entry', 'ARP Entry Info')
 
     def load_data(self, router_entry: 'RouterEntry'):
         arp_records = router_entry.rest_api.get('ip/arp', 'status=stale,reachable')
-        for r in arp_records:
-            add_dhcp_info(r, router_entry.dhcp_record(str(r.get('mac-address'))))
         self.metric_store.set_metrics(arp_records)

@@ -14,7 +14,7 @@
 
 
 from collector.metric_store import MetricStore, LoadingCollector
-from utils.utils import parse_timedelta, add_mac_vendor
+from utils.utils import parse_timedelta
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -33,7 +33,8 @@ class DHCPCollector(LoadingCollector):
             {
                 'expires_after': parse_timedelta,
                 'last_seen': parse_timedelta
-            })
+            },
+            True)
 
         # Metrics
         self.metric_store.create_info_metric('dhcp_lease', 'DHCP Active Leases')
@@ -42,6 +43,4 @@ class DHCPCollector(LoadingCollector):
 
     def load_data(self, router_entry: 'RouterEntry'):
         dhcp_lease_records = router_entry.rest_api.get('ip/dhcp-server/lease')
-        [add_mac_vendor(lease) for lease in dhcp_lease_records]
         self.metric_store.set_metrics(dhcp_lease_records)
-        router_entry.set_dhcp_entries(dhcp_lease_records)

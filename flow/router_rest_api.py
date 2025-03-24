@@ -57,21 +57,17 @@ class RouterRestAPI:
         except ConnectionError as connection_error:
             # Connection error, set retry timer to 30s
             self.retry_timer = time.time() + 30
-            logging.critical(f'Connection Error: {connection_error}')
             raise connection_error
         except requests.exceptions.HTTPError as http_error:
             # HTTP Error, no retry timer
-            logging.critical(f'Unsuccesful HTTP Request: {http_error}')
             raise http_error
         except requests.exceptions.Timeout as timeout_error:
             # Timeout, set retry timer to 30s
             self.retry_timer = time.time() + 30
-            logging.critical(f'Timeout Occured: {timeout_error}')
             raise timeout_error
         except Exception as exc:
-            # Other exception set retry timer to 10s
-            self.retry_timer = time.time() + 10
-            logging.critical(f'Got Exception: {exc}')
+            # Other exception set retry timer to 20s
+            self.retry_timer = time.time() + 20
             raise exc
     
     def post(self, path, command, data):
@@ -90,7 +86,6 @@ class RouterRestAPI:
         except ConnectionError as connection_error:
             # Connection error, set retry timer to 30s
             self.retry_timer = time.time() + 30
-            logging.critical(f'Connection Error: {connection_error}')
         except requests.exceptions.HTTPError as http_error:
             # HTTP Error, no retry timer
             logging.critical(f'Unsuccesful HTTP Request: {http_error}')

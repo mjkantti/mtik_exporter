@@ -130,10 +130,10 @@ class ExportProcessor:
             except Exception as e:
                 if str(e) == 'retry_timer_skip':
                     if not logged_skip:
-                        logging.critical("Skipping Load because of previous error")
+                        logging.error("Skipping Load because of previous error")
                         logged_skip = True
                     continue
-                logging.exception('Catched exception while loading')
+                logging.error(f'Catched exception while loading: {e}')
             self.internal_collector.set_last_run(internal_labels)
 
 if __name__ == '__main__':

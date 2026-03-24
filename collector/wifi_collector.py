@@ -30,8 +30,8 @@ class WifiCollector(LoadingCollector):
 
         # Metrics
         self.metric_store.create_info_metric('wifi_interfaces', 'Wifi Interfaces')
-        self.metric_store.create_gauge_metric('wifi_interface_registered_peers', 'Wifi interface registered peers', 'registered_peers', ['id', 'name', 'comment'])
-        self.metric_store.create_gauge_metric('wifi_interface_authorized_peers', 'Wifi interface authorized peers', 'authorized_peers', ['id', 'name', 'comment'])
+        self.metric_store.create_gauge_metric('wifi_interface_registered_peers', 'Wifi interface registered peers', 'registered_peers', ['id', 'mac_address', 'name', 'comment'])
+        self.metric_store.create_gauge_metric('wifi_interface_authorized_peers', 'Wifi interface authorized peers', 'authorized_peers', ['id', 'mac_address', 'name', 'comment'])
 
     def load_data(self, router_entry: 'RouterEntry'):
         wifi_interface_records = router_entry.rest_api.get('interface/wifi')

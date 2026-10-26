@@ -133,7 +133,7 @@ class ExportProcessor:
                         logging.error("Skipping Load because of previous error")
                         logged_skip = True
                     continue
-                logging.error(f'Catched exception while loading: {e}')
+                logging.error(f'Catched exception while loading {c.name}: {e}')
             self.internal_collector.set_last_run(internal_labels)
 
 if __name__ == '__main__':

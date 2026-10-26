@@ -57,9 +57,9 @@ class SystemResourceCollector(LoadingCollector):
     def load_data(self, router_entry: 'RouterEntry'):
         resource_record = router_entry.rest_api.get('system/resource')
         if resource_record:
-            ver, channel = parse_ros_version(resource_record['version'])
-            if channel:
-                resource_record['current_version'] = ver
-                resource_record['channel'] = channel
+            #ver, channel = parse_ros_version(resource_record['version'])
+            #if channel:
+            #    resource_record['current_version'] = ver
+            #    resource_record['channel'] = channel
 
             self.metric_store.set_metrics([resource_record])

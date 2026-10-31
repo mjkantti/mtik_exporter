@@ -14,7 +14,7 @@
 
 
 from collector.metric_store import MetricStore, LoadingCollector
-from utils.utils import parse_timedelta
+from utils.utils import parse_timedelta, ip4_to_hex
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -28,7 +28,7 @@ class DHCPCollector(LoadingCollector):
         self.name = 'DHCPCollector'
         self.metric_store = MetricStore(
             router_id,
-            ['active_address', 'address', 'mac_address', 'mac_vendor', 'host_name', 'comment', 'server', 'dynamic', 'client_id', 'status', 'address_lists', 'class_id'],
+            ['active_address', 'address', 'hex_address', 'mac_address', 'mac_vendor', 'host_name', 'comment', 'server', 'dynamic', 'client_id', 'status', 'address_lists', 'class_id'],
             ['expires_after', 'last_seen', 'lease_time'],
             {
                 'expires_after': parse_timedelta,
@@ -45,4 +45,5 @@ class DHCPCollector(LoadingCollector):
 
     def load_data(self, router_entry: 'RouterEntry'):
         dhcp_lease_records = router_entry.rest_api.get('ip/dhcp-server/lease')
+        dhcp_lease_records = [l | {"hex_address": ip4_to_hex(l.get("address"))} for l in dhcp_lease_records]
         self.metric_store.set_metrics(dhcp_lease_records)

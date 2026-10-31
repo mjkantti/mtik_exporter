@@ -16,6 +16,7 @@ import logging
 import re
 
 from datetime import datetime, timedelta, timezone
+from ipaddress import ip_address
 from urllib import request
 from mac_vendor_lookup import MacLookup, VendorNotFoundError
 
@@ -123,3 +124,7 @@ def get_mac_vendor(mac: str) -> str:
             return mac_lookup.lookup(mac)
         except VendorNotFoundError:
             return ""
+
+def ip4_to_hex(ip_str):
+    # Converts IPv4 to an 8-character zero-padded hex string (e.g., "10.3.3.3" -> "0a030303")
+    return f"{int(ip_address(ip_str)):08x}"

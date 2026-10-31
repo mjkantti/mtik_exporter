@@ -39,11 +39,10 @@ class DHCPCollector(LoadingCollector):
 
         # Metrics
         self.metric_store.create_info_metric('dhcp_lease', 'DHCP Active Leases')
-        self.metric_store.create_gauge_metric('dhcp_lease_expiry', 'DHCP Active Lease Expiry', 'expires_after', ['mac_address', 'comment', 'client_id'])
-        self.metric_store.create_gauge_metric('dhcp_lease_last_seen', 'DHCP Active Lease Last Seen', 'last_seen', ['mac_address', 'comment', 'client_id'])
-        self.metric_store.create_gauge_metric('dhcp_lease_time', 'DHCP Lease time', 'lease_time', ['mac_address', 'comment', 'client_id'])
+        self.metric_store.create_gauge_metric('dhcp_lease_expiry', 'DHCP Active Lease Expiry', 'expires_after', ['mac_address', 'address', 'comment', 'client_id'])
+        self.metric_store.create_gauge_metric('dhcp_lease_last_seen', 'DHCP Active Lease Last Seen', 'last_seen', ['mac_address', 'address', 'comment', 'client_id'])
+        self.metric_store.create_gauge_metric('dhcp_lease_time', 'DHCP Lease time', 'lease_time', ['mac_address', 'address', 'comment', 'client_id'])
 
     def load_data(self, router_entry: 'RouterEntry'):
         dhcp_lease_records = router_entry.rest_api.get('ip/dhcp-server/lease')
-        print(dhcp_lease_records)
         self.metric_store.set_metrics(dhcp_lease_records)

@@ -127,4 +127,7 @@ def get_mac_vendor(mac: str) -> str:
 
 def ip4_to_hex(ip_str):
     # Converts IPv4 to an 8-character zero-padded hex string (e.g., "10.3.3.3" -> "0a030303")
-    return f"{int(ip_address(ip_str)):08x}"
+    if ip_str:
+        return f'{int(ip_address(ip_str)):08x}'
+    else:
+        return ''

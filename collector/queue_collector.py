@@ -26,14 +26,13 @@ class QueueTreeCollector(LoadingCollector):
         self.name = 'QueueTreeCollector'
         self.metric_store = MetricStore(
             router_id,
-            ['name', 'parent', 'packet_mark', 'limit_at', 'max_limit', 'priority', 'disabled'],
-            ['rate', 'bytes', 'queued_bytes', 'dropped'])
+            ['name', 'parent', 'packet_mark', 'limit_at', 'max_limit', 'priority', 'disabled'])
 
         # Metrics
         self.metric_store.create_info_metric('queue_tree', 'Queue Tree Info')
-        self.metric_store.create_counter_metric('queue_tree_rates', 'Average passing data rate in bytes per second', 'rate', ['name'])
+        self.metric_store.create_gauge_metric('queue_tree_rates', 'Average passing data rate in bits per second', 'rate', ['name'])
         self.metric_store.create_counter_metric('queue_tree_bytes', 'Number of processed bytes', 'bytes', ['name'])
-        self.metric_store.create_counter_metric('queue_tree_queued_bytes', 'Number of queued bytes', 'queued_bytes', ['name'])
+        self.metric_store.create_gauge_metric('queue_tree_queued_bytes', 'Number of queued bytes', 'queued_bytes', ['name'])
         self.metric_store.create_counter_metric('queue_tree_dropped', 'Number of dropped bytes', 'dropped', ['name'])
 
     def load_data(self, router_entry: 'RouterEntry'):
@@ -46,8 +45,7 @@ class QueueSimpleCollector(LoadingCollector):
         self.name = 'QueueSimpleCollector'
         self.metric_store = MetricStore(
             router_id,
-            ['name', 'parent', 'packet_mark', 'limit_at', 'max_limit', 'priority', 'bytes', 'packets', 'queued_bytes', 'queued_packets','dropped', 'rate', 'packet_rate', 'disabled'],
-            ['bytes_up', 'bytes_down', 'queued_bytes_up', 'queued_bytes_down', 'dropped_up', 'dropped_down'])
+            ['name', 'parent', 'packet_mark', 'disabled'])
 
         # Metrics
         self.metric_store.create_info_metric('queue_simple', 'Queue Simple Info')
@@ -55,8 +53,8 @@ class QueueSimpleCollector(LoadingCollector):
         self.metric_store.create_counter_metric('queue_simple_bytes_upload', 'Number of upload processed bytes', 'bytes_up', ['name'])
         self.metric_store.create_counter_metric('queue_simple_bytes_download', 'Number of download processed bytes', 'bytes_down', ['name'])
 
-        self.metric_store.create_counter_metric('queue_simple_queued_bytes_upload', 'Number of upload queued bytes', 'queued_bytes_up', ['name'])
-        self.metric_store.create_counter_metric('queue_simple_queued_bytes_download', 'Number of download queued bytes', 'queued_bytes_down', ['name'])
+        self.metric_store.create_gauge_metric('queue_simple_queued_bytes_upload', 'Number of upload queued bytes', 'queued_bytes_up', ['name'])
+        self.metric_store.create_gauge_metric('queue_simple_queued_bytes_download', 'Number of download queued bytes', 'queued_bytes_down', ['name'])
 
         self.metric_store.create_counter_metric('queue_simple_dropped_upload', 'Number of upload dropped bytes', 'dropped_up', ['name'])
         self.metric_store.create_counter_metric('queue_simple_dropped_download', 'Number of download dropped bytes', 'dropped_down', ['name'])

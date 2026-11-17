@@ -28,20 +28,19 @@ To Create
 ##### System
 ```
 system:
-  port: 49090
-  socket_timeout: 10
+  # Address and port the metrics HTTP server listens on, "::" listens on all interfaces (IPv4 and IPv6)
+  export_address: "::"
+  export_port: 49090
 
-  initial_delay_on_failure: 120
-  max_delay_on_failure: 900
-  delay_inc_div: 5
-
-  verbose_mode: False
+  # Debug logging, same as the --debug command line flag
+  debug_mode: False
 
   check_for_updates: True
   check_for_updates_channel:
     - development
     - stable
-  check_for_updates_interval: 3600
+  # How often collectors running on the exporter host (not on the router) are polled, e.g. the update check
+  system_polling_interval: 3600
 ```
 
 ##### Router(s)
@@ -50,13 +49,18 @@ Sample-Router:
   enabled: False
 
   hostname: localhost
+  # Port of the router's REST API (www or www-ssl service), leave out to use the default port (80, or 443 with use_tls)
+  # host_port: 8080
 
   username: username
   password: password
 
-  use_ssl: False
+  use_tls: False
   no_ssl_certificate: False
   ssl_certificate_verify: False
+
+  # Seconds to wait for the router to connect or respond before giving up
+  request_timeout: 2
 
   polling_interval: 10
   slow_polling_interval: 60
@@ -90,8 +94,12 @@ Sample-Router:
     - public_ip
     - wireguard
 ```
+**NOTE:** TLS support is not fully implemented. `use_tls` switches the connection to https, but `no_ssl_certificate` and `ssl_certificate_verify` are not implemented and have no effect. The certificate is always verified, so https only works if the router has a certificate trusted by the exporter host (a self-signed certificate will fail).
+
 ##### Collectors
 Metrics are collected in two intervals, (which can be same), polling_interval and slow_polling_interval, default values for these are 10 seconds and 60 seconds.
+
+Any collector key can be listed under either `collectors` (polled every `polling_interval`) or `slow_collectors` (polled every `slow_polling_interval`). The split in the sample configuration is only a suggestion, put rarely changing data in the slow group.
 ##### Collector Keys
 `dhcp` - DHCP Info
 
@@ -155,7 +163,17 @@ Metrics are collected in two intervals, (which can be same), polling_interval an
 
 `lte` - LTE Interface Metrics
 
-`bridge_hosts` - MAC Table, NOTE this is very slow (takes up to 5 seconds on my devices)
+`containers` - Containers and their running state
+
+`kid_control_devices` - Kid Control Devices, traffic and rates
+
+`zerotier` - ZeroTier Interfaces
+
+`zerotier_peers` - ZeroTier Peers and latency
+
+`zerotier_controller` - ZeroTier Controller Members
+
+`bridge_hosts` - MAC Table. **WARNING:** this can be very slow (takes up to 5 seconds on some devices), not recommended if it takes that long. All routers and collectors are loaded one at a time, so while this loads every other collector waits and their data is delayed.
 
 #### Installation
 - from Docker Registry

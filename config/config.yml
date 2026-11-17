@@ -1,28 +1,35 @@
 system:
-    port: 49090
-    socket_timeout: 10
+    # Address and port the metrics HTTP server listens on, "::" listens on all interfaces (IPv4 and IPv6)
+    export_address: "::"
+    export_port: 49090
 
-    initial_delay_on_failure: 120
-    max_delay_on_failure: 900
-    delay_inc_div: 5
+    # Debug logging, same as the --debug command line flag
+    debug_mode: False
+
 
     check_for_updates: True
     check_for_updates_channel:
       - development
       - stable
-    check_for_updates_interval: 3600
+    # How often collectors running on the exporter host (not on the router) are polled, e.g. the update check
+    system_polling_interval: 3600
 
 Sample-Router:
     enabled: False
 
     hostname: localhost
+    # Port of the router's REST API (www or www-ssl service), leave out to use the default port (80, or 443 with use_tls)
+    # host_port: 8080
 
     username: username
     password: password
 
-    use_ssl: False
+    use_tls: False
     no_ssl_certificate: False
     ssl_certificate_verify: False
+
+    # Seconds to wait for the router to connect or respond before giving up
+    request_timeout: 2
 
     polling_interval: 10
     slow_polling_interval: 60

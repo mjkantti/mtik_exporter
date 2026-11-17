@@ -29,7 +29,6 @@ class NetwatchCollector(LoadingCollector):
         self.metric_store = MetricStore(
             router_id,
             ['name', 'host', 'comment', 'timeout', 'interval', 'type'],
-            ['since', 'status', 'loss_count', 'response_count', 'rtt_avg', 'rtt_jitter', 'rtt_max', 'rtt_min', 'rtt_stdev', 'sent_count', 'http_status_code', 'http_resp_time', 'tcp_connect_time'],
             {
                 'since': parse_datetime,
                 'rtt_avg': parse_timedelta,
@@ -59,7 +58,7 @@ class NetwatchCollector(LoadingCollector):
         # HTTP(S)
         self.metric_store.create_gauge_metric('netwatch_http_status_code', 'Netwatch HTTP Status Code', 'http_status_code')
         self.metric_store.create_gauge_metric('netwatch_http_response_time', 'Netwatch HTTP Response Time', 'http_resp_time')
-        self.metric_store.create_gauge_metric('tcp_connect_time', 'Netwatch HTTP TCP Connect Time', 'tcp_connect_time')
+        self.metric_store.create_gauge_metric('netwatch_tcp_connect_time', 'Netwatch HTTP TCP Connect Time', 'tcp_connect_time')
 
     def load_data(self, router_entry: 'RouterEntry'):
         nw_records = router_entry.rest_api.get('tool/netwatch', {'disabled': 'false'})

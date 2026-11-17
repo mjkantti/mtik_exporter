@@ -126,7 +126,7 @@ class SystemCollectorRegistry:
 
     def __init__(self, system_config, keys: list[str]) -> None:
         self.system_collectors: list['LoadingCollector'] = []
-        self.interval: int = system_config.system_interval
+        self.interval: int = system_config.system_polling_interval
         self.interal_collector = InternalCollector(keys)
 
         # SYSTEM Collectors

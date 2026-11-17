@@ -27,7 +27,6 @@ class BGPCollector(LoadingCollector):
         self.metric_store = MetricStore(
             router_id,
             ['name', 'remote_address', 'remote_as', 'local_as', 'remote_afi', 'local_afi'],
-            ['prefix_count', 'local_messages', 'local_bytes', 'remote_messages', 'remote_bytes', 'established', 'uptime'],
             {
                 'established': lambda value: 1 if value=='true' else 0,
                 'uptime': parse_timedelta

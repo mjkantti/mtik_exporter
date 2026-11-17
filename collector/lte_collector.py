@@ -30,7 +30,6 @@ class LTECollector(LoadingCollector):
         self.metric_store = MetricStore(
             router_id,
             ['id', 'name', 'comment', 'current_operator', 'data_class', 'status'],
-            ['rsrp', 'rsrq', 'rssi', 'sinr', 'session_uptime'],
             {
                 'session_uptime': parse_timedelta,
             })
@@ -50,15 +49,19 @@ class LTECollector(LoadingCollector):
             monitor_records = []
             if_ids = []
             for ifc in interface_lte_records:
+                # Same labels for up and down interfaces, so the series identity does not change with link state
+                if_info = {'id': str(ifc.get('.id', '')), 'name': str(ifc.get('name', '')), 'comment': str(ifc.get('comment', ''))}
                 if ifc.get('running', 'true') == 'false' or ifc.get('disabled', 'false') == 'true':
-                    monitor_records.append({'id': ifc.get('id', ''), 'name': ifc.get('name', ''), 'comment': ifc.get('comment', ''), 'status': 'link-down'})
+                    if_info['status'] = 'link-down'
+                    monitor_records.append(if_info)
                 else:
-                    if_ids.append({'id': str(ifc.get('.id')), 'name': str(ifc.get('name')), 'comment': str(ifc.get('comment'))})
+                    if_ids.append(if_info)
 
             id_str = ','.join([i.get('id') for i in if_ids if i])
-            monitor_records_running = router_entry.rest_api.post('interface/lte', 'monitor', data = {'once': True, '.id': id_str})
-            for if_info, mr in zip(if_ids, monitor_records_running):
-                if_info.update(mr)
-                monitor_records.append(if_info)
+            if id_str:
+                monitor_records_running = router_entry.rest_api.post('interface/lte', 'monitor', data = {'once': True, '.id': id_str})
+                for if_info, mr in zip(if_ids, monitor_records_running):
+                    if_info.update(mr)
+                    monitor_records.append(if_info)
 
             self.metric_store.set_metrics(monitor_records)

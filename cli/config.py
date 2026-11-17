@@ -28,12 +28,12 @@ class ConfigKeys:
     HOST_KEY = 'hostname'
     USER_KEY = 'username'
     PASSWD_KEY = 'password'
-    PORT_KEY = 'port'
+    HOST_PORT_KEY = 'host_port'
 
-    SSL_KEY = 'use_ssl'
+    TLS_KEY = 'use_tls'
     NO_SSL_CERTIFICATE = 'no_ssl_certificate'
     SSL_CERTIFICATE_VERIFY = 'ssl_certificate_verify'
-    SOCKET_TIMEOUT = 'socket_timeout'
+    REQUEST_TIMEOUT = 'request_timeout'
 
     POLLING_INTERVAL_KEY = 'polling_interval'
     SLOW_POLLING_INTERVAL_KEY = 'slow_polling_interval'
@@ -41,11 +41,11 @@ class ConfigKeys:
     FAST_POLLING_KEYS = 'collectors'
     SLOW_POLLING_KEYS = 'slow_collectors'
 
+    DEBUG_MODE_KEY = 'debug_mode'
     CHECK_FOR_UPDATES_KEY = 'check_for_updates'
     CHECK_FOR_UPDATES_CHANNEL_KEY = 'check_for_updates_channel'
-    SYSTEM_INTERVAL_KEY = 'system_interval'
+    SYSTEM_POLLING_INTERVAL_KEY = 'system_polling_interval'
 
-    EXPORTER_INC_DIV = 'delay_inc_div'
     EXPORTER_ADDR = 'export_address'
     EXPORTER_PORT = 'export_port'
 
@@ -58,22 +58,19 @@ class ConfigKeys:
     DEFAULT_POLLING_INTERVAL = 10
     DEFAULT_SLOW_POLLING_INTERVAL = 60
     DEFAULT_EXPORT_PORT = 49090
-    DEFAULT_SOCKET_TIMEOUT = 2
-    DEFAULT_INITIAL_DELAY = 120
-    DEFAULT_MAX_DELAY = 900
-    DEFAULT_INC_DIV = 5
+    DEFAULT_REQUEST_TIMEOUT = 2
     DEFAULT_CHECK_FOR_UPDATES_CHANNEL = ['stable']
-    DEFAULT_SYSTEM_INTERVAL = 3600
+    DEFAULT_SYSTEM_POLLING_INTERVAL = 3600
     DEFAULT_EXPORT_ADDRESS = '::'
 
     ROUTER_STR_KEYS = {HOST_KEY, USER_KEY, PASSWD_KEY}
-    ROUTER_BOOLEAN_KEYS = {ENABLED_KEY, SSL_KEY, NO_SSL_CERTIFICATE, SSL_CERTIFICATE_VERIFY}
-    ROUTER_INT_KEYS = {POLLING_INTERVAL_KEY, SLOW_POLLING_INTERVAL_KEY, PORT_KEY, SOCKET_TIMEOUT}
+    ROUTER_BOOLEAN_KEYS = {ENABLED_KEY, TLS_KEY, NO_SSL_CERTIFICATE, SSL_CERTIFICATE_VERIFY}
+    ROUTER_INT_KEYS = {POLLING_INTERVAL_KEY, SLOW_POLLING_INTERVAL_KEY, HOST_PORT_KEY, REQUEST_TIMEOUT}
     ROUTER_LIST_KEYS = {FAST_POLLING_KEYS, SLOW_POLLING_KEYS}
 
     SYSTEM_STR_KEYS = {EXPORTER_ADDR}
-    SYSTEM_BOOLEAN_KEYS = {CHECK_FOR_UPDATES_KEY}
-    SYSTEM_INT_KEYS = {EXPORTER_PORT, EXPORTER_INC_DIV, SYSTEM_INTERVAL_KEY}
+    SYSTEM_BOOLEAN_KEYS = {CHECK_FOR_UPDATES_KEY, DEBUG_MODE_KEY}
+    SYSTEM_INT_KEYS = {EXPORTER_PORT, SYSTEM_POLLING_INTERVAL_KEY}
     SYSTEM_LIST_KEYS = {CHECK_FOR_UPDATES_CHANNEL_KEY}
 
     # mtik_exporter config entry name
@@ -118,7 +115,8 @@ class SystemConfigHandler:
         config = {}
         try:
             with open(self.data_path) as cfgstr:
-                config = yaml.safe_load(cfgstr)
+                # An empty file loads as None
+                config = yaml.safe_load(cfgstr) or {}
         except:
             logging.exception(f'Could not reaad {self.data_path}')
 
@@ -134,14 +132,20 @@ class SystemConfigHandler:
         logging.info('%s: Reading Config for router', entry_name)
         config_entry_reader = {}
 
+        # An entry with nothing under it loads as None, treat it as empty (all defaults, so disabled)
+        router_config = self.routers_config[entry_name] or {}
+        if not isinstance(router_config, dict):
+            logging.warning('%s: Router entry is not a section of settings, ignoring its value', entry_name)
+            router_config = {}
+
         for key in ConfigKeys.ROUTER_BOOLEAN_KEYS:
-            config_entry_reader[key] = self.routers_config[entry_name].get(key, False)
+            config_entry_reader[key] = router_config.get(key, False)
 
         for key in ConfigKeys.ROUTER_STR_KEYS | ConfigKeys.ROUTER_INT_KEYS:
-            config_entry_reader[key] = self.routers_config[entry_name].get(key, self._default_value_for_key(key))
+            config_entry_reader[key] = router_config.get(key, self._default_value_for_key(key))
 
         for key in ConfigKeys.ROUTER_LIST_KEYS:
-            config_entry_reader[key] = self.routers_config[entry_name].get(key, [])
+            config_entry_reader[key] = router_config.get(key, [])
 
         return config_entry_reader
 
@@ -160,14 +164,13 @@ class SystemConfigHandler:
     def _default_value_for_key(self, key):
         logging.info('Getting Default value for %s', key)
         return {
-            ConfigKeys.SSL_KEY: False,
-            ConfigKeys.PORT_KEY: '',
+            ConfigKeys.TLS_KEY: False,
+            ConfigKeys.HOST_PORT_KEY: ConfigKeys.DEFAULT_API_PORT,
             ConfigKeys.POLLING_INTERVAL_KEY: ConfigKeys.DEFAULT_POLLING_INTERVAL,
             ConfigKeys.SLOW_POLLING_INTERVAL_KEY: ConfigKeys.DEFAULT_SLOW_POLLING_INTERVAL,
-            ConfigKeys.SOCKET_TIMEOUT: ConfigKeys.DEFAULT_SOCKET_TIMEOUT,
-            ConfigKeys.EXPORTER_INC_DIV: ConfigKeys.DEFAULT_INC_DIV,
+            ConfigKeys.REQUEST_TIMEOUT: ConfigKeys.DEFAULT_REQUEST_TIMEOUT,
             ConfigKeys.CHECK_FOR_UPDATES_CHANNEL_KEY: ConfigKeys.DEFAULT_CHECK_FOR_UPDATES_CHANNEL,
-            ConfigKeys.SYSTEM_INTERVAL_KEY: ConfigKeys.DEFAULT_SYSTEM_INTERVAL,
+            ConfigKeys.SYSTEM_POLLING_INTERVAL_KEY: ConfigKeys.DEFAULT_SYSTEM_POLLING_INTERVAL,
             ConfigKeys.EXPORTER_ADDR: ConfigKeys.DEFAULT_EXPORT_ADDRESS,
             ConfigKeys.EXPORTER_PORT: ConfigKeys.DEFAULT_EXPORT_PORT,
         }.get(key)

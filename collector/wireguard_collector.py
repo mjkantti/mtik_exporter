@@ -42,7 +42,6 @@ class WireguardPeerCollector(LoadingCollector):
         self.metric_store = MetricStore(
             router_id,
             ['name', 'interface', 'public_key', 'endpoint_address', 'endpoint_port', 'current_endpoint_address', 'current_endpoint_port', 'allowed_address', 'comment'],
-            ['tx', 'rx', 'last_handshake'],
             {
                 'last_handshake': parse_timedelta
             })

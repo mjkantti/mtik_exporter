@@ -27,8 +27,7 @@ class HealthCollector(LoadingCollector):
         self.name = 'HealthCollector'
         self.metric_store = MetricStore(
             router_id,
-            [],
-            ['voltage', 'temperature', 'phy_temperature', 'cpu_temperature', 'switch_temperature', 'fan1_speed', 'fan2_speed', 'fan3_speed', 'fan4_speed', 'power_consumption'])
+            [])
 
         # Metrics
         self.metric_store.create_gauge_metric('system_routerboard_voltage', 'Supplied routerboard voltage', 'voltage')

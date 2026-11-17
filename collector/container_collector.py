@@ -24,8 +24,7 @@ class ContainerCollector(LoadingCollector):
         self.name = 'ContainerCollector'
         self.metric_store = MetricStore(
             router_id,
-            ['name', 'tag', 'os', 'arch', 'interface', 'root_dir', 'status', 'comment'],
-            ['state']
+            ['name', 'tag', 'os', 'arch', 'interface', 'root_dir', 'status', 'comment']
             )
 
         # Metrics

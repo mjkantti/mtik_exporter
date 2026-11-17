@@ -21,6 +21,10 @@ import time
 # Mikrotik returns everything with latin1 encoding
 mtik_encoding = 'latin1'
 
+class RetryTimerSkip(Exception):
+    ''' Request skipped because the router is backing off after a previous error, not an error by itself
+    '''
+
 class RouterRestAPI:
     ''' Base wrapper for the routeros rest api
     '''
@@ -31,72 +35,47 @@ class RouterRestAPI:
         self.successive_failure_count: int = 0
         self.auth = (config_entry.username, config_entry.password)
 
-        protocol = 'https' if config_entry.use_ssl else 'http'
+        protocol = 'https' if config_entry.use_tls else 'http'
         host_url = f'{protocol}://{config_entry.hostname}'
-        if config_entry.port:
-            host_url += f':{config_entry.port}'
+        if config_entry.host_port:
+            host_url += f':{config_entry.host_port}'
         self.base_url = f'{host_url}/rest'
 
-        self.timeout = config_entry.socket_timeout
+        self.timeout = config_entry.request_timeout
         self.retry_timer = time.time()
         self.ses = requests.Session()
 
     def get(self, path, params = {}):
-        if time.time() < self.retry_timer:
-            raise Exception("retry_timer_skip")
+        return self._request('GET', f"{self.base_url}/{path}", params=params)
 
-        url = f"{self.base_url}/{path}"
-        logging.debug("Hitting %s", url)
+    def post(self, path, command, data):
+        return self._request('POST', f"{self.base_url}/{path}/{command}", json=data)
+
+    def _request(self, method, url, **kwargs):
+        if time.time() < self.retry_timer:
+            raise RetryTimerSkip(self.router_name)
+
+        logging.debug("Hitting %s %s", method, url)
         try:
-            resp = self.ses.get(url, auth=self.auth, timeout=self.timeout, params=params)
+            resp = self.ses.request(method, url, auth=self.auth, timeout=self.timeout, **kwargs)
             resp.raise_for_status()
             logging.debug(f"Done, took: {resp.elapsed.total_seconds()}")
 
             c = resp.content.decode(mtik_encoding)
             return json.loads(c, strict = False)
-        except ConnectionError as connection_error:
-            # Connection error, set retry timer to 30s
-            self.retry_timer = time.time() + 30
-            raise connection_error
         except requests.exceptions.HTTPError as http_error:
-            # HTTP Error, no retry timer
-            raise http_error
-        except requests.exceptions.Timeout as timeout_error:
-            # Timeout, set retry timer to 30s
+            # Auth failures will not fix themselves, back off to avoid flooding the router log with failed logins
+            # Other HTTP errors (e.g. 404 for an endpoint missing on this device) only affect one collector, no retry timer
+            if http_error.response is not None and http_error.response.status_code in (401, 403):
+                logging.error('%s: Authentication failed (HTTP %i), check username, password and group policy',
+                              self.router_name, http_error.response.status_code)
+                self.retry_timer = time.time() + 60
+            raise
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            # Connection error or timeout, set retry timer to 30s
             self.retry_timer = time.time() + 30
-            raise timeout_error
-        except Exception as exc:
+            raise
+        except Exception:
             # Other exception set retry timer to 20s
             self.retry_timer = time.time() + 20
-            raise exc
-    
-    def post(self, path, command, data):
-        if time.time() < self.retry_timer:
-            return []
-
-        url = f"{self.base_url}/{path}/{command}"
-        logging.debug("Hitting %s", url)
-        try:
-            resp = self.ses.post(url, auth=self.auth, timeout=self.timeout, json=data)
-            resp.raise_for_status()
-            logging.debug(f"Done, took: {resp.elapsed.total_seconds()}")
-
-            c = resp.content.decode(mtik_encoding)
-            return json.loads(c)
-        except ConnectionError as connection_error:
-            # Connection error, set retry timer to 30s
-            self.retry_timer = time.time() + 30
-        except requests.exceptions.HTTPError as http_error:
-            # HTTP Error, no retry timer
-            logging.critical(f'Unsuccesful HTTP Request: {http_error}')
-        except requests.exceptions.Timeout as timeout_error:
-            # Timeout, set retry timer to 30s
-            self.retry_timer = time.time() + 30
-            logging.critical(f'Timeout Occured: {timeout_error}')
-        except Exception as exc:
-            # Other exception set retry timer to 10s
-            self.retry_timer = time.time() + 10
-            logging.critical(f'Got Exception: {exc}')
-
-        return None
-    
+            raise

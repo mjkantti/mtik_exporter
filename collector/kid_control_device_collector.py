@@ -29,7 +29,6 @@ class KidDeviceCollector(LoadingCollector):
         self.metric_store = MetricStore(
             router_id,
             ['name', 'user', 'mac_address', 'ip_address', 'disabled'],
-            ['bytes_down', 'bytes_up', 'rate_up', 'rate_down', 'bytes_up', 'idle_time'],
             {
                 'rate_up': parse_rates,
                 'rate_down': parse_rates,
@@ -42,8 +41,8 @@ class KidDeviceCollector(LoadingCollector):
 
         # Metrics
         self.metric_store.create_info_metric('kid_control_device', 'Kid-control device Info')
-        self.metric_store.create_gauge_metric('kid_control_device_bytes_down', 'Number of received bytes', 'bytes_down', ['name', 'mac_address', 'user'])
-        self.metric_store.create_gauge_metric('kid_control_device_bytes_up', 'Number of transmitted bytes', 'bytes_up', ['name', 'mac_address', 'user'])
+        self.metric_store.create_counter_metric('kid_control_device_bytes_down', 'Number of received bytes', 'bytes_down', ['name', 'mac_address', 'user'])
+        self.metric_store.create_counter_metric('kid_control_device_bytes_up', 'Number of transmitted bytes', 'bytes_up', ['name', 'mac_address', 'user'])
         self.metric_store.create_gauge_metric('kid_control_device_rate_down', 'Device rate down', 'rate_down', ['name', 'mac_address', 'user'])
         self.metric_store.create_gauge_metric('kid_control_device_rate_up', 'Device rate up', 'rate_up', ['name', 'mac_address', 'user'])
         self.metric_store.create_gauge_metric('kid_control_device_idle_time', 'Device idle time', 'idle_time', ['name', 'mac_address', 'user'])

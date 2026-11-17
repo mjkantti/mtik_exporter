@@ -20,6 +20,7 @@ from time import time, sleep
 
 from flow.collector_registry import CollectorRegistry, SystemCollectorRegistry
 from flow.router_entry import RouterEntry
+from flow.router_rest_api import RetryTimerSkip
 from cli.config import config_handler, ConfigKeys
 from cli.options import OptionsParser
 
@@ -54,7 +55,7 @@ class ExportProcessor:
             self.thr.join(5)
 
         logging.info(f'Shut Down Done')
-        sys.exit(1)
+        sys.exit(0)
 
     def start(self):
         self.option_parser.parse_options()
@@ -63,6 +64,9 @@ class ExportProcessor:
         start_time = round(time(), -1)
 
         system_config = config_handler.system_entry()
+        if system_config.debug_mode:
+            logging.getLogger().setLevel(logging.DEBUG)
+            logging.debug('Debug mode enabled from config')
         system_collector_registry = SystemCollectorRegistry(system_config, ['name', ConfigKeys.ROUTERBOARD_NAME, ConfigKeys.ROUTERBOARD_ADDRESS])
         self.internal_collector = system_collector_registry.interal_collector
 
@@ -96,7 +100,8 @@ class ExportProcessor:
             logging.info('Adding System Collector %s', c.name)
             REGISTRY.register(c)
 
-        self.run_collectors(None, system_collector_registry.system_collectors, interval, start_time, 3)
+        # First system run shortly after startup so it does not block the HTTP server, after that on the system polling interval
+        self.s.enterabs(time() + 5, 3, self.run_collectors, argument=(None, system_collector_registry.system_collectors, interval, start_time, 3))
 
         logging.info('Running HTTP metrics server on address %s port %i', system_config.export_address, system_config.export_port)
 
@@ -124,15 +129,17 @@ class ExportProcessor:
             logging.debug('Running %s', c.name)
 
             try:
-                with self.internal_collector.time(internal_labels), self.internal_collector.count_exceptions(internal_labels):
+                with self.internal_collector.time(internal_labels):
                     c.load(router_entry)
                 self.internal_collector.inc_load_count(internal_labels)
+            except RetryTimerSkip:
+                # Backing off after an error that was already counted, do not count the skip as an error
+                if not logged_skip:
+                    logging.error("Skipping Load because of previous error")
+                    logged_skip = True
+                continue
             except Exception as e:
-                if str(e) == 'retry_timer_skip':
-                    if not logged_skip:
-                        logging.error("Skipping Load because of previous error")
-                        logged_skip = True
-                    continue
+                self.internal_collector.inc_errors(internal_labels)
                 logging.error(f'Catched exception while loading {c.name}: {e}')
             self.internal_collector.set_last_run(internal_labels)
 

@@ -14,7 +14,7 @@
 
 
 from collector.metric_store import MetricStore, LoadingCollector
-from utils.utils import parse_ros_version, parse_timedelta
+from utils.utils import parse_timedelta
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -28,13 +28,11 @@ class SystemResourceCollector(LoadingCollector):
         self.name = 'SystemResourceCollector'
         self.metric_store = MetricStore(
             router_id,
-            ['version', 'channel', 'current_version', 'cpu', 'architecture_name', 'board_name'],
-            ['uptime', 'write-sect-total', 'bad_blocks', 'cpu_count', 'cpu_frequency', 'free_memory', 'total_memory', 'cpu_load', 'free_hdd_space', 'total_hdd_space'],
+            ['version', 'cpu', 'architecture_name', 'board_name'],
             {
                 'uptime': parse_timedelta,
                 'bad_blocks': lambda b: b.strip('%') if b else b
             })
-        self.version_metric_store = MetricStore(router_id, ['current_version', 'channel', 'latest_version'])
 
         # Metrics
         self.metric_store.create_info_metric('system', 'System Resource Information')
@@ -50,16 +48,7 @@ class SystemResourceCollector(LoadingCollector):
         self.metric_store.create_gauge_metric('system_hdd_bad_blocks_percent', 'HDD Bad Block percentage', 'bad_blocks', ['board_name', 'cpu', 'architecture_name'])
         self.metric_store.create_counter_metric('system_hdd_write_sector_count', 'HDD Written Sector Count', 'write_sect_total', ['board_name', 'cpu', 'architecture_name'])
 
-        # Updates
-        self.version_metric_store.create_info_metric('system_latest_version', 'Latest RouterOS version available')
-        self.version_metric_store.create_gauge_metric('system_latest_version_built', 'Latest RouterOS version built time', 'latest_built')
-
     def load_data(self, router_entry: 'RouterEntry'):
         resource_record = router_entry.rest_api.get('system/resource')
         if resource_record:
-            #ver, channel = parse_ros_version(resource_record['version'])
-            #if channel:
-            #    resource_record['current_version'] = ver
-            #    resource_record['channel'] = channel
-
             self.metric_store.set_metrics([resource_record])

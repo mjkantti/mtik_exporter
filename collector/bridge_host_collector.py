@@ -25,7 +25,6 @@ class BridgeHostCollector(LoadingCollector):
         self.metric_store = MetricStore(
             router_id,
             ['mac_address', 'mac_vendor', 'vid', 'bridge', 'interface', 'on_interface'],
-            ['prefix_count', 'local_messages', 'local_bytes', 'remote_messages', 'remote_bytes', 'established', 'uptime'],
             resolve_mac_vendor = True)
 
         # Metrics

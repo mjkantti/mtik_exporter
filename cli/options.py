@@ -72,6 +72,6 @@ Selected metrics info can be printed on the command line. For more information, 
         ''' Checks if path_arg is a valid file path
         '''
         if not (os.path.exists(path_arg) and os.path.isfile(path_arg)):
-            parser.error('"{path_arg}" does not seem to be an existing file path')
+            parser.error(f'"{path_arg}" does not seem to be an existing file path')
         else:
             return path_arg

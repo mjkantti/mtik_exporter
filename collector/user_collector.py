@@ -28,7 +28,6 @@ class UserCollector(LoadingCollector):
         self.metric_store = MetricStore(
             router_id,
             ['name', 'address', 'via', 'group'],
-            ['when', 'count'],
             {
                 'when': parse_datetime
             })

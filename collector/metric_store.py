@@ -18,6 +18,8 @@ from prometheus_client.registry import Collector
 from collections.abc import Callable
 from time import time
 
+import logging
+
 from utils.utils import get_mac_vendor
 
 from typing import TYPE_CHECKING
@@ -31,15 +33,13 @@ class MetricStore():
     '''
     def __init__(self, router_id: dict[str, str],
                  metric_labels: list[str],
-                 metric_values: list[str] = [],
-                 translation_table: dict[str, Callable[[str | None], str | float | None]]={},
+                 translation_table: dict[str, Callable[[str | None], str | float | None]] | None = None,
                  resolve_mac_vendor: bool = False
                 ):
         self.router_id = router_id
         self.ts: float = 0
         self.metric_labels = self.add_router_labels(metric_labels)
-        self.metric_values = metric_values
-        self.translation_table = translation_table
+        self.translation_table = translation_table or {}
         self.resolve_mac_vendor = resolve_mac_vendor
 
         self.metrics: list[tuple[Metric, list[str], str | None]] = []
@@ -47,11 +47,11 @@ class MetricStore():
     def create_info_metric(self, name: str, decription: str):
         self.metrics.append((InfoMetricFamily(f'mtik_exporter_{name}', decription, labels=self.metric_labels), self.metric_labels, None))
 
-    def create_gauge_metric(self, name: str, decription: str, value: str, labels = []):
+    def create_gauge_metric(self, name: str, decription: str, value: str, labels: list[str] | None = None):
         labels = self.add_router_labels(labels) if labels else self.metric_labels
         self.metrics.append((GaugeMetricFamily(f'mtik_exporter_{name}', decription, labels=labels), labels, value))
 
-    def create_counter_metric(self, name: str, decription: str, value: str, labels = []):
+    def create_counter_metric(self, name: str, decription: str, value: str, labels: list[str] | None = None):
         labels = self.add_router_labels(labels) if labels else self.metric_labels
         self.metrics.append((CounterMetricFamily(f'mtik_exporter_{name}', decription, labels=labels), labels, value))
 
@@ -66,7 +66,7 @@ class MetricStore():
         for metric, _, _ in self.metrics:
             metric.samples.clear()
 
-    def set_metrics(self, router_records: list[dict[str, str | float]] = []):
+    def set_metrics(self, router_records: list[dict[str, str | float]] | None = None):
         self.ts = time()
 
         if not router_records:
@@ -113,6 +113,13 @@ class MetricStore():
                 else:
                     v = translated_record.get(value)
                     if v == None:
+                        continue
+
+                    # A non-numeric value would make the whole scrape fail, skip the sample instead
+                    try:
+                        v = float(v)
+                    except (TypeError, ValueError):
+                        logging.warning('Skipping non-numeric value %r for metric %s (key %s)', v, metric.name, value)
                         continue
 
                 lv: list[str] = [str(translated_record.get(label, '')) for label in labels]

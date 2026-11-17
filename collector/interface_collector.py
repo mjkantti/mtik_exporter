@@ -28,8 +28,7 @@ class InterfaceCollector(LoadingCollector):
         self.name = 'InterfaceCollector'
         self.metric_store = MetricStore(
             router_id,
-            ['id', 'name', 'comment', 'type', 'mtu', 'mac_address', 'running'],
-            ['rx_byte', 'tx_byte', 'rx_packet', 'tx_packet', 'rx_error', 'tx_error', 'rx_drop', 'tx_drop', 'link_downs'])
+            ['id', 'name', 'comment', 'type', 'mtu', 'mac_address', 'running'])
 
         # Metrics
         self.metric_store.create_counter_metric('interface_rx_byte', 'Number of received bytes', 'rx_byte')
@@ -44,7 +43,7 @@ class InterfaceCollector(LoadingCollector):
         self.metric_store.create_counter_metric('interface_rx_drop', 'Number of received packets being dropped', 'rx_drop')
         self.metric_store.create_counter_metric('interface_tx_drop', 'Number of transmitted packets being dropped', 'tx_drop')
 
-        self.metric_store.create_counter_metric('link_downs', 'Number of times link went down', 'link_downs')
+        self.metric_store.create_counter_metric('interface_link_downs', 'Number of times link went down', 'link_downs')
 
     def load_data(self, router_entry: 'RouterEntry'):
         interface_traffic_records = router_entry.rest_api.get('interface')
@@ -60,7 +59,6 @@ class InterfaceMonitorCollector(LoadingCollector):
         self.metric_store = MetricStore(
             router_id,
             ['id', 'name', 'comment'],
-            ['full_duplex', 'status', 'rate', 'sfp_temperature'],
             {
                 'status': lambda value: 1 if value=='link-ok' else 0,
                 'rate': parse_rates,
@@ -82,15 +80,19 @@ class InterfaceMonitorCollector(LoadingCollector):
             monitor_records = []
             if_ids = []
             for ifc in interface_traffic_records:
+                # Same labels for up and down interfaces, so the series identity does not change with link state
+                if_info = {'id': str(ifc.get('.id', '')), 'name': str(ifc.get('name', '')), 'comment': str(ifc.get('comment', ''))}
                 if ifc.get('running', 'true') == 'false' or ifc.get('disabled', 'false') == 'true':
-                    monitor_records.append({'id': ifc.get('id', ''), 'name': ifc.get('name', ''), 'comment': ifc.get('comment', ''), 'status': 'link-down'})
+                    if_info['status'] = 'link-down'
+                    monitor_records.append(if_info)
                 else:
-                    if_ids.append({'id': str(ifc.get('.id')), 'name': str(ifc.get('name')), 'comment': str(ifc.get('comment'))})
+                    if_ids.append(if_info)
 
             id_str = ','.join([i.get('id') for i in if_ids if i])
-            monitor_records_running = router_entry.rest_api.post('interface/ether', 'monitor', data = {'once': True, '.id': id_str})
-            for if_info, mr in zip(if_ids, monitor_records_running):
-                if_info.update(mr)
-                monitor_records.append(if_info)
+            if id_str:
+                monitor_records_running = router_entry.rest_api.post('interface/ether', 'monitor', data = {'once': True, '.id': id_str})
+                for if_info, mr in zip(if_ids, monitor_records_running):
+                    if_info.update(mr)
+                    monitor_records.append(if_info)
 
             self.metric_store.set_metrics(monitor_records)

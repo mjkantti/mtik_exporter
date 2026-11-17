@@ -27,7 +27,6 @@ class PublicIPAddressCollector(LoadingCollector):
         self.metric_store = MetricStore(
             router_id,
             ['public_address', 'dns_name', 'public_address_ipv6'],
-            [],
             {
                 'dns_name': lambda name: 'ddns_disabled' if not name else name,
                 #'public_address_ipv6': lambda addr: '' if not addr else addr,

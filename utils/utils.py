@@ -13,14 +13,20 @@
 ## GNU General Public License for more details.
 
 import logging
+import os
 import re
 
 from datetime import datetime, timedelta, timezone
 from ipaddress import ip_address
 from urllib import request
-from mac_vendor_lookup import MacLookup, VendorNotFoundError
+from mac_vendor_lookup import BaseMacLookup, MacLookup, VendorNotFoundError
 
 UPDATE_BASE_URL = 'https://upgrade.mikrotik.com/routeros/NEWESTa7'
+UPDATE_TIMEOUT = 10
+
+# MAC vendor list location, the Docker image sets this so the list downloaded at build time is used at runtime
+if os.environ.get('MAC_VENDORS_CACHE'):
+    BaseMacLookup.cache_path = os.environ['MAC_VENDORS_CACHE']
 mac_lookup = MacLookup()
 
 def get_available_updates(channel: str) -> tuple[str, str]:
@@ -31,7 +37,7 @@ def get_available_updates(channel: str) -> tuple[str, str]:
 
     logging.info(f'Fetching available ROS releases from {url}')
     try:
-        with request.urlopen(url) as response:
+        with request.urlopen(url, timeout=UPDATE_TIMEOUT) as response:
             result = response.read()
             contents = result.decode("utf-8")
             latest_version, build_ts = contents.split()
@@ -39,30 +45,6 @@ def get_available_updates(channel: str) -> tuple[str, str]:
     except Exception as exc:
         logging.warning(f'Error fetching latest RouterOS Version info: {exc}')
         return 'N/A', ''
-
-def parse_ros_version(ver: str) -> tuple[str, str]:
-    """Parse the version returned from the /system/resource command.
-    Returns a tuple: (<version>, <channel>).
-
-    >>> parse_ros_version('1.2.3 (stable)')
-    1.2.3, stable
-    """
-    ros_version_rgx = re.compile(r'(.+)\s[\[|\(]?([a-z]+)?[\]|\)]?')
-    version, channel = ros_version_rgx.findall(ver)[0]
-
-    return version, channel
-
-def parse_ros_version_old(ver: str) -> tuple[str, str]:
-    """Parse the version returned from the /system/resource command.
-    Returns a tuple: (<version>, <channel>).
-
-    >>> parse_ros_version('1.2.3 (stable)')
-    1.2.3, stable
-    """
-    v1, v2, channel = re.findall(r'((?:\d+\.\d+)+)(?:[a-z]+|\.)?(\d+)?\s[\[|\(]?([a-z]+)?[\]|\)]?', ver)[0]
-    version = '.'.join([v1, v2])
-
-    return version, channel
 
 def parse_timedelta(time: str) -> float | None:
     if not time:
@@ -113,21 +95,28 @@ def parse_rates(rate: str | None) -> float:
         'm': 6,
         'K': 3,
         'k': 3,
-        '': -1,
+        '': 0,
     }
 
     return float(rc[1]) * 10 ** si_table.get(rc[2], -1) if rc and len(rc.groups()) == 2 else -1
 
 def get_mac_vendor(mac: str) -> str:
-    if mac:
-        try:
-            return mac_lookup.lookup(mac)
-        except VendorNotFoundError:
-            return ""
+    if not mac:
+        return ''
+
+    try:
+        return mac_lookup.lookup(mac)
+    except VendorNotFoundError:
+        return ''
+    except Exception as exc:
+        # Malformed MAC or vendor list not available, do not fail the whole collector load
+        logging.warning('MAC vendor lookup failed for %s: %s', mac, exc)
+        return ''
 
 def ip4_to_hex(ip_str):
     # Converts IPv4 to an 8-character zero-padded hex string (e.g., "10.3.3.3" -> "0a030303")
-    if ip_str:
+    # Anything that is not an address (empty, pool name) returns an empty string instead of failing the whole load
+    try:
         return f'{int(ip_address(ip_str)):08x}'
-    else:
+    except ValueError:
         return ''

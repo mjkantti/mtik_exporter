@@ -33,8 +33,8 @@ class InternalCollector():
     def time(self, labelvalues):
         return Timer(self.load_time.labels(**labelvalues), 'inc')
 
-    def count_exceptions(self, labelvalues):
-        return self.load_exceptions.labels(**labelvalues).count_exceptions()
+    def inc_errors(self, labelvalues):
+        return self.load_exceptions.labels(**labelvalues).inc()
 
     def set_last_run(self, labelvalues):
         return self.load_last_run.labels(**labelvalues).set_to_current_time()

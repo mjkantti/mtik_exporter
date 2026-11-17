@@ -29,7 +29,6 @@ class DHCPCollector(LoadingCollector):
         self.metric_store = MetricStore(
             router_id,
             ['active_address', 'address', 'address_hex', 'mac_address', 'mac_vendor', 'host_name', 'comment', 'server', 'dynamic', 'client_id', 'status', 'address_lists', 'class_id'],
-            ['expires_after', 'last_seen', 'lease_time'],
             {
                 'expires_after': parse_timedelta,
                 'last_seen': parse_timedelta,

@@ -27,11 +27,9 @@ class PackageCollector(LoadingCollector):
         self.name = 'PackageCollector'
         self.metric_store = MetricStore(router_id,
                                         ['name', 'version', 'disabled'],
-                                        ['build_time'],
                                         {
                                             'build_time': parse_datetime
                                         })
-        #self.metric_store_updates = MetricStore(router_id, ['channel', 'latest_version', 'build_time', 'status'], polling_interval=polling_interval)
 
         # Metrics
         self.metric_store.create_info_metric('installed_packages', 'Installed Packages')

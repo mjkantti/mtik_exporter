@@ -26,7 +26,7 @@ class WifiCollector(LoadingCollector):
 
     def __init__(self, router_id: dict[str, str]):
         self.name = 'WifiCollector'
-        self.metric_store = MetricStore(router_id, ['id', 'name', 'comment', 'configuration', 'configuration_mode', 'configuration_ssid', 'mac_address', 'master', 'state', 'channel', 'tx_power'], ['registered_peers', 'authorized_peers'])
+        self.metric_store = MetricStore(router_id, ['id', 'name', 'comment', 'configuration', 'configuration_mode', 'configuration_ssid', 'mac_address', 'master', 'state', 'channel', 'tx_power'])
 
         # Metrics
         self.metric_store.create_info_metric('wifi_interfaces', 'Wifi Interfaces')
@@ -53,7 +53,6 @@ class WifiClientCollector(LoadingCollector):
         self.metric_store = MetricStore(
             router_id,
             ['interface', 'ssid', 'mac_address', 'mac_vendor'],
-            ['tx_rate', 'rx_rate', 'rx_signal', 'signal', 'uptime', 'rx_bytes', 'tx_bytes'],
             resolve_mac_vendor = True)
 
         # Metrics

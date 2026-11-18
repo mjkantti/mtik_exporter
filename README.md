@@ -42,6 +42,7 @@ system:
   # How often collectors running on the exporter host (not on the router) are polled, e.g. the update check
   system_polling_interval: 3600
 ```
+With `check_for_updates` enabled, the exporter reads MikroTik's update feed for each listed channel and exports `mtik_exporter_routeros_latest_version_info` (labels `channel`, `latest_version`) and `mtik_exporter_routeros_latest_version_built`. Each router's own version is the `version` label of `mtik_exporter_system_resource_info`, from the `system_resource` collector.
 
 ##### Router(s)
 ```

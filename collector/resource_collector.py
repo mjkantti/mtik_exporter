@@ -35,7 +35,7 @@ class SystemResourceCollector(LoadingCollector):
             })
 
         # Metrics
-        self.metric_store.create_info_metric('system', 'System Resource Information')
+        self.metric_store.create_info_metric('system_resource','System Resource Information')
 
         self.metric_store.create_counter_metric('system_uptime', 'Time interval since boot-up', 'uptime', ['board_name', 'cpu', 'architecture_name'])
         self.metric_store.create_gauge_metric('system_free_memory', 'Unused amount of RAM', 'free_memory', ['board_name', 'cpu', 'architecture_name'])

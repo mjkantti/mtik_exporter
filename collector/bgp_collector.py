@@ -33,7 +33,7 @@ class BGPCollector(LoadingCollector):
             })
 
         # Metrics
-        self.metric_store.create_info_metric('bgp_sessions_info', 'BGP sessions info')
+        self.metric_store.create_info_metric('bgp_sessions','BGP sessions info')
 
         session_id_labes = ['name']
         self.metric_store.create_counter_metric('bgp_remote_messages', 'Number of remote messages', 'remote_messages', session_id_labes)

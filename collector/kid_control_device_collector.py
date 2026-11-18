@@ -23,9 +23,9 @@ if TYPE_CHECKING:
 class KidDeviceCollector(LoadingCollector):
     """ Kid-control device Metrics collector
     """
+    key, name = 'kid_control_devices', 'KidDeviceCollector'
 
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'KidDeviceCollector'
         self.metric_store = MetricStore(
             router_id,
             ['name', 'user', 'mac_address', 'ip_address', 'disabled'],

@@ -23,9 +23,9 @@ if TYPE_CHECKING:
 class SystemResourceCollector(LoadingCollector):
     ''' System Resource Metrics collector
     '''
+    key, name = 'system_resource', 'SystemResourceCollector'
 
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'SystemResourceCollector'
         self.metric_store = MetricStore(
             router_id,
             ['version', 'cpu', 'architecture_name', 'board_name'],

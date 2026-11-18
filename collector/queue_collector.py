@@ -21,9 +21,9 @@ if TYPE_CHECKING:
 
 class QueueTreeCollector(LoadingCollector):
     '''Queue Tree collector'''
+    key, name = 'queue_tree', 'QueueTreeCollector'
 
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'QueueTreeCollector'
         self.metric_store = MetricStore(
             router_id,
             ['name', 'parent', 'packet_mark', 'limit_at', 'max_limit', 'priority', 'disabled'])
@@ -41,8 +41,8 @@ class QueueTreeCollector(LoadingCollector):
 
 
 class QueueSimpleCollector(LoadingCollector):
+    key, name = 'queue_simple', 'QueueSimpleCollector'
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'QueueSimpleCollector'
         self.metric_store = MetricStore(
             router_id,
             ['name', 'parent', 'packet_mark', 'disabled'])

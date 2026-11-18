@@ -22,8 +22,8 @@ if TYPE_CHECKING:
 class CapsmanCollector(LoadingCollector):
     ''' CAPsMAN Metrics collector
     '''
+    key, name = 'capsman', 'CapsmanCollector'
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'CapsmanCollector'
         self.metric_store = MetricStore(router_id, ['identity', 'version', 'base_mac', 'board'])
 
         # Metrics

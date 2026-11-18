@@ -20,8 +20,8 @@ if TYPE_CHECKING:
 
 class ContainerCollector(LoadingCollector):
     '''Container collector'''
+    key, name = 'containers', 'ContainerCollector'
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'ContainerCollector'
         self.metric_store = MetricStore(
             router_id,
             ['name', 'tag', 'os', 'arch', 'interface', 'root_dir', 'status', 'comment']

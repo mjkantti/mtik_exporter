@@ -129,6 +129,9 @@ class MetricStore():
         return labels + list(self.router_id.keys())
 
 class LoadingCollector(Collector):
+    # Router collectors set both as class attributes: key, name = '<config key>', '<name>'
+    # The key is what the config uses, collectors without a key are not discovered as router collectors
+    key: str
     name: str
     metric_store: MetricStore
 

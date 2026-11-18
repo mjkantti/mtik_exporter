@@ -30,9 +30,9 @@ def milliamps_to_amps(value: str | None) -> float | None:
 class POECollector(LoadingCollector):
     ''' POE Metrics collector
     '''
+    key, name = 'poe', 'POECollector'
 
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'POECollector'
         self.metric_store = MetricStore(
             router_id,
             ['id', 'name', 'comment', 'poe_out', 'poe_priority', 'poe_voltage', 'poe_out_status'],

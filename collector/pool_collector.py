@@ -22,9 +22,9 @@ if TYPE_CHECKING:
 class PoolCollector(LoadingCollector):
     ''' IP Pool Metrics collector
     '''
+    key, name = 'pool', 'PoolCollector'
 
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'PoolCollector'
         self.metric_store = MetricStore(router_id, ['pool', 'address', 'owner', 'info'])
 
         # Metrics

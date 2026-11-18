@@ -21,9 +21,9 @@ if TYPE_CHECKING:
 
 class WireguardCollector(LoadingCollector):
     '''Wireguard collector'''
+    key, name = 'wireguard', 'WireguardCollector'
 
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'WireguardCollector'
         self.metric_store = MetricStore(router_id, ['name', 'mtu', 'listen_port', 'public_key', 'comment', 'running'])
 
         # Metrics
@@ -36,9 +36,9 @@ class WireguardCollector(LoadingCollector):
 
 class WireguardPeerCollector(LoadingCollector):
     '''Wireguard collector'''
+    key, name = 'wireguard_peers', 'WireguardPeerCollector'
 
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'WireguardPeerCollector'
         self.metric_store = MetricStore(
             router_id,
             ['name', 'interface', 'public_key', 'endpoint_address', 'endpoint_port', 'current_endpoint_address', 'current_endpoint_port', 'allowed_address', 'comment'],

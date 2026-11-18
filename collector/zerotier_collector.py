@@ -21,8 +21,8 @@ if TYPE_CHECKING:
 
 class ZeroTierInterfaceCollector(LoadingCollector):
     '''ZeroTier collector'''
+    key, name = 'zerotier', 'ZeroTierInterfaceCollector'
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'ZeroTierInterfaceCollector'
         self.metric_store = MetricStore(
             router_id,
             ['instance', 'mac_address', 'mtu', 'name', 'network', 'network_name', 'status', 'allow_default', 'allow_managed', 'allow_global', 'bridge', 'type'],
@@ -39,8 +39,8 @@ class ZeroTierInterfaceCollector(LoadingCollector):
 
 class ZeroTierPeerCollector(LoadingCollector):
     '''ZeroTier peer collector'''
+    key, name = 'zerotier_peers', 'ZeroTierPeerCollector'
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'ZeroTierPeerCollector'
         self.metric_store = MetricStore(
             router_id,
             ['zt_address', 'instance', 'bonded', 'role', 'preferred_endpoint'],
@@ -64,8 +64,8 @@ class ZeroTierPeerCollector(LoadingCollector):
 
 class ZeroTierControllerCollector(LoadingCollector):
     '''ZeroTier collector'''
+    key, name = 'zerotier_controller', 'ZeroTierControllerCollector'
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'ZeroTierControllerCollector'
         self.metric_store = MetricStore(
             router_id,
             ['authorized', 'comment', 'inactive', 'ip_address', 'name', 'network', 'zt_address'],

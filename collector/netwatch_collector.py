@@ -23,9 +23,9 @@ if TYPE_CHECKING:
 class NetwatchCollector(LoadingCollector):
     ''' Netwatch Metrics collector
     '''
+    key, name = 'netwatch', 'NetwatchCollector'
 
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'NetwatchCollector'
         self.metric_store = MetricStore(
             router_id,
             ['name', 'host', 'comment', 'timeout', 'interval', 'type'],

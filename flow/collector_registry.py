@@ -12,35 +12,14 @@
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ## GNU General Public License for more details.
 
+import importlib
 import logging
+import pkgutil
 
-from collector.dhcp_collector import DHCPCollector
-from collector.package_collector import PackageCollector
-from collector.interface_collector import InterfaceCollector, InterfaceMonitorCollector
-from collector.health_collector import HealthCollector
-from collector.identity_collector import IdentityCollector
-from collector.public_ip_collector import PublicIPAddressCollector
-from collector.ipv6_neighbor_collector import IPv6NeighborCollector
-from collector.lte_collector import LTECollector
-from collector.poe_collector import POECollector
-from collector.netwatch_collector import NetwatchCollector
-from collector.pool_collector import PoolCollector
-from collector.resource_collector import SystemResourceCollector
-from collector.route_collector import RouteCollector, IPv6RouteCollector
-from collector.wifi_collector import WifiCollector, WifiClientCollector
-from collector.capsman_collector import CapsmanCollector
-from collector.firewall_collector import FirewallFilterCollector, FirewallMangleCollector, FirewallRawCollector, IPv6FirewallFilterCollector, IPv6FirewallMangleCollector, IPv6FirewallRawCollector
-from collector.user_collector import UserCollector
-from collector.queue_collector import QueueTreeCollector
-from collector.queue_collector import QueueSimpleCollector
-from collector.wireguard_collector import WireguardCollector, WireguardPeerCollector
-from collector.bridge_host_collector import BridgeHostCollector
-from collector.container_collector import ContainerCollector
-from collector.kid_control_device_collector import KidDeviceCollector
-from collector.bgp_collector import BGPCollector
-from collector.arp_collector import ARPCollector
-from collector.zerotier_collector import ZeroTierInterfaceCollector, ZeroTierPeerCollector, ZeroTierControllerCollector
+from functools import cache
 
+import collector
+from collector.metric_store import LoadingCollector
 from collector.latest_version import LatestVersionCollector
 from collector.internal_collector import InternalCollector
 
@@ -48,53 +27,38 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from flow.router_entry import RouterEntry
-    from collector.metric_store import LoadingCollector
+
+
+@cache
+def discover_collectors() -> dict[str, type[LoadingCollector]]:
+    ''' Finds every router collector, a collector is any LoadingCollector subclass in the collector package with a key
+        Called lazily (not at import time) so the debug log below goes through the configured logger
+    '''
+    for module in pkgutil.iter_modules(collector.__path__):
+        importlib.import_module(f'collector.{module.name}')
+
+    mapping: dict[str, type[LoadingCollector]] = {}
+    classes = list(LoadingCollector.__subclasses__())
+    while classes:
+        cls = classes.pop()
+        classes.extend(cls.__subclasses__())
+        key = getattr(cls, 'key', None)
+        if not key:
+            continue
+        if key in mapping:
+            raise ValueError(f'Duplicate collector key "{key}": {mapping[key].__name__} and {cls.__name__}')
+        mapping[key] = cls
+
+    logging.debug('Available collectors: %s', ', '.join(sorted(mapping)))
+    return mapping
 
 
 class CollectorRegistry:
     ''' mtik_exporter Collectors Registry
     '''
-    collector_mapping = {
-        'installed_packages': PackageCollector,
-        'dhcp': DHCPCollector,
-        'system_resource': SystemResourceCollector,
-        'health': HealthCollector, 
-        'pool': PoolCollector,
-        'interface': InterfaceCollector,
-        'identity': IdentityCollector,
-        'interface_monitor': InterfaceMonitorCollector,
-        'lte': LTECollector,
-        'firewall_filter': FirewallFilterCollector,
-        'firewall_mangle': FirewallMangleCollector,
-        'firewall_raw': FirewallRawCollector,
-        'ipv6_firewall_filter': IPv6FirewallFilterCollector,
-        'ipv6_firewall_mangle': IPv6FirewallMangleCollector,
-        'ipv6_firewall_raw': IPv6FirewallRawCollector,
-        'ipv6_neighbor': IPv6NeighborCollector,
-        'route': RouteCollector,
-        'ipv6_route': IPv6RouteCollector,
-        'capsman': CapsmanCollector,
-        'wifi': WifiCollector,
-        'wifi_clients': WifiClientCollector,
-        'poe': POECollector,
-        'public_ip': PublicIPAddressCollector,
-        'netwatch': NetwatchCollector,
-        'user': UserCollector,
-        'queue_simple': QueueSimpleCollector,
-        'queue_tree': QueueTreeCollector,
-        'bgp': BGPCollector,
-        'arp': ARPCollector,
-        'wireguard': WireguardCollector,
-        'wireguard_peers': WireguardPeerCollector,
-        'kid_control_devices': KidDeviceCollector,
-        'bridge_hosts': BridgeHostCollector,
-        'containers': ContainerCollector,
-        'zerotier_peers': ZeroTierPeerCollector,
-        'zerotier': ZeroTierInterfaceCollector,
-        'zerotier_controller': ZeroTierControllerCollector,
-    }
 
     def __init__(self, router_entry: 'RouterEntry') -> None:
+        self.collector_mapping = discover_collectors()
         self.router_entry = router_entry
         self.polling_interval = router_entry.config_entry.polling_interval
         self.slow_polling_interval = router_entry.config_entry.slow_polling_interval

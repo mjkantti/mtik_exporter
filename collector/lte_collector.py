@@ -24,9 +24,9 @@ if TYPE_CHECKING:
 class LTECollector(LoadingCollector):
     ''' Router LTE Metrics collector
     '''
+    key, name = 'lte', 'LTECollector'
 
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'LTECollector'
         self.metric_store = MetricStore(
             router_id,
             ['id', 'name', 'comment', 'current_operator', 'data_class', 'status'],

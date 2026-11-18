@@ -23,8 +23,8 @@ if TYPE_CHECKING:
 class HealthCollector(LoadingCollector):
     ''' System Health Metrics collector
     '''
+    key, name = 'health', 'HealthCollector'
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'HealthCollector'
         self.metric_store = MetricStore(
             router_id,
             [])

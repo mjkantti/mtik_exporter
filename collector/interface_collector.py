@@ -23,9 +23,9 @@ if TYPE_CHECKING:
 class InterfaceCollector(LoadingCollector):
     ''' Router Interface Metrics collector
     '''
+    key, name = 'interface', 'InterfaceCollector'
 
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'InterfaceCollector'
         self.metric_store = MetricStore(
             router_id,
             ['id', 'name', 'comment', 'type', 'mtu', 'mac_address', 'running'])
@@ -53,9 +53,9 @@ class InterfaceCollector(LoadingCollector):
 class InterfaceMonitorCollector(LoadingCollector):
     ''' Router Interface Monitor Metrics collector
     '''
+    key, name = 'interface_monitor', 'InterfaceMonitorCollector'
 
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'InterfaceMonitorCollector'
         self.metric_store = MetricStore(
             router_id,
             ['id', 'name', 'comment'],

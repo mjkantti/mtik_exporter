@@ -20,8 +20,8 @@ if TYPE_CHECKING:
 
 class BridgeHostCollector(LoadingCollector):
     '''Bridge host (MAC Table) collector'''
+    key, name = 'bridge_hosts', 'BridgeHostsCollector'
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'BridgeHostsCollector'
         self.metric_store = MetricStore(
             router_id,
             ['mac_address', 'mac_vendor', 'vid', 'bridge', 'interface', 'on_interface'],

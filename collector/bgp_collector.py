@@ -22,8 +22,8 @@ if TYPE_CHECKING:
 
 class BGPCollector(LoadingCollector):
     '''BGP collector'''
+    key, name = 'bgp', 'BGPCollector'
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'BGPCollector'
         self.metric_store = MetricStore(
             router_id,
             ['name', 'remote_address', 'remote_as', 'local_as', 'remote_afi', 'local_afi'],

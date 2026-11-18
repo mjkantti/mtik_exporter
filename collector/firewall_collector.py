@@ -25,8 +25,8 @@ firewall_labels = ['chain', 'action', 'comment']
 class FirewallFilterCollector(LoadingCollector):
     ''' Firewall rules traffic metrics collector
     '''
+    key, name = 'firewall_filter', 'FirewallFilterCollector'
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'FirewallFilterCollector'
 
         self.metric_store = MetricStore(router_id, firewall_labels)
 
@@ -41,8 +41,8 @@ class FirewallFilterCollector(LoadingCollector):
 class FirewallMangleCollector(LoadingCollector):
     ''' Firewall rules traffic metrics collector
     '''
+    key, name = 'firewall_mangle', 'FirewallMangleCollector'
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'FirewallMangleCollector'
 
         self.metric_store = MetricStore(router_id, firewall_labels)
 
@@ -57,8 +57,8 @@ class FirewallMangleCollector(LoadingCollector):
 class FirewallRawCollector(LoadingCollector):
     ''' Firewall rules traffic metrics collector
     '''
+    key, name = 'firewall_raw', 'FirewallRawCollector'
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'FirewallRawCollector'
 
         self.metric_store = MetricStore(router_id, firewall_labels)
 
@@ -73,8 +73,8 @@ class FirewallRawCollector(LoadingCollector):
 class IPv6FirewallFilterCollector(LoadingCollector):
     ''' Firewall rules traffic metrics collector
     '''
+    key, name = 'ipv6_firewall_filter', 'IPv6FirewallFilterCollector'
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'IPv6FirewallFilterCollector'
 
         self.metric_store = MetricStore(router_id, firewall_labels)
 
@@ -89,8 +89,8 @@ class IPv6FirewallFilterCollector(LoadingCollector):
 class IPv6FirewallMangleCollector(LoadingCollector):
     ''' Firewall rules traffic metrics collector
     '''
+    key, name = 'ipv6_firewall_mangle', 'IPv6FirewallMangleCollector'
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'IPv6FirewallMangleCollector'
 
         self.metric_store = MetricStore(router_id, firewall_labels)
 
@@ -105,8 +105,8 @@ class IPv6FirewallMangleCollector(LoadingCollector):
 class IPv6FirewallRawCollector(LoadingCollector):
     ''' Firewall rules traffic metrics collector
     '''
+    key, name = 'ipv6_firewall_raw', 'IPv6FirewallRawCollector'
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'IPv6FirewallRawCollector'
 
         self.metric_store = MetricStore(router_id, firewall_labels)
 

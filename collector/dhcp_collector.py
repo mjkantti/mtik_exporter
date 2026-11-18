@@ -23,9 +23,9 @@ if TYPE_CHECKING:
 class DHCPCollector(LoadingCollector):
     ''' DHCP Metrics collector
     '''
+    key, name = 'dhcp', 'DHCPCollector'
 
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'DHCPCollector'
         self.metric_store = MetricStore(
             router_id,
             ['active_address', 'address', 'address_hex', 'mac_address', 'mac_vendor', 'host_name', 'comment', 'server', 'dynamic', 'client_id', 'status', 'address_lists', 'class_id'],

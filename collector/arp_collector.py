@@ -20,8 +20,8 @@ if TYPE_CHECKING:
 
 class ARPCollector(LoadingCollector):
     '''ARP Entry collector'''
+    key, name = 'arp', 'ARPCollector'
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'ARPCollector'
         self.metric_store = MetricStore(
             router_id,
             ['mac_address', 'mac_vendor', 'address', 'interface', 'status', 'dynamic'],

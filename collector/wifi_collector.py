@@ -23,9 +23,9 @@ if TYPE_CHECKING:
 class WifiCollector(LoadingCollector):
     ''' Wireless Metrics collector
     '''
+    key, name = 'wifi', 'WifiCollector'
 
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'WifiCollector'
         self.metric_store = MetricStore(router_id, ['id', 'name', 'comment', 'configuration', 'configuration_mode', 'configuration_ssid', 'mac_address', 'master', 'state', 'channel', 'tx_power'])
 
         # Metrics
@@ -47,9 +47,9 @@ class WifiCollector(LoadingCollector):
 class WifiClientCollector(LoadingCollector):
     ''' Wireless Metrics collector
     '''
+    key, name = 'wifi_clients', 'WifiClientCollector'
 
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'WifiClientCollector'
         self.metric_store = MetricStore(
             router_id,
             ['interface', 'ssid', 'mac_address', 'mac_vendor'],

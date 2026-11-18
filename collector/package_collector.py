@@ -22,9 +22,9 @@ if TYPE_CHECKING:
 
 class PackageCollector(LoadingCollector):
     '''Installed Packages collector'''
+    key, name = 'installed_packages', 'PackageCollector'
 
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'PackageCollector'
         self.metric_store = MetricStore(router_id,
                                         ['name', 'version', 'disabled'],
                                         {

@@ -22,9 +22,9 @@ if TYPE_CHECKING:
 
 class UserCollector(LoadingCollector):
     '''Active Users collector'''
+    key, name = 'user', 'UserCollector'
 
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'UserCollector'
         self.metric_store = MetricStore(
             router_id,
             ['name', 'address', 'via', 'group'],

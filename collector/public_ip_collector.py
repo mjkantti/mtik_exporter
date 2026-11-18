@@ -21,9 +21,9 @@ if TYPE_CHECKING:
 
 class PublicIPAddressCollector(LoadingCollector):
     '''Public IP address collector'''
+    key, name = 'public_ip', 'PublicIPAddressCollector'
 
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'PublicIPAddressCollector'
         self.metric_store = MetricStore(
             router_id,
             ['public_address', 'dns_name', 'public_address_ipv6'],

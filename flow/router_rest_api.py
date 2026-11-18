@@ -59,7 +59,7 @@ class RouterRestAPI:
         try:
             resp = self.ses.request(method, url, auth=self.auth, timeout=self.timeout, **kwargs)
             resp.raise_for_status()
-            logging.debug(f"Done, took: {resp.elapsed.total_seconds()}")
+            logging.debug("Done %s %s, took: %.3fs", method, url, resp.elapsed.total_seconds())
 
             c = resp.content.decode(mtik_encoding)
             return json.loads(c, strict = False)

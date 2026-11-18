@@ -21,9 +21,9 @@ if TYPE_CHECKING:
 
 class IPv6NeighborCollector(LoadingCollector):
     '''IPv6 Neighbor Collector'''
+    key, name = 'ipv6_neighbor', 'IPv6NeighborCollector'
 
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'IPv6NeighborCollector'
         self.metric_store = MetricStore(
             router_id,
             ['address', 'interface', 'mac_address', 'mac_vendor', 'status', 'router'],

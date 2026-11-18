@@ -22,8 +22,8 @@ if TYPE_CHECKING:
 class IdentityCollector(LoadingCollector):
     ''' System Identity Metrics collector
     '''
+    key, name = 'identity', 'IdentityCollector'
     def __init__(self, router_id: dict[str, str]):
-        self.name = 'IdentityCollector'
         self.metric_store = MetricStore(router_id, ['name'])
 
         # Metrics

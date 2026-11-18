@@ -24,6 +24,27 @@ from mac_vendor_lookup import BaseMacLookup, MacLookup, VendorNotFoundError
 UPDATE_BASE_URL = 'https://upgrade.mikrotik.com/routeros/NEWESTa7'
 UPDATE_TIMEOUT = 10
 
+# RouterOS duration, e.g. 1w2d3h4m5s6ms7us
+DURATION_RGX = re.compile(r'((?P<weeks>\d+)w)?'
+                          r'((?P<days>\d+)d)?'
+                          r'((?P<hours>\d+)h)?'
+                          r'((?P<minutes>\d+)m(?![a-z]))?' # Should not match with ms
+                          r'((?P<seconds>\d+)s)?'
+                          r'((?P<milliseconds>\d+)ms)?'
+                          r'((?P<microseconds>\d+)us)?')
+
+# RouterOS rate, e.g. 2.5Gbps, and the power of ten for each unit prefix
+RATE_RGX = re.compile(r'(\d*(?:\.\d*)?)([GgMmKk]?)bps')
+RATE_SI_EXPONENTS = {
+    'G': 9,
+    'g': 9,
+    'M': 6,
+    'm': 6,
+    'K': 3,
+    'k': 3,
+    '': 0,
+}
+
 # MAC vendor list location, the Docker image sets this so the list downloaded at build time is used at runtime
 if os.environ.get('MAC_VENDORS_CACHE'):
     BaseMacLookup.cache_path = os.environ['MAC_VENDORS_CACHE']
@@ -50,16 +71,9 @@ def parse_timedelta(time: str) -> float | None:
     if not time:
         return None
 
-    duration_interval_rgx = re.compile(r'((?P<weeks>\d+)w)?'
-                                       r'((?P<days>\d+)d)?'
-                                       r'((?P<hours>\d+)h)?'
-                                       r'((?P<minutes>\d+)m(?![a-z]))?' # Should not match with ms
-                                       r'((?P<seconds>\d+)s)?'
-                                       r'((?P<milliseconds>\d+)ms)?'
-                                       r'((?P<microseconds>\d+)us)?')
     time_dict: dict[str, str] = {}
     try:
-        match_res = duration_interval_rgx.match(time)
+        match_res = DURATION_RGX.match(time)
         if match_res:
             time_dict = match_res.groupdict()
     except Exception as e:
@@ -86,19 +100,9 @@ def parse_rates(rate: str | None) -> float:
     if rate is None:
         return 0
     
-    rates_rgx = re.compile(r'(\d*(?:\.\d*)?)([GgMmKk]?)bps')
-    rc = rates_rgx.search(rate)
-    si_table = {
-        'G': 9,
-        'g': 9,
-        'M': 6,
-        'm': 6,
-        'K': 3,
-        'k': 3,
-        '': 0,
-    }
+    rc = RATE_RGX.search(rate)
 
-    return float(rc[1]) * 10 ** si_table.get(rc[2], -1) if rc and len(rc.groups()) == 2 else -1
+    return float(rc[1]) * 10 ** RATE_SI_EXPONENTS.get(rc[2], -1) if rc and len(rc.groups()) == 2 else -1
 
 def get_mac_vendor(mac: str) -> str:
     if not mac:

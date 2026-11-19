@@ -1,0 +1,16 @@
+# Not needed at runtime
+.git
+.github
+.gitignore
+.dockerignore
+Dockerfile
+README.md
+dashboards
+**/__pycache__
+**/*.py[cod]
+
+# Local files that may hold credentials; never bake them into an image
+.env
+/config.yml
+/config.yml.*
+sessions.txt

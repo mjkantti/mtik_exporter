@@ -3,6 +3,11 @@ on:
   push:
     branches:
       - 'master'
+    paths-ignore:
+      - 'dashboards/**'
+      - '.github/**'
+      - 'README.md'
+      - 'LICENSE'
 
 jobs:
   docker:

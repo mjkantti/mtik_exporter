@@ -26,7 +26,6 @@
   "fiscalYearStartMonth": 0,
   "gnetId": 13679,
   "graphTooltip": 0,
-  "id": 32,
   "links": [
     {
       "asDropdown": false,
@@ -4605,7 +4604,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   }
                 ]
               },
@@ -4808,7 +4808,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "#6ED0E0",
@@ -4936,7 +4937,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -5081,7 +5083,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -5867,7 +5870,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -6030,7 +6034,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -6171,7 +6176,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -8821,7 +8827,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -8990,7 +8997,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -9162,7 +9170,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -9333,7 +9342,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -10721,7 +10731,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -10857,7 +10868,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -10996,7 +11008,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -11134,7 +11147,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": null
                   },
                   {
                     "color": "red",
@@ -11236,11 +11250,6 @@
   "templating": {
     "list": [
       {
-        "current": {
-          "selected": false,
-          "text": "VM",
-          "value": "bdkympr0s9la8f"
-        },
         "hide": 0,
         "includeAll": false,
         "multi": false,
@@ -11254,11 +11263,6 @@
         "type": "datasource"
       },
       {
-        "current": {
-          "selected": false,
-          "text": "JP-Chateau",
-          "value": "JP-Chateau"
-        },
         "datasource": {
           "type": "victoriametrics-datasource",
           "uid": "${ds}"
@@ -11285,15 +11289,6 @@
         "useTags": false
       },
       {
-        "current": {
-          "selected": true,
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
-        },
         "datasource": {
           "type": "victoriametrics-datasource",
           "uid": "${ds}"
@@ -11316,11 +11311,6 @@
         "type": "query"
       },
       {
-        "current": {
-          "selected": false,
-          "text": "All",
-          "value": "$__all"
-        },
         "datasource": {
           "type": "victoriametrics-datasource",
           "uid": "${ds}"
@@ -11343,15 +11333,6 @@
         "type": "query"
       },
       {
-        "current": {
-          "selected": true,
-          "text": [
-            "All"
-          ],
-          "value": [
-            "$__all"
-          ]
-        },
         "datasource": {
           "type": "victoriametrics-datasource",
           "uid": "${ds}"
@@ -11374,11 +11355,6 @@
         "type": "query"
       },
       {
-        "current": {
-          "selected": false,
-          "text": "10.0.0.166:49090",
-          "value": "10.0.0.166:49090"
-        },
         "datasource": {
           "type": "victoriametrics-datasource",
           "uid": "${ds}"
@@ -11414,6 +11390,5 @@
   "timezone": "",
   "title": "Mikrotik Monitoring",
   "uid": "abc4ae8a-f097-482d-ad73-5bfcedc92ae3",
-  "version": 533,
   "weekStart": ""
 }
